@@ -11,6 +11,9 @@ tags: [suse, harvester, kubevirt, vms, virtual machines]
 title: "Protect Harvester VMs with Kasten K10 by Veeam"
 ---
 
+{: .alert-warning }
+Heads up, Suse has since released Harvester 1.3.1 which includes some required fixes to allow Kasten to support block mode exports, without the security workaround. Check out [this newer post](/harvester-1-3-1) for more information!
+
 Why Harvester and Why Should I Care?
 =====================================
 
