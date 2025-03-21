@@ -1,11 +1,7 @@
 ---
 layout: post
 title: Creating an internal GKE ingress for Kasten
-description: In GCP (Google Cloud Platform) Kubernetes is a first class citizen. GCP provide the concept of VPC Native where Pods 
-   in the kubernetes cluster receive IP addresses from a secondary range within your Virtual Private Cloud (VPC). 
-   This is also known as the alias IP method. It  provides better IP address management, avoids manual routing configurations, and 
-   integrates more seamlessly with other GCP networking features. But how do you expose an internal ingress in this architecture ? 
-   And specically how do you expose an internal ingress for Kasten ?
+description: GKE provide a very performent solution for load balancing containers. But how do you expose an internal ingress in this architecture ? And  more specifically how do you expose an internal ingress for Kasten ?
 date: 2025-03-21 00:00:35 +0300
 author: michaelcourcy
 image: '/images/posts/2025-03-21-internal-gke-ingress/ingress-internal-gke.webp'
@@ -16,11 +12,11 @@ featured:
 
 # What is VPC native in GCP ? 
 
-When you create your GCP Project you have a default network in Auto mode. **Auto** means it automatically creates a subnet in each available region, using a predefined range of IP addresses. As new regions become available.
+When you create your GCP Project you have a default network in Auto mode. **Auto** means it automatically creates a subnet in each available region they become available.
 
 ![Default network in Auto mode](../images/posts/2025-03-21-internal-gke-ingress/default-network.png)
 
-In Google Kubernetes Engine (GKE), VPC-native refers to a cluster networking mode where Pods receive IP addresses from a secondary range within your Virtual Private Cloud (VPC). This is also known as the alias IP method. It provides better IP address management, avoids manual routing configurations, and integrates more seamlessly with other GCP networking features.
+You can create in this network a VPC-native Google Kubernetes Engine (GKE). Each Pods receive an IP addresses from a secondary range within your VPC. This is also known as the alias IP method. It provides better IP address management, avoids manual routing configurations, and integrates more seamlessly with other GCP networking features.
 
 I created a zonal GKE cluster in the US-Central1 region
 ```
@@ -28,7 +24,6 @@ gcloud container clusters create mcourcy-telepass \
     --zone us-central1-a \
     --node-locations us-central1-a,us-central1-b,us-central1-c
 ``` 
-by default the `default` network is selected. GCP subnets are regional resources, so a single subnet can span multiple zones within the same region (ie us-central1-a,us-central1-b,us-central1-c). 
 
 In this example you can see that my GKE cluster is aliased with the us-central1 region subnet 
 ![GKE cluster is aliased to the us-central1 region](../images/posts/2025-03-21-internal-gke-ingress/gke-network-alias.png)
@@ -85,7 +80,7 @@ Because of this architecture that we described above, one very important integra
 All the load balancing capacities of GCP can be used to directly map a GCP load balancer to pods without going through the usual 
 node port approach where the load balancer has to go in the host and be redirected through the kube-proxy or IP-table rules, with an eventual hop to another host.
 
-[Classic load balancing vs container native load balancing](../images/posts/2025-03-21-internal-gke-ingress/classic-load-balancing-vs-container-native-load-balancing.svg)
+![Classic load balancing vs container native load balancing](../images/posts/2025-03-21-internal-gke-ingress/classic-load-balancing-vs-container-native-load-balancing.svg)
 
 On the left is the classic load balancing : the load balancer send the request to one of the host without knowing if the pods are 
 really living on this host. Hence the packet may be resent to another host by kube-proxy or by an IP table rules to reach the host that really hold the pod.
@@ -109,10 +104,10 @@ gcloud compute networks subnets create proxy-only-subnet \
     --range=10.120.0.0/23
 ```
 Remember that you can only have one proxy-only (REGIONAL_MANAGED_PROXY) subnet with role=ACTIVE per region in a given VPC network.
-So if you already have this subnet you don't need (and you shouldn't) create this proxy only subnet but reuse it the second point.
+So if you already have this subnet you don't need (and you shouldn't) create this proxy only subnet but reuse it in the second point.
 
 
-2. We need a forwarding rule that allow any pod IP to be reached on the pod Port from the proxy-only-subnet (which is the subnet that 
+2. We need a firewall rule that allow any pod IP to be reached on the pod Port from the proxy-only-subnet (which is the subnet that 
 will originate the load balancers connections). 
 The service that we want to ingress is gateway, this service expose the port 80 but its target container port is 8000. 
 As I explained Native container load balancing will target the container directly not the service 
@@ -174,7 +169,7 @@ You need the annotation
     kubernetes.io/ingress.class: "gce-internal"
 ```
 
-So that the gke internal ingress controller will be used and will create the necessary GCP resource for an internal load balancing.
+So that the gke internal ingress controller will be used and will create the necessary GCP resources for an internal load balancing.
 
 # Trobleshooting and testing 
 
@@ -205,7 +200,7 @@ k8s1-aa340f82-kasten-io-gateway-80-f5e3a248                 us-central1-c  GCE_V
 
 Only one has the size 1 because there is only one gateway pod.
 
-## Let's test it now !! 
+## Let's test it now 
 
 Now let's do a simple curl test to see if the url http://10.128.0.15:80/k10/ is responding with a kasten page. 
 
