@@ -5,7 +5,7 @@ description: Description: Learn how to automate the deployment of Veeam Kasten O
 date: 2025-03-26 00:00:35 +0300
 author: alexandrearrive
 image: 'images/posts/2025-03-26-veeam-kasten-operator-rosa-terraform/car_builder.jpeg' 
-image_caption: 'Managing internal ingress in GKE'
+image_caption: 'Deploy Veeam Kasten Operator on OpenShift with Terraform'
 tags: [Terraform, Backup, Kasten, Kubernetes, ROSA, OpenShift, Operator]
 featured:
 ---
