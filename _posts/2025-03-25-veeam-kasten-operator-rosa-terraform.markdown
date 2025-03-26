@@ -12,6 +12,7 @@ featured:
 
 This article discusses the deployment of the Veeam Kasten Operator on Red Hat OpenShift using Terraform to automate the setup of OpenShift in AWS with the managed service ROSA. It aims to provide information on how to reproduce and evaluate Veeam Kasten under specific conditions. The focus is on Terraform, Veeam Kasten, and Red Hat OpenShift on AWS, also known as ROSA.
 
+
 # What’s Terraform?
 
 Terraform has revolutionized infrastructure provisioning and lifecycle management, both on-premise and in the cloud, over the last decade. Launched in 2017, Terraform's first provider debuted alongside the [Terraform Registry](https://registry.terraform.io/). By 2019, it had reached 100 million downloads, and in 2022, the AWS Terraform provider surpassed one billion downloads.
