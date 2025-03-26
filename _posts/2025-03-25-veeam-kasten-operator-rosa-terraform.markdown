@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Automate the installation of the Veeam Kasten Operator on OpenShift with Terrraform
-description: Description: Learn how to automate the deployment of Veeam Kasten Operator on Red Hat OpenShift using Terraform
+description: Learn how to automate the deployment of Veeam Kasten Operator on Red Hat OpenShift using Terraform
 date: 2025-03-26 00:00:35 +0300
 author: alexandrearrive
 image: 'images/posts/2025-03-26-veeam-kasten-operator-rosa-terraform/car_builder.jpeg' 
