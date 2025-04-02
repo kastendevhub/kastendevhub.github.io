@@ -4,7 +4,7 @@ title:
 description: In this blog post, we look at migrating virtual machines from VMware to Kubernetes cluster running Kubevirt using Forklift
 date: 2025-04-01 11:00:00 +0000
 author: satheeshmohandass
-image: '/images/posts/2025-04-01-vmware-kubevirt-migration-using-forklift/ocpv.png'
+image: '/images/posts/2025-04-01-vmware-kubevirt-migration-using-forklift/forklift.png'
 image_caption: 'Migrate to Kubevirt using Forklift'
 tags: [vmware, migration, forklift, kubevirt, kasten]
 featured: false
@@ -52,9 +52,13 @@ csi-hostpath-sc (default)   hostpath.csi.k8s.io   Delete          Immediate     
 
 ## Pre-Configuration
 
-During my testing, I found that the kubevirt and forklift pods fails with error `Failed to create an inotify watcher, too many open files`. To resolve this error, I had to update the system configuration. 
+During my testing, I found that the kubevirt and forklift pods fails with error 
 
-Open the file /etc/sysctl.conf and add the following  
+```
+Failed to create an inotify watcher, too many open files
+```
+
+To resolve this error, I had to update the system configuration. Open the file `/etc/sysctl.conf` and add the following  
 
 ```
 fs.inotify.max_user_watches=999999
