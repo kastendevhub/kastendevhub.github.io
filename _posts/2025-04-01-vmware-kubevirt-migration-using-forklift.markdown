@@ -4,7 +4,7 @@ title: VMware KubeVirt Migration Using Forklift
 description: In this blog post, I discuss about migrating virtual machines from VMware to a Kubernetes cluster running KubeVirt using Forklift tool
 date: 2025-04-01 11:00:00 +0000
 author: satheeshmohandass
-image: '/images/posts/2025-04-01-VMware-KubeVirt-migration-using-forklift/forklift.png'
+image: '/images/posts/2025-04-01-vmware-kubevirt-migration-using-forklift/forklift.png'
 image_caption: 'Migrate to KubeVirt using Forklift'
 tags: [VMware, migration, forklift, KubeVirt, kasten]
 featured: false
