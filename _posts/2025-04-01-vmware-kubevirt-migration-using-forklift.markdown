@@ -1,20 +1,20 @@
 ---
 layout: post
-title: 
-description: In this blog post, we look at migrating virtual machines from VMware to Kubernetes cluster running Kubevirt using Forklift
+title: VMware KubeVirt Migration Using Forklift
+description: In this blog post, we look at migrating virtual machines from VMware to Kubernetes cluster running KubeVirt using Forklift
 date: 2025-04-01 11:00:00 +0000
 author: satheeshmohandass
-image: '/images/posts/2025-04-01-vmware-kubevirt-migration-using-forklift/forklift.png'
-image_caption: 'Migrate to Kubevirt using Forklift'
-tags: [vmware, migration, forklift, kubevirt, kasten]
+image: '/images/posts/2025-04-01-VMware-KubeVirt-migration-using-forklift/forklift.png'
+image_caption: 'Migrate to KubeVirt using Forklift'
+tags: [VMware, migration, forklift, KubeVirt, kasten]
 featured: false
 ---
 
-Broadcom's strategic pricing changes for VMware have sparked significant conversations within the tech community. With potential increases in licensing costs and the introduction of new pricing models, many organizations are now actively seeking alternatives. While customers are evaluating various options such as Proxmox, Hyper-V and Nutanix, one of the compelling alternative is Kubevirt. 
+Broadcom's strategic pricing changes for VMware have sparked significant conversations within the tech community. With potential increases in licensing costs and the introduction of new pricing models, many organizations are now actively seeking alternatives. While customers are evaluating various options such as Proxmox, Hyper-V and Nutanix, one of the compelling alternative is KubeVirt. 
 
-## What is Kubevirt?
+## What is KubeVirt?
 
-KubeVirt is an extension of Kubernetes that enables users to run and manage virtual machines alongside containerized applications, providing a unified platform for both environments. Some of the key reasons why Kubevirt stands out as a visible alternatives are 
+KubeVirt is an extension of Kubernetes that enables users to run and manage virtual machines alongside containerized applications, providing a unified platform for both environments. Some of the key reasons why KubeVirt stands out as a visible alternatives are 
 
 - Unified Management - KubeVirt allows organizations to manage both virtual machines and containerized applications within a single Kubernetes environment
 - Cost Efficiency - By leveraging existing Kubernetes infrastructure, KubeVirt can help organizations reduce costs associated with licensing and infrastructure management
@@ -26,7 +26,7 @@ KubeVirt is an extension of Kubernetes that enables users to run and manage virt
 any many more….
 
 
-In this blog, I walk through the steps on how a virtual machine, running on VMware Infrastructure can be migrated to a Kubernetes clusters as Kubevirt VM using Forklift. 
+In this blog, I walk through the steps on how a virtual machine, running on VMware Infrastructure can be migrated to a Kubernetes clusters as KubeVirt VM using Forklift. 
 
 ## What is Forklift?
 
@@ -52,7 +52,7 @@ csi-hostpath-sc (default)   hostpath.csi.k8s.io   Delete          Immediate     
 
 ## Pre-Configuration
 
-During my testing, I found that the kubevirt and forklift pods fails with error 
+During my testing, I found that the KubeVirt and forklift pods fails with error 
 
 ```
 Failed to create an inotify watcher, too many open files
@@ -78,21 +78,21 @@ Reboot the node for the changes to effect.
 {: .alert-info }
 Note: if you are running on a multi-node kubernetes cluster, the changes need to be applied on all nodes.
 
-## Install Kubevirt
+## Install KubeVirt
 
-Now that I have a kubernetes cluster with storage configured, the next step is to install Kubevirt. 
+Now that I have a kubernetes cluster with storage configured, the next step is to install KubeVirt. 
 
 ```
-export VERSION=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
+export VERSION=$(curl -s https://storage.googleapis.com/KubeVirt-prow/release/KubeVirt/KubeVirt/stable.txt)
 echo $VERSION
-kubectl create -f "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-operator.yaml"
-kubectl create -f "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-cr.yaml"
+kubectl create -f "https://github.com/KubeVirt/KubeVirt/releases/download/${VERSION}/KubeVirt-operator.yaml"
+kubectl create -f "https://github.com/KubeVirt/KubeVirt/releases/download/${VERSION}/KubeVirt-cr.yaml"
 ```
 
-Verify if kubevirt is successfully deployed. This will take a few mins for all pods to successfully deploy.
+Verify if KubeVirt is successfully deployed. This will take a few mins for all pods to successfully deploy.
 
 ```
-kubectl get kubevirt.kubevirt.io/kubevirt -n kubevirt -o=jsonpath="{.status.phase}"
+kubectl get KubeVirt.KubeVirt.io/KubeVirt -n KubeVirt -o=jsonpath="{.status.phase}"
 Deployed
 ```
 
@@ -101,8 +101,8 @@ Deployed
 virtctl is a command-line utility provided by KubeVirt. virtctl acts as a client tool to interact with KubeVirt resources, such as virtual machines, virtual machine instances (VMIs), and related components. It is similar to kubectl but provides additional commands specifically for managing virtual machines in a Kubernetes environment.
 
 ```
-export VERSION=$(curl https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
-sudo wget https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/virtctl-${VERSION}-linux-amd64 
+export VERSION=$(curl https://storage.googleapis.com/KubeVirt-prow/release/KubeVirt/KubeVirt/stable.txt)
+sudo wget https://github.com/KubeVirt/KubeVirt/releases/download/${VERSION}/virtctl-${VERSION}-linux-amd64 
 sudo chmod +x virtctl-v1.5.0-linux-amd64
 sudo mv virtctl-v1.5.0-linux-amd64 /usr/local/bin/virtctl
 ```
@@ -179,9 +179,9 @@ network-attachment-definitions       net-attach-def                             
 KubeVirt CDI (Containerized Data Importer) is a tool designed to manage the lifecycle of virtual machine disk images in a KubeVirt environment. It simplifies the process of importing, uploading, and cloning virtual machine (VM) disk images, making it easier to manage storage for virtual machines running in Kubernetes. CDI is an integral part of the KubeVirt ecosystem, which enables running virtual machines alongside containers in Kubernetes
 
 ```
-export CDI_VERSION=$(curl -s https://api.github.com/repos/kubevirt/containerized-data-importer/releases/latest | grep tag_name | cut -d '"' -f 4)
-kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI_VERSION}/cdi-operator.yaml
-kubectl apply -f https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI_VERSION}/cdi-cr.yaml
+export CDI_VERSION=$(curl -s https://api.github.com/repos/KubeVirt/containerized-data-importer/releases/latest | grep tag_name | cut -d '"' -f 4)
+kubectl apply -f https://github.com/KubeVirt/containerized-data-importer/releases/download/${CDI_VERSION}/cdi-operator.yaml
+kubectl apply -f https://github.com/KubeVirt/containerized-data-importer/releases/download/${CDI_VERSION}/cdi-cr.yaml
 ```
 
 Verify if all the CDI components are running
@@ -198,22 +198,22 @@ cdi-uploadproxy-69cd77cb7-9qxr6   1/1     Running   0          31s
 Verify the CRDS are installed
 
 ```
-kubectl get crds | grep cdi.kubevirt.io
-cdiconfigs.cdi.kubevirt.io                                    2025-03-24T23:59:33Z
-cdis.cdi.kubevirt.io                                          2025-03-24T23:59:14Z
-dataimportcrons.cdi.kubevirt.io                               2025-03-24T23:59:33Z
-datasources.cdi.kubevirt.io                                   2025-03-24T23:59:33Z
-datavolumes.cdi.kubevirt.io                                   2025-03-24T23:59:33Z
-objecttransfers.cdi.kubevirt.io                               2025-03-24T23:59:33Z
-openstackvolumepopulators.forklift.cdi.kubevirt.io            2025-03-24T23:59:34Z
-ovirtvolumepopulators.forklift.cdi.kubevirt.io                2025-03-24T23:59:34Z
-storageprofiles.cdi.kubevirt.io                               2025-03-24T23:59:33Z
-volumeclonesources.cdi.kubevirt.io                            2025-03-24T23:59:33Z
-volumeimportsources.cdi.kubevirt.io                           2025-03-24T23:59:33Z
-volumeuploadsources.cdi.kubevirt.io                           2025-03-24T23:59:33Z
+kubectl get crds | grep cdi.KubeVirt.io
+cdiconfigs.cdi.KubeVirt.io                                    2025-03-24T23:59:33Z
+cdis.cdi.KubeVirt.io                                          2025-03-24T23:59:14Z
+dataimportcrons.cdi.KubeVirt.io                               2025-03-24T23:59:33Z
+datasources.cdi.KubeVirt.io                                   2025-03-24T23:59:33Z
+datavolumes.cdi.KubeVirt.io                                   2025-03-24T23:59:33Z
+objecttransfers.cdi.KubeVirt.io                               2025-03-24T23:59:33Z
+openstackvolumepopulators.forklift.cdi.KubeVirt.io            2025-03-24T23:59:34Z
+ovirtvolumepopulators.forklift.cdi.KubeVirt.io                2025-03-24T23:59:34Z
+storageprofiles.cdi.KubeVirt.io                               2025-03-24T23:59:33Z
+volumeclonesources.cdi.KubeVirt.io                            2025-03-24T23:59:33Z
+volumeimportsources.cdi.KubeVirt.io                           2025-03-24T23:59:33Z
+volumeuploadsources.cdi.KubeVirt.io                           2025-03-24T23:59:33Z
 ```
 
-When Kubevirt CDI is successfully installed, it creates a storageprofile with the same name as the storageclass that exist on the cluster. In my environment, a storageprofile was created with the name csi-hostpath-sc. This storageprofile created by the api cdi.kubevirt.io missed the accessModes and volumeMode parameters. I had to add them manually by patching the storageprofile.
+When KubeVirt CDI is successfully installed, it creates a storageprofile with the same name as the storageclass that exist on the cluster. In my environment, a storageprofile was created with the name csi-hostpath-sc. This storageprofile created by the api cdi.KubeVirt.io missed the accessModes and volumeMode parameters. I had to add them manually by patching the storageprofile.
 
 ```
 kubectl patch storageprofile csi-hostpath-sc --type=merge -p "$(cat << EOM
@@ -229,7 +229,7 @@ EOM
 {: .alert-info }
 Note: depending on the storage and csi driver you use on your environment, this extra patching might not be needed. Check the spec of the storageprofile and if the accessModes and volumeMode is defined, the patching can be skipped.
 
-For more information on CDI storageprofile see [link](https://github.com/kubevirt/containerized-data-importer/blob/main/doc/storageprofile.md)
+For more information on CDI storageprofile see [link](https://github.com/KubeVirt/containerized-data-importer/blob/main/doc/storageprofile.md)
 
 ## Install Forklift
 
@@ -369,7 +369,7 @@ data:
   password: <base64 value of vsphere password>
 kind: Secret
 metadata:
-  name: vmware-secret
+  name: VMware-secret
   namespace: konveyor-forklift
 type: Opaque
 EOF
@@ -384,11 +384,11 @@ kind: Provider
 metadata:
   annotations:
     forklift.konveyor.io/empty-vddk-init-image: 'yes'
-  name: vmware
+  name: VMware
   namespace: konveyor-forklift
 spec:
   secret:
-    name: vmware-secret
+    name: VMware-secret
     namespace: konveyor-forklift
   settings:
     sdkEndpoint: vcenter
@@ -397,13 +397,13 @@ spec:
 EOF
 ```
 
-If forklift is able to successfully connect to vSphere and complete an inventory, you should see the status for vmware-provider as Ready. If the Provider status is stuck at Staging, review the logs of the inventory container from the forklift-controller pod in the konveyor-forklift namespace for errors.
+If forklift is able to successfully connect to vSphere and complete an inventory, you should see the status for VMware-provider as Ready. If the Provider status is stuck at Staging, review the logs of the inventory container from the forklift-controller pod in the konveyor-forklift namespace for errors.
 
 ```
 kubectl get Provider -A
 NAMESPACE           NAME              TYPE        STATUS   READY   CONNECTED   INVENTORY   URL                                   AGE
 konveyor-forklift   host              openshift   Ready    True    True        True                                              3m33s
-konveyor-forklift   vmware-provider   vsphere     Ready    True    True        True        https://shield-vcsa.sbmlabs.net/sdk   2m49s
+konveyor-forklift   VMware-provider   vsphere     Ready    True    True        True        https://shield-vcsa.sbmlabs.net/sdk   2m49s
 ```
 
 ### Create the NetworkMap
@@ -432,7 +432,7 @@ spec:
     source:
       apiVersion: forklift.konveyor.io/v1beta1
       kind: Provider
-      name: vmware
+      name: VMware
       namespace: konveyor-forklift
 EOF
 ```
@@ -447,7 +447,7 @@ migration-network-map   True    10s
 
 Create the StorageMap
 
-Similar to NetworkMap, StorageMap maps the storage aspects when migrating VMs from one environment to another. In the example below, I am mapping VMWare datastore datastore-1007 to csi-hostpath-sc storage class on the kubernetes cluster.
+Similar to NetworkMap, StorageMap maps the storage aspects when migrating VMs from one environment to another. In the example below, I am mapping VMware datastore datastore-1007 to csi-hostpath-sc storage class on the kubernetes cluster.
 ```
 cat <<EOF | kubectl create -f - 
 apiVersion: forklift.konveyor.io/v1beta1
@@ -470,7 +470,7 @@ spec:
     source:
       apiVersion: forklift.konveyor.io/v1beta1
       kind: Provider
-      name: vmware
+      name: VMware
       namespace: konveyor-forklift
 EOF
 ```
@@ -518,7 +518,7 @@ spec:
     source:
       apiVersion: forklift.konveyor.io/v1beta1
       kind: Provider
-      name: vmware
+      name: VMware
       namespace: konveyor-forklift
   targetNamespace: konveyor-forklift
   vms:
@@ -613,7 +613,7 @@ migration-xcvfg   True              True                 6h43m
 When the migration completed, you should see a VM created but in stopped state
 
 ```
-[root@minikube-centos-cluster ~]# kubectl get vms -A
+kubectl get vms -A
 NAMESPACE           NAME                 AGE   STATUS    READY
 konveyor-forklift   migration-test-vm1   10m   Stopped   False
 ```
