@@ -33,7 +33,6 @@ In a nutshell : you register your cloud identity to an identity provider that yo
 
 ![Sequential workflow for the federated identity](../images/posts/2024-12-18-federated-identity/idp.png)
 
-
 # How does it work for Openshift ?
 
 Now that we've seen the theory let see a real implementation with Openshift.
