@@ -10,16 +10,16 @@ tags: [Azure , Backup, Kasten, Kubernetes, Security, Authentication, Federated i
 featured:
 ---
 
-# What is federated identity and why it matters ? 
+# What is federated identity and why it matters ?
 
-When your program perfom an operation with a cloud provider like Azure it needs to authentify and if the  identity is granted the necessary authorizations the operation will succeed. 
+When your program perfom an operation with a cloud provider like Azure it needs to authentify and if the  identity is granted the necessary authorizations the operation will succeed.
 
 Kasten need to perform operations on Azure :
 - Snapshots operation on the storage when CSI is not available (for instance legacy azure disk)
-- Moving snapshot from a region to another one 
+- Moving snapshot from a region to another one
 - Exporting data to a blob container
 
-The issue is the authentication part because you need to store your credential somewhere. Credentials are like [plutonium](https://en.wikipedia.org/wiki/Plutonium) this is something that you don't want to manipulate, you don't want to be responsible for storing or managing it. 
+The issue is the authentication part because you need to store your credential somewhere. Credentials are like [plutonium](https://en.wikipedia.org/wiki/Plutonium) this is something that you don't want to manipulate, you don't want to be responsible for storing or managing it.
 
 ![Credentials are like plutonium](../images/posts/2024-12-18-federated-identity/credentials-are-plutonium.png)
 
@@ -27,16 +27,15 @@ You can put the credential in a kubenetes secret but you need to make sure that 
 
 ## Enter federated identity
 
-Azure (but also the main cloud providers like AWS or GCP) comes with a solution called **Federated identity**. 
+Azure (but also the main cloud providers like AWS or GCP) comes with a solution called **Federated identity**.
 
 In a nutshell : you register your cloud identity to an identity provider that you choose (1). The client  by authenticating with a [JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519) (2 and 3) claim the cloud identity (4). Azure can validate the signature of the token against the identity provider that was registered. If successful the client can perfom operation **as** the cloud identity.
 
 ![Sequential workflow for the federated identity](../images/posts/2024-12-18-federated-identity/idp.png)
 
+# How does it work for Openshift ?
 
-# How does it work for Openshift ? 
-
-Now that we've seen the theory let see a real implementation with Openshift. 
+Now that we've seen the theory let see a real implementation with Openshift.
 
 Openshift support federated identity on Azure since version 4.14. You need to install openshift [following this guide](https://docs.openshift.com/container-platform/4.14/installing/installing_azure/installing-azure-customizations.html#installing-azure-with-short-term-creds_installing-azure-customizations).
 
@@ -45,10 +44,10 @@ The public address of the storage account container is the **issuer** endpoint. 
 
 ![Storage account acting like an IDP](../images/posts/2024-12-18-federated-identity/storage-account.png)
 
-But Azure only need public JKMS key (in the openid directory) to validate the signature of the JWT. JKMS is the public key in the cryptographic signature. 
+But Azure only need public JKMS key (in the openid directory) to validate the signature of the JWT. JKMS is the public key in the cryptographic signature.
 Openshift keep the control on the creation of the JWT and sign it with the private key.
 
-Now when you check the Azure managed identity that are used by openshift 
+Now when you check the Azure managed identity that are used by openshift
 
 ![Managed identities use by Openshift](../images/posts/2024-12-18-federated-identity/managed-identities.png)
 
@@ -57,23 +56,23 @@ You can see that their federated credential field point to the storage account t
 ![Managed identity details](../images/posts/2024-12-18-federated-identity/managed-identity.png)
 
 Also a subject identifier is defined. Meaning that only the service account define in this field can assume this role.
-When Azure Entra Id will validate the JWT it will use this 2 informations : 
+When Azure Entra Id will validate the JWT it will use this 2 informations :
 - The issuer by validating the signature
-- The subject identifier by checking the sub field in the JWT 
+- The subject identifier by checking the sub field in the JWT
 
 
 ## Use it for your own application
 
 But this configuration is not only used by the Openshift operators, one can create a service account that can assume a managed identity. In this [Redhat tutorial](https://access.redhat.com/solutions/7044926) a kubernetes service account  read the content of an Azure Key Vault.
 
-We're not going to redo the tutorial but the main steps are 
+We're not going to redo the tutorial but the main steps are
 
 - Create a managed identity.
 ```
-az identity create --name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}" 
+az identity create --name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}"
 ```
 - Configure the authorization to allow  the managed identity to read the secret in the keyvault.
-- Create the federated credential with the issuer and the subject. 
+- Create the federated credential with the issuer and the subject.
 ```
  az identity federated-credential create \
 --name "kubernetes-federated-credential" \
@@ -98,12 +97,12 @@ EOF
 ```
 cat <<EOF | oc apply -f -
 apiVersion: v1
-kind: Pod           
+kind: Pod
 metadata:
  name: quick-start
- namespace: ${SERVICE_ACCOUNT_NAMESPACE}                                                         
- labels:                      
-   azure.workload.identity/use: "true"  
+ namespace: ${SERVICE_ACCOUNT_NAMESPACE}
+ labels:
+   azure.workload.identity/use: "true"
 spec:
  serviceAccountName: ${SERVICE_ACCOUNT_NAME}
 ....
@@ -126,8 +125,8 @@ Then the Openshift webhook will automatically inject the necessary artifact in t
     - mountPath: /var/run/secrets/azure/tokens
       name: azure-identity-token
       readOnly: true
-....   
- volumes: 
+....
+ volumes:
   - name: azure-identity-token
     projected:
       defaultMode: 420
@@ -138,11 +137,11 @@ Then the Openshift webhook will automatically inject the necessary artifact in t
           path: azure-identity-token
 ```
 
-# How does it works for Kasten 
+# How does it works for Kasten
 
 Kasten support managed identity if your Openshift cluster has been installed with support for short term credential as explained above.
 
-First you need to create a managed identity let's say `kasten-managed-identity`, take note of the ClientId 
+First you need to create a managed identity let's say `kasten-managed-identity`, take note of the ClientId
 
 ![Kasten managed identity clientId](../images/posts/2024-12-18-federated-identity/kasten-managed-identity.png)
 
@@ -154,7 +153,7 @@ Create the federated credentials the subject must be the k10-k10 service account
 
 ![Kasten managed identity role](../images/posts/2024-12-18-federated-identity/kasten-managed-identity-federation.png)
 
-Now all you have to do is add this helm options to have k10-k10 service account assume the kasten-managed-identity 
+Now all you have to do is add this helm options to have k10-k10 service account assume the kasten-managed-identity
 
 ```
 azure:
@@ -169,15 +168,15 @@ You'll see the corresponding infra profile.
 
 ![Infra profile](../images/posts/2024-12-18-federated-identity/infra-profile.png)
 
-# Test it 
+# Test it
 
-A simple way to test it is to recreate a legacy storage class 
+A simple way to test it is to recreate a legacy storage class
 ```
 allowVolumeExpansion: true
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: azuredisk-legacy  
+  name: azuredisk-legacy
 parameters:
   kind: Managed
   storageaccounttype: Premium_LRS
@@ -188,8 +187,8 @@ volumeBindingMode: WaitForFirstConsumer
 
 Create an application that use it for instance [use this guide](https://github.com/michaelcourcy/basic-app) to create a simple stateful application and create a policy to export.
 
-# Conclusion 
+# Conclusion
 
-With the support for Azure federated identity you don't need anymore to store your azure credential for Kasten anywere which brings a lot more security and simplify your configuration. 
+With the support for Azure federated identity you don't need anymore to store your azure credential for Kasten anywere which brings a lot more security and simplify your configuration.
 
-You can also check our [documenation](https://docs.kasten.io/latest/install/openshift/helm.html#federated-identity) and [our support](https://docs.kasten.io/latest/install/azure/azure.html#installing-veeam-kasten-with-managed-identity) for Managed identity on AKS. 
+You can also check our [documenation](https://docs.kasten.io/latest/install/openshift/helm.html#federated-identity) and [our support](https://docs.kasten.io/latest/install/azure/azure.html#installing-veeam-kasten-with-managed-identity) for Managed identity on AKS.
