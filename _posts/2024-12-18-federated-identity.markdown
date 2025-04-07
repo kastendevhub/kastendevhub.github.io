@@ -34,9 +34,9 @@ In a nutshell : you register your cloud identity to an identity provider that yo
 ![Sequential workflow for the federated identity](../images/posts/2024-12-18-federated-identity/idp.png)
 
 
-# How does it work for Openshit ? 
+# How does it work for Openshift ? 
 
-Now that we've seen the theory let see a real implementation with Openshit. 
+Now that we've seen the theory let see a real implementation with Openshift. 
 
 Openshift support federated identity on Azure since version 4.14. You need to install openshift [following this guide](https://docs.openshift.com/container-platform/4.14/installing/installing_azure/installing-azure-customizations.html#installing-azure-with-short-term-creds_installing-azure-customizations).
 

@@ -40,7 +40,7 @@ However I want to show in this post that with a bit more manual operation you ca
 Create a namespace flr-manual 
 ![Create namespace](../images/posts/2024-10-25-kubevirt-flr-and-kasten/create-namespace.png)
 
-Use the openshit ui to create a VM from a template
+Use the openshift ui to create a VM from a template
 ![Create a vm](../images/posts/2024-10-25-kubevirt-flr-and-kasten/create-vm.png)
 
 Choose the fedora-server-small template because it has source available (iso can be automatically obtained from a docker image) and it's easier.
