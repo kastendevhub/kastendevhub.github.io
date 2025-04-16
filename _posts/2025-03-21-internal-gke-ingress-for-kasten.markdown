@@ -21,7 +21,7 @@ You can deploy a VPC-native Google Kubernetes Engine (GKE) cluster in this defau
 Below is an example of a zonal GKE cluster in the us-central1 region:
 
 ```shell
-gcloud container clusters create mcourcy-telepass \
+gcloud container clusters create mcourcy-cluster1 \
     --zone us-central1-a \
     --node-locations us-central1-a,us-central1-b,us-central1-c
 ```
@@ -145,6 +145,9 @@ Also, you can find the NEG that’s created behind the scenes:
 ```shell
 gcloud compute network-endpoint-groups list | grep kasten-io
 ```
+
+> By default the GKE mutating webhook is activated to add the annotation `cloud.google.com/neg: '{"ingress": true}'` on any service you create, but in some situation [described here](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#container-native_load_balancing) (for instance shared VPC) this mutating webhook is not activated and you have to add the annotation manually. If you don't do that the ingress will fail creating the internal load balancer.
+
 
 ## Testing the Ingress
 
