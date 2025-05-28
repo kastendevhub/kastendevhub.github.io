@@ -140,6 +140,7 @@ When you need to restore a single table, Kasten K10 performs a volume clone rest
 You'll see a new PVC with a name like `data-postgres16-postgresql-0-2025-05-28-15-13-41`
 
 2. Patch the StatefulSet to mount the new PVC temporarily:
+
 ```
 kubectl patch statefulset postgres16-postgresql -n postgres-demo --patch '
 {
@@ -166,9 +167,9 @@ kubectl patch statefulset postgres16-postgresql -n postgres-demo --patch '
 ```
 
 4. Restore a specific table from the binary dump:
+
 ```
 kubectl exec -it postgres16-postgresql-0 -n postgres-demo -- bash
-
 # Inside the pod, restore only the customers table
 export PGHOST='localhost'
 export PGUSER='postgres'
