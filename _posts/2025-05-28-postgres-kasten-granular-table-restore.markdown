@@ -67,10 +67,10 @@ actions:
         pgSecret:
           kind: Secret
           name: 'postgres16-postgresql'
-          namespace: '{{ .StatefulSet.Namespace }}'
+          namespace: '{{{{}} .StatefulSet.Namespace {{}}}}'
       args:
-        pod: "{{ index .StatefulSet.Pods 0 }}"
-        namespace: '{{ .StatefulSet.Namespace }}'
+        pod: "{{{{}} index .StatefulSet.Pods 0 {{}}}}"
+        namespace: '{{{{}} .StatefulSet.Namespace {{}}}}'
         command:
         - bash
         - -o
@@ -81,7 +81,7 @@ actions:
         - |
           export PGHOST='localhost'
           export PGUSER='postgres'
-          export PGPASSWORD='{{ index .Phases.pgDumpall.Secrets.pgSecret.Data "postgres-password" | toString }}'
+          export PGPASSWORD='{{{{}} index .Phases.pgDumpall.Secrets.pgSecret.Data "postgres-password" | toString {{}}}}'
           mkdir -p /bitnami/postgresql/backups
           
           # Back up global objects (roles, tablespaces) in plain text
