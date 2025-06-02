@@ -52,6 +52,7 @@ SELECT * FROM customers;
 Kasten K10 uses Kanister blueprints to define how applications should be backed up. For PostgreSQL, we'll use a custom blueprint that creates individual binary dumps for each database, enabling granular restore capabilities:
 
 ```
+{% raw %}
 apiVersion: cr.kanister.io/v1alpha1
 kind: Blueprint
 metadata:
@@ -67,10 +68,10 @@ actions:
         pgSecret:
           kind: Secret
           name: 'postgres16-postgresql'
-          namespace: '{{{{}} .StatefulSet.Namespace {{}}}}'
+          namespace: '{{ .StatefulSet.Namespace }}'
       args:
-        pod: "{{{{}} index .StatefulSet.Pods 0 {{}}}}"
-        namespace: '{{{{}} .StatefulSet.Namespace {{}}}}'
+        pod: "{{ index .StatefulSet.Pods 0 }}"
+        namespace: '{{ .StatefulSet.Namespace }}'
         command:
         - bash
         - -o
@@ -81,7 +82,7 @@ actions:
         - |
           export PGHOST='localhost'
           export PGUSER='postgres'
-          export PGPASSWORD='{{{{}} index .Phases.pgDumpall.Secrets.pgSecret.Data "postgres-password" | toString {{}}}}'
+          export PGPASSWORD='{{ index .Phases.pgDumpall.Secrets.pgSecret.Data "postgres-password" | toString }}'
           mkdir -p /bitnami/postgresql/backups
           
           # Back up global objects (roles, tablespaces) in plain text
@@ -94,6 +95,7 @@ actions:
           for db in $databases; do
             pg_dump -U postgres -Fc $db > /bitnami/postgresql/backups/${db}.dump
           done
+{% endraw %}
 ```
 
 Apply this blueprint to your cluster:
