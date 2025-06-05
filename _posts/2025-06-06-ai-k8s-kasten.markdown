@@ -25,7 +25,7 @@ Because AI is complex and there are a lot of moving parts, we're going to focus 
 
 ## Context is everything, duh
 
-Take the phrase "Lovely weather today." Without context (e.g. this was sent via a chat from an individual who we have no prior knowledge of), we have to take this phrase at face value and assume the speaker is earnestly saying it's nice outside.  But consider the scenario when, instead of a faceless chat, the speaker and we are sheltering in a bus stop together waiting for the golf-ball-sized hail to subside long enough to allow us to run to the nearest building to avoid the visible tornado heading our way, it takes on a different meaning all together. It's meaning is _sarcastic_ and perhaps a bit _facetious_, that is our speaker is saying the opposite of what they actually mean and being irreverant to an otherwise serious situation.
+Take the phrase "Lovely weather today." Without context (e.g. this was sent via a chat from an individual whom we have no prior knowledge of), we have to take this phrase at face value and assume the speaker is earnestly saying it's nice outside.  But consider the scenario when, instead of a faceless chat, the speaker and we are sheltering in a bus stop together waiting for the golf-ball-sized hail to subside long enough to allow us to run to the nearest building to avoid the visible tornado heading our way, it takes on a different meaning all together. It's meaning is _sarcastic_ and perhaps a bit _facetious_, that is our speaker is saying the opposite of what they actually mean and being irreverant to an otherwise serious situation.
 
 Want more or better examples of where context matters? Highly recommend watching Larry David's Curb Your Enthusiasm to better understand my point.
 
