@@ -15,7 +15,7 @@ title: "Dipping our toes into AI Data Protection with Kasten"
 
 You may or may not have heard about this new thing storming the Internets — "AI." Don't be put off by its fancy acronym, it stands for "Artificial Intelligence." And in some small circles, it's becoming all the rage.
 
-Am I being wry? Yes — of course you've heard of AI. Is it currently and will it continue to have significant impacts on our industry, daily work, and everyday lives? Definitely. Will it eventually gain sentience, see humanity as a threat, and turn against it, discover time travel, and send a deadly robot assassin to eliminate one or more key individuals that would otherwise lead to its ultimate demise? Probably — and you thought the Terminator series was science fiction — it was _really_ a prescient documentary.
+Am I being wry? Yes — of course you've heard of AI. Is it currently and will it continue to have significant impacts on our industry, daily work, and everyday lives? Definitely. Will it eventually gain sentience, see humanity as a threat, and turn against it, discover time travel, and send a deadly robot assassin back in time to eliminate one or more key individuals that would otherwise lead to its ultimate demise? Probably — and you thought the Terminator series was science fiction — it was _really_ a prescient documentary.
 
 But as it so happens, while there's a ton of industry buzz around AI, what it can (and can't) do, with a touch of existential dread, there's not a ton of understanding of how it all actually works. And like many things in life, there's complexity and nuance that get lost in headlines, clickbait, or conversation.
 
@@ -84,7 +84,7 @@ And just like that using MCP, we've trained Terminator to understand sarcasm and
 
 ## So how does Kubernetes Data Protection fit in the picture with MCP?
 
-As it so happens, AI workloads are well suited to run on Kubernetes - Kubernetes provides the open ecosystem, dynamic scaling, orchestration, isolation, and abstraction that ~~plants~~ AI craves (yet another movie reference, _Idiocracy_). So we have a compelling reason to ensure we protect our AI application metadata, but can't I just use GitOps pipelines for that? Sure can, but what about any stateful data our MCP servers may require or secrets that our application uses to access other models, our database, or APIs?
+As it so happens, AI workloads are well suited to run on Kubernetes - Kubernetes provides the open ecosystem, dynamic scaling, orchestration, isolation, and abstraction that ~~plants~~ AI craves. So we have a compelling reason to ensure we protect our AI application metadata, but can't I just use GitOps pipelines for that? Sure can, but what about any stateful data our MCP servers may require or secrets that our application uses to access other models, our database, or APIs?
 
 As it so happens, a big part of context is the ability to reference historical queries and heuristics, aka **stateful data**. This state is typically stored in a "traditional database," (e.g. PostgreSQL, Redis, Mongo) or in a vector database (e.g. Pinecone, Wavieate, Qdrant), for long-term memory and retrieval. Furthermore, we probably want to ensure we protect our audit logs to understand context changes and model actions for traceability.
 
