@@ -27,14 +27,14 @@ Because AI is complex and there are a lot of moving parts, we're going to focus 
 
 Take the phrase "Lovely weather today." Without context (e.g. this was sent via a chat from an individual whom we have no prior knowledge of), we have to take this phrase at face value and assume the speaker is earnestly saying it's nice outside.  But consider the scenario when, instead of a faceless chat, the speaker and we are sheltering in a bus stop together waiting for the golf-ball-sized hail to subside long enough to allow us to run to the nearest building to avoid the visible tornado heading our way, it takes on a different meaning all together. It's meaning is _sarcastic_ and perhaps a bit _facetious_, that is our speaker is saying the opposite of what they actually mean and being irreverant to an otherwise serious situation.
 
-Want more or better examples of where context matters? Highly recommend watching Larry David's Curb Your Enthusiasm to better understand my point.
+Want more or better examples of where context matters? Highly recommend watching Larry David's _Curb Your Enthusiasm_ to better understand my point.
 
 And you're probably saying to yourself, "great Matt, you've fit in your _Zoolander_, _Terminator_, and _Curb_ references and thanks for the pedantic lesson on context, but how does this have anything to do with computing or AI?" Well as it turns out, context has _a lot_ to do with AI, as it allows AI models to effectively interact and provide more tailored or effective responses based on previous questions.  You can think of MCP as an **AI-centric reinterpretation of an API**, tailored to the needs of language models and AI agents rather than conventional software components.
 
 {: .alert-info }
 In the interest of transparency, I did use ChatGPT to aid in the authoring of this blog, as who would be better suited to explain MCP than its original authors, the original creators of **OpenAI** (now [Anthropic](https://www.anthropic.com/))? But you have my assurance that I never use AI to actually write my blogs for me, as I take a principled approach to online writing, in that I do not wish to be a contributor to the [AI halucination feedback loop problem](https://www.unite.ai/the-ai-feedback-loop-when-machines-amplify-their-own-mistakes-by-trusting-each-others-lies/), which is a very interesting — and disconcerting — problem with AI that is potentially getting worse by the day. 
 
-Consider the following table, comparing features and how they are represented in a traditional API andvia MCP:
+Consider the following table, comparing features and how they are represented in a traditional API and via MCP:
 
 | Feature                    | Traditional API                 | MCP (Model Context Protocol)                                    |
 | -------------------------- | ------------------------------- | --------------------------------------------------------------- |
