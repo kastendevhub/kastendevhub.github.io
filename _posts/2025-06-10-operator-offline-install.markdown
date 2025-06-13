@@ -480,6 +480,46 @@ When setting up the mirrored operator in your disconnected OpenShift cluster, yo
 2. **CatalogSource**: This makes the operator visible in OperatorHub
 3. **ClusterCatalog**: Contains additional metadata for the mirroring configuration
 
+```
+cat /home/ec2-user/oc-mirror/mirror1/working-dir/cluster-resources/idms-oc-mirror.yaml
+---
+apiVersion: config.openshift.io/v1
+kind: ImageDigestMirrorSet
+metadata:
+  name: idms-operator-0
+spec:
+  imageDigestMirrors:
+  - mirrors:
+    - my-registry.local:8443/kasten
+    source: registry.connect.redhat.com/kasten
+  - mirrors:
+    - my-registry.local:8443/openshift4
+    source: registry.redhat.io/openshift4
+status: {}
+cat /home/ec2-user/oc-mirror/mirror1/working-dir/cluster-resources/cc-redhat-marketplace-index-v4-16.yaml
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterCatalog
+metadata:
+  name: cc-redhat-marketplace-index-v4-16
+spec:
+  priority: 0
+  source:
+    image:
+      ref: my-registry.local:8443/redhat/redhat-marketplace-index:v4.16
+    type: Image
+status: {}
+cat /home/ec2-user/oc-mirror/mirror1/working-dir/cluster-resources/cs-redhat-marketplace-index-v4-16.yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: cs-redhat-marketplace-index-v4-16
+  namespace: openshift-marketplace
+spec:
+  image: my-registry.local:8443/redhat/redhat-marketplace-index:v4.16
+  sourceType: grpc
+status: {}
+```
+
 The correct order of application is:
 
 ```bash
