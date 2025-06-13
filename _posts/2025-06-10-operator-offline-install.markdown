@@ -406,11 +406,6 @@ You should get this output
 2025/06/13 13:32:20  [INFO]   : mirror time     : 11m40.466258086s
 2025/06/13 13:32:20  [INFO]   : 👋 Goodbye, thank you for using oc-mirror
 ```
-
-## Step 5: Configure OpenShift to Access the Private Registry
-
-Before applying our mirror configuration files, we need to ensure that OpenShift can access images from our private registry. This involves two critical configurations:
-
 ## Step 5: Configure OpenShift to Access the Private Registry
 
 Before applying our mirror configuration files, we need to ensure that OpenShift can access images from our private registry. This involves two critical configurations:
