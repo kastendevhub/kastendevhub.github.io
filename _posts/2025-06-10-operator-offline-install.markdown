@@ -411,24 +411,6 @@ You should get this output
 
 Before applying our mirror configuration files, we need to ensure that OpenShift can access images from our private registry. This involves two critical configurations:
 
-### 5.1 Add Registry Authentication Credentials
-
-First, we need to add our registry credentials to the global pull secret:
-
-```bash
-# Export the current global pull secret
-oc extract secret/pull-secret -n openshift-config --to=.
-
-# Add our registry credentials to the pull secret JSON
-cat .dockerconfigjson | jq '.auths += {"my-registry.local:8443": {"auth": "aW5pdDpTNU43azQyWkVweVZLOHJNNjl2V1R3ZjNKZ1V0MWIwZQ==", "email": "admin@example.com"}}' > new-pull-secret.json
-
-# Verify the new pull secret has our registry included
-cat new-pull-secret.json | jq -r '.auths | keys[]'
-
-# Update the global pull secret
-oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=new-pull-secret.json
-```
-
 ## Step 5: Configure OpenShift to Access the Private Registry
 
 Before applying our mirror configuration files, we need to ensure that OpenShift can access images from our private registry. This involves two critical configurations:
@@ -451,7 +433,7 @@ cat new-pull-secret.json | jq -r '.auths | keys[]'
 oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=new-pull-secret.json
 ```
 
-> Note: The authentication string `aW5pdDpTNU43azQyWkVweVZLOHJNNjl2V1R3ZjNKZ1V0MWIwZQ==` is a base64 encoded version of `init:S5N7k42ZEpyVK8rM69vWTwf3JgUt1b0e`. You can generate your own with: `echo -n 'username:password' | base64`
+The authentication string `aW5pdDpTNU43azQyWkVweVZLOHJNNjl2V1R3ZjNKZ1V0MWIwZQ==` is a base64 encoded version of `init:S5N7k42ZEpyVK8rM69vWTwf3JgUt1b0e`. You can generate your own with: `echo -n 'username:password' | base64`
 
 ### 5.2 Configure OpenShift to Skip TLS Verification
 
