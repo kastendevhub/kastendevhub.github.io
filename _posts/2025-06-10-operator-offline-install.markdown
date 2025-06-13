@@ -429,9 +429,6 @@ cat new-pull-secret.json | jq -r '.auths | keys[]'
 oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=new-pull-secret.json
 ```
 
-> You're absolutely right. Before applying the catalog resources, we need to configure OpenShift to authenticate with our private registry and handle any TLS certificate issues. Let's add a section before Step 6 to address this:
-
-```markdown
 ## Step 5: Configure OpenShift to Access the Private Registry
 
 Before applying our mirror configuration files, we need to ensure that OpenShift can access images from our private registry. This involves two critical configurations:
