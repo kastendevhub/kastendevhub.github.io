@@ -1,0 +1,20 @@
+---
+author: mattslotten
+date: 2025-05-22 16:43:35 -0800
+description: "File-Level Recovery with Veeam Kasten and Veeam Backup and Replication"
+featured: false
+image: "/images/posts/2025-05-22-demo-flr/demo-flr.png"
+image_caption: "File-Level Recovery with Veeam Kasten and Veeam Backup and Replication"
+layout: post
+published: true
+tags: [demo, virtual machines, kubevirt]
+title: "Veeam Kasten and Backup and Replication FLR Interactive Demo"
+---
+
+With the release of Veeam Kasten 8.0, Kasten now has more VM-centric features, including a Virtual Machine Dashboard and the ability to send blockmode volumes to VBR from Kasten, which enabled file-level-recovery capabilities. To see for yourself, check out this interactive demo: 
+
+<div>
+        <script async src="https://js.storylane.io/js/v2/storylane.js"></script>
+        <button onclick="Storylane.Play({type: 'popup', demo_type: 'html', width: 1366, height: 768, scale: '0.95', demo_url: 'https://veeam.storylane.io/demo/ien6jr0ragcb?embed=popup', padding_bottom: '56.25%'})" class="sl-preview-cta" style="background-color:#00d15f;border:none;border-radius:8px;box-shadow:0px 0px 15px rgba(26, 19, 72, 0.45);color:#FFFFFF;display:inline-block;font-family:Poppins, Arial, sans-serif;font-size:clamp(16px, 1.599vw, 20px);font-weight:600;height:clamp(40px, 3.996vw, 50px);line-height:1.2;padding:0 clamp(15px, 1.776vw, 20px);text-overflow:ellipsis;transform:translateZ(0);transition:background 0.4s;white-space:nowrap;width:auto;z-index:999999;cursor:pointer">Kasten 8.0 FLR Demo</button>
+      </div>
+        
