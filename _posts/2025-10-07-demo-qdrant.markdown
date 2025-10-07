@@ -107,7 +107,7 @@ helm install my-demo kasten-ai-demo/k10animalai -n animalai --create-namespace
 Then simply install Kasten on the cluster and apply the blueprint mentioned above:
 
 ```
-kubectl create -f k8s/k10-bp-qdrant.yaml
+kubectl create -f https://raw.githubusercontent.com/kastendevhub/kasten-ai-demo/refs/heads/main/k8s/k10-bp-qdrant.yaml
 kubectl --namespace animalai annotate statefulset/my-demo-qdrant \
     kanister.kasten.io/blueprint=qdrant-hooks
 ```
@@ -116,4 +116,4 @@ Here's a link to the GitHub repo for the project for those that wish to tinker:
 
 [Kasten AI Demo](https://github.com/kastendevhub/kasten-ai-demo)
 
-Note that with this first iteration, the application cannot be deployed as-is to a Red Hat OpenShift cluster, as it violates the out-of-the-box SCC policy. A future "to-do" is to figure out how to allow us to deploy to OpenShift, currently I believe I am limited to the underlying Qdrant helm chart.
+Note that with this first iteration, the application cannot be deployed as-is to a Red Hat OpenShift cluster, as it violates the out-of-the-box OpenShift SCC policy. A future "to-do" is to figure out how to allow us to deploy to OpenShift, currently I believe I am limited by the underlying Qdrant helm chart not having SCC flags.
