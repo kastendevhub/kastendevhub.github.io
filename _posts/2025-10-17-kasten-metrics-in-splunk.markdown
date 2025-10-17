@@ -4,8 +4,8 @@ title: Operationalizing Kasten K10 Metrics in Splunk
 description: How to export Kasten K10 Prometheus metrics to Splunk using the federate endpoint and OpenTelemetry, then build useful SPL queries and dashboards that mirror PromQL.
 date: 2025-10-17 00:00:35 +0300
 author: michaelcourcy
-image: '/images/posts/2025-10-17-kasten-metrics-in-splunk/kasten-splunk.png'
-image_caption: 'kasten splunk architecture'
+image: '/images/posts/2025-10-17-kasten-metrics-in-splunk/kasten-splunk-shaking-hands.png'
+image_caption: 'kasten splunk work together'
 tags: [Kasten, Splunk, Metrics, Observability, Prometheus, OpenTelemetry]
 featured:
 ---
