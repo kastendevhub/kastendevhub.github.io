@@ -21,7 +21,7 @@ Kasten K10 exposes rich Prometheus metrics across its services (catalog, jobs, e
 
 This post explains the approach I use in the kasten-splunk project to collect Kasten metrics via Prometheus’ federate endpoint, ingest them into a Splunk metrics index with OpenTelemetry, and reconstruct key PromQL logic with SPL.
 
-Project: https://github.com/michaelcourcy/kasten-splunk
+Project: [https://github.com/michaelcourcy/kasten-splunk](https://github.com/michaelcourcy/kasten-splunk)
 
 
 ## Architecture at a glance
