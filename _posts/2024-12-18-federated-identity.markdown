@@ -71,7 +71,13 @@ We're not going to redo the tutorial but the main steps are
 ```
 az identity create --name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}"
 ```
+
 - Configure the authorization to allow  the managed identity to read the secret in the keyvault.
+```
+azureclient_id=$(az identity show --name ${USER_ASSIGNED_IDENTITY_NAME} --resource-group ${RESOURCE_GROUP} --query clientId -o tsv)
+az keyvault set-policy --name "${KEYVAULT_NAME}" --secret-permissions get --object-id "${USER_ASSIGNED_IDENTITY_OBJECT_ID}"
+```
+
 - Create the federated credential with the issuer and the subject.
 ```
  az identity federated-credential create \
