@@ -108,7 +108,7 @@ metadata:
  name: quick-start
  namespace: ${SERVICE_ACCOUNT_NAMESPACE}
  labels:
-   azure.workload.identity/use: "true"
+    azure.workload.identity/use: "true"
 spec:
  serviceAccountName: ${SERVICE_ACCOUNT_NAME}
 ....
@@ -156,6 +156,9 @@ Make sure you give the necessary role for this managed identity to perform the o
 ![Kasten managed identity role](../images/posts/2024-12-18-federated-identity/kasten-managed-identity-role.png)
 
 Create the federated credentials the subject must be the k10-k10 service account `system:serviceaccount:kasten-io:k10-k10`, use the issuer as explained above.
+
+> **Note** This is not true anymore since service account has been resdistributed,
+> please check the [kasten documentation](https://docs.kasten.io/latest/install/openshift/helm/#federated-identity) 
 
 ![Kasten managed identity role](../images/posts/2024-12-18-federated-identity/kasten-managed-identity-federation.png)
 
