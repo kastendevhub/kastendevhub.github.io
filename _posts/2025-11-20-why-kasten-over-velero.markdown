@@ -4,7 +4,7 @@ title: Why Choose Kasten K10 Over Velero for Kubernetes Backup
 description: Many customers ask why they should use Kasten, a commercial solution, rather than Velero, which is free and open source. This in-depth comparison explores enterprise support, security, compliance, operability, and consistency to explain why most organizations migrate from Velero to Kasten.
 date: 2025-11-20 00:00:35 +0300
 author: michaelcourcy
-image: '/images/posts/2025-05-28-postgres-kasten-granular-table-restore/pick-tables.png'
+image: '/images/posts/2025-11-20-why-kasten-over-velero/kasten-over-velero.png'
 image_caption: 'Why Choose Kasten K10 Over Velero'
 tags: [Kasten, Velero, Backup, Kubernetes, Enterprise, Security, Compliance]
 featured:
