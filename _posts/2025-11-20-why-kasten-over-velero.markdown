@@ -1,16 +1,16 @@
 ---
 layout: post
-title: Why Choose Kasten K10 Over Velero for Kubernetes Backup
+title: Why Choose Veeam Kasten Over Velero for Kubernetes Backup
 description: Many customers ask why they should use Kasten, a commercial solution, rather than Velero, which is free and open source. This in-depth comparison explores enterprise support, security, compliance, operability, and consistency to explain why most organizations migrate from Velero to Kasten.
 date: 2025-11-20 00:00:35 +0300
 author: michaelcourcy
-image: '/images/posts/2025-11-20-why-kasten-over-velero/kasten-over-velero.png'
-image_caption: 'Why Choose Kasten K10 Over Velero'
+image: '/images/posts/2025-11-20-why-kasten-over-velero/kasten-over-velero-2.png'
+image_caption: 'Why Choose Veeam Kasten Over Velero'
 tags: [Kasten, Velero, Backup, Kubernetes, Enterprise, Security, Compliance]
 featured:
 ---
 
-Many customers ask us why they should use Kasten K10, a commercial solution, rather than Velero, which is free and open source. While the appeal of "free" is obvious, open source doesn't always translate to cost savings. In fact, most of our customers started with Velero and eventually migrated to Kasten. This article explores the key reasons why.
+Many customers ask us why they should use Veeam Kasten, a commercial solution, rather than Velero, which is free and open source. While the appeal of "free" is obvious, open source doesn't always translate to cost savings. In fact, most of our customers started with Velero and eventually migrated to Kasten. This article explores the key reasons why.
 
 ## Enterprise Support
 
@@ -28,11 +28,16 @@ When you work with Kasten, we accompany you from the start. You'll have direct c
 - What's possible, what's not recommended, and best practices
 - Specific commitments tailored to your environment
 
+But it' also 
+- Our ability to patch quickly any security flaw 
+- Our Customer Succes Management to onboard you 
+- Our support 24/7 and even during the POC 
+
 You're not alone—we show you how to install and operate Kasten successfully.
 
 ### Product Evolution Driven by Customer Needs
 
-It's common for us to evolve our product directly for customers with specific requirements. Recently, a customer needed full Azure Managed Identity support across all operations. We didn't have complete coverage at that time, but we built it and delivered it quickly. Why? Because we work for our customers—not just a community, but real paying customers with real business needs.
+It's common for us to evolve our product directly for customers with specific requirements. Recently, a customer needed full Azure Managed Identity support across all operations. We didn't have complete coverage at that time, but we built it and delivered it quickly. Why? Because we work for our customers—not just a community, but real customers with real business needs.
 
 ## Security and Compliance
 
@@ -71,6 +76,7 @@ With Kasten, you can fully delegate backup and restore activities to application
 
 Kasten is compliant with numerous industry standards:
 - ISO 27001
+- FIPS
 - SOC 2
 - HIPAA
 - NIST
@@ -86,11 +92,13 @@ While you can do everything via command line, in practice, CLI-only tools create
 
 Kasten provides an excellent graphical interface that gives you a quick, comprehensive view of all operations. With Velero, you must execute terminal commands for every piece of information or action.
 
+In combination with native Kubernetes RBAC rule, you can leverage the User Interface as a self-service portal for your application teams, your administrators or your backup teams.
+
 This difficulty in operating Velero often leads organizations to under-protect applications or even abandon protection altogether. I've seen customers where Velero configuration became such a headache that disaster struck before they could protect critical workloads.
 
 ### Automatic Discovery
 
-Kasten automatically discovers your applications, identifies what's inside them, and can even apply different backup methods based on the workloads present. **Velero cannot do this.**
+Kasten automatically discovers your applications, identifies what's inside them, and can even apply different backup methods based on the different services that compose the application. **Velero cannot do this.**
 
 Over time, this GUI and automation have a massive impact on operational efficiency.
 
@@ -103,6 +111,7 @@ Even in the realm of command-line usage, Kasten offers much richer APIs than Vel
 - Run Actions
 - Restore Actions
 - Retire Actions
+- ... 
 
 You can easily automate many backup-related operations. With Velero, this is much more complex or impossible.
 
@@ -193,7 +202,7 @@ A critical feature many organizations need is the ability to export CSI or cloud
 
 ### Kasten's Solution
 
-Kasten K10 natively supports:
+Veeam Kasten natively supports:
 - Snapshot export to object storage (S3, Azure Blob, GCS)
 - Converts cloud snapshots into a portable format
 - Cross-region and cross-cloud restores from exported snapshots
@@ -211,4 +220,4 @@ The reality is that "free" open source often comes with hidden costs:
 - Poor operability that leads to under-protected workloads
 - Technical limitations that force compromises between consistency and durability
 
-Most organizations that start with Velero eventually migrate to Kasten K10 when they realize these costs. The question isn't whether to invest in a professional backup solution—it's whether to invest before or after a disaster.
+Most organizations that start with Velero eventually migrate to Veeam Kasten when they realize these costs. The question isn't whether to invest in a professional backup solution—it's whether to invest before or after a disaster.
