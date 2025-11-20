@@ -47,7 +47,7 @@ Security and compliance are the second major differentiators when comparing Kast
 
 Kasten's security model is based on **envelope encryption**. A master key (KEK - Key Encryption Key) derives unique Data Encryption Keys (DEKs) for each backup. This approach offers:
 
-- **Unique encryption per backup**: Even if a cloud provider could access your object storage, they cannot decrypt your backups without the master key
+- **Unique encryption per backup**: It reduces the  material an attacker has to perform cryptanalysis. Patterns emerge, statistical attacks become feasible, and mathematical weaknesses in the encryption algorithm are easier to exploit with large datasets using the same key. 
 - **Key rotation**: You can rotate access to the master key, critical for maintaining encryption quality over time
 
 With Velero, a single encryption key is reused across all backups. This is a significant security weakness, especially when you need to trust third-party storage providers or want the flexibility to move backup targets.
