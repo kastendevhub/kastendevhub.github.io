@@ -12,6 +12,8 @@ featured:
 
 Many customers ask us why they should use Veeam Kasten, a commercial solution, rather than Velero, which is free and open source. While the appeal of "free" is obvious, open source doesn't always translate to cost savings. In fact, most of our customers started with Velero and eventually migrated to Kasten. This article explores the key reasons why.
 
+> **This blog has been written with version Velero v1.17.1 and Veeam Kasten 8.0.12 both released in november 2025**
+
 ## Enterprise Support
 
 The first critical difference is enterprise-level support. When you use an open-source tool and encounter a disaster—something unexpected, a bug, or a situation that no longer fits your environment—you have nowhere to turn. At best, you can post on a forum or GitHub and hope someone has time to respond. But you have absolutely no guarantees.
