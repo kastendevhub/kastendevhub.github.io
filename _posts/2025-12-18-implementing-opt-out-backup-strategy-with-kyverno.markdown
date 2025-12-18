@@ -1,6 +1,6 @@
 ---
 author: clarencepouthier-michaelcourcy
-date: 2025-12-18 10:00:00 -0800
+date: 2025-12-18 00:00:35 +0300
 description: "Learn how to implement a secure opt-out backup strategy for Kasten using Kyverno policies and RBAC"
 featured: false
 image: /images/posts/2025-12-18-implementing-opt-out-backup-strategy-with-kyverno/kyverno-kasten-optout.png
