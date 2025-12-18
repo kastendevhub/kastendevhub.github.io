@@ -1,13 +1,14 @@
 ---
+layout: post
+title: "Implementing a Secure Opt-Out Backup Strategy with Kasten and Kyverno"
 author: clarencepouthier-michaelcourcy
 date: 2025-12-18 00:00:35 +0300
 description: "Learn how to implement a secure opt-out backup strategy for Kasten using Kyverno policies and RBAC"
-featured: false
 image: /images/posts/2025-12-18-implementing-opt-out-backup-strategy-with-kyverno/kyverno-kasten-optout.png
-layout: post
+image_caption: 'Implement a secure opt-out backup strategy'
 published: true
 tags: [kasten, kyverno, kubernetes, security, rbac, backup]
-title: "Implementing a Secure Opt-Out Backup Strategy with Kasten and Kyverno"
+featured:
 ---
 
 In many enterprise Kubernetes environments, backup and infrastructure teams operate separately with different levels of access. This creates a challenge: how can you give backup administrators control over backup scope without granting them full namespace administration privileges?
