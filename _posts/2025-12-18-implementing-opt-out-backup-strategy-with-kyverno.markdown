@@ -49,6 +49,7 @@ Create a Kyverno mutate policy that automatically adds the `backup=true` label t
 
 Create a file named `add-backup-label-on-namespace-creation.yaml`:
 
+{% raw %}
 ```yaml
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -73,6 +74,7 @@ spec:
             labels:
               backup: "true"
 ```
+{% endraw %}
 
 Apply it:
 
@@ -143,6 +145,7 @@ kubectl apply -f backup-admin-rbac.yaml
 
 Create a file named `forbid-all-except-backup-label.yaml`:
 
+{% raw %}
 ```yaml
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -193,6 +196,7 @@ spec:
                 operator: NotEquals
                 value: "{{ request.oldObject.metadata.finalizers || `[]` }}"
 ```
+{% endraw %}
 
 Apply it:
 
