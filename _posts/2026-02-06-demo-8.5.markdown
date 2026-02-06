@@ -1,6 +1,6 @@
 ---
 author: mattslotten
-date: 2026-02-06 09:00:35 -0800
+date: 2026-02-06 01:00:35 -0800
 description: "Check out the new Modern Virtualization features and capabilities released in Veeam Kasten 8.5"
 featured: false
 image: "/images/posts/2026-02-06-demo-8.5/demo-8.5.png"
