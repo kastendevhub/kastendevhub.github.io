@@ -1,0 +1,20 @@
+---
+author: mattslotten
+date: 2026-02-06 09:00:35 -0800
+description: "Check out the new Modern Virtualization features and capabilities released in Veeam Kasten 8.5"
+featured: false
+image: "/images/posts/2026-02-06-demo-8.5/demo-8.5.png"
+image_caption: "Veeam Kasten 8.5 Modern Virtualization Enhancements"
+layout: post
+published: true
+tags: [demo, virtual machines, kubevirt]
+title: "Veeam Kasten 8.5 Modern Virtualization Enhancements"
+---
+
+With the release of Veeam Kasten 8.5, we have introduced significant enhancements for KubeVirt VM protection, including VM-based policies, multi-VM restore, and cloud native File Level Recovery (FLR). To see for yourself, check out this interactive demo: 
+
+<div>
+        <script async src="https://js.storylane.io/js/v2/storylane.js"></script>
+        <button onclick="Storylane.Play({type: 'popup', demo_type: 'html', width: 1517, height: 853, scale: '0.95', demo_url: 'https://veeam.storylane.io/demo/5x4nkkkmgnrw?embed=popup', padding_bottom: '56.25%'})" class="sl-preview-cta" style="background-color:#00d15f;border:none;border-radius:8px;box-shadow:0px 0px 15px rgba(26, 19, 72, 0.45);color:#FFFFFF;display:inline-block;font-family:Poppins, Arial, sans-serif;font-size:clamp(16px, 1.599vw, 20px);font-weight:600;height:clamp(40px, 3.996vw, 50px);line-height:1.2;padding:0 clamp(15px, 1.776vw, 20px);text-overflow:ellipsis;transform:translateZ(0);transition:background 0.4s;white-space:nowrap;width:auto;z-index:999999;cursor:pointer">Veeam Kasten 8.5 Demo</button>
+      </div>
+        

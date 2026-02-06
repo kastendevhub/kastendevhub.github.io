@@ -9,3 +9,4 @@ _site/
 vendor/
 # https://direnv.net
 .env
+.vscode
