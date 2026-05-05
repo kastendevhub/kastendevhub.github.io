@@ -281,7 +281,7 @@ Next, open the **query UI** for your remote backend (Prometheus, Grafana Explore
 - Filters on your K10 **cluster’s** `clusterName` label
 
 For example:
-```
+```json
 catalog_persistent_volume_free_space_percent{clusterName="<Cluster-Unique-Name>"}
 ```
 Any metric name that matches your `write_relabel_configs` regex will work here.
