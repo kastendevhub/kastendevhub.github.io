@@ -1,7 +1,7 @@
 ---
 author: jaikarthikeyan
 date: 2026-05-04 13:06:02 +0300
-description: ""
+description: "In this blog, We will look at how to enable remote_writes from Kasten's internal prometheus to push metrics to a centralized prometheus receiver."
 featured: false
 image: "/images/posts/observability-prometheus-remote-writes/kasten-central-prom.png"
 image_caption: ""
@@ -11,7 +11,7 @@ tags: [Kasten, remote-write, Metrics, Observability, Prometheus]
 title: "Aggregating Kasten metrics to a centralized Prometheus instance"
 ---
 
-Starting with Kasten K10 v8.5.0, the in‑cluster Prometheus can push metrics directly to an external backend using Prometheus remote_write — no more sidecars, exporters, or custom agents.
+Starting with **Veeam Kasten v8.5.0**, the in‑cluster Prometheus can push metrics directly to an external backend using Prometheus remote_write — no more sidecars, exporters, or custom agents.
 
 In older K10 versions, getting metrics out of the cluster often meant extra components and ad‑hoc wiring. Now, remote write is a first‑class K10 setting in both the Helm chart and the Operator. This matters if you want a centralized place to query K10 health across environments and retain metrics longer without maintaining a separate Prometheus stack per cluster.
 
@@ -22,7 +22,8 @@ Once remote_write is configured, Kasten’s Prometheus can ship metrics to **any
 - Cortex / Mimir
 - Any managed or self‑hosted backend that supports Prometheus remote writes
 
-> Exact configuration details (URL path, auth, tenancy labels) depend on your provider. Always cross‑check with your backend’s remote_write documentation.
+{% include note.html content="Exact configuration details (URL path, auth, tenancy labels) depend on your provider. Always cross‑check with your backend’s remote_write documentation." %}
+
 
 ## Why remote_write instead of external Prometheus pulling the metrics directly?
 
@@ -77,7 +78,7 @@ By default, Prometheus will remote write **everything** it scrapes, including in
 
 The write_relabel_configs in the examples intentionally **keep only Kasten-specific metrics** you care about so you don’t flood the receiver with unrelated samples or explode label cardinality.
 
-```
+```yaml
 write_relabel_configs:
 - action: keep
   source_labels: [__name__]
@@ -111,7 +112,8 @@ This value comes directly from the Helm chart’s `clusterName` field.
 
 This becomes essential when you build multi‑cluster dashboards and alerts.
 
-> The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics.
+
+{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics." %}
 
 ## Setup
 The steps below all follow the same pattern, regardless of auth method:
@@ -140,13 +142,13 @@ Examples:
 - Internal ingestion services that are Prometheus-compatible but not Prometheus-native
 
 #### Create Kubernetes secret for Prometheus remote write custom auth token credentials
-```
+```bash
 kubectl create secret generic prometheus-remote-write-creds \
   --namespace kasten-io \
   --from-literal=apikey=apikeyxxxxxx
 ```
 #### Helm values with custom token header
-```
+```yaml
   clusterName: <Cluster-Unique-Name>
   prometheus:
     server:
@@ -177,13 +179,13 @@ Typical scenarios:
 TLS config is independent of the auth method. The example below shows it combined with a basic auth, but you can pair `tls_config` with bearer token, custom authorization headers, or no auth at all.
 
 #### Create a secret with the root CA and intermediate CAs (if needed)
-```
+```bash
 kubectl create secret generic prometheus-ca-cert-secret \
   --from-file=ca.crt \
   -n kasten-io
 ```
 #### Helm values with Custom Authorization Header and TLS certificate
-```
+```yaml
   clusterName: <Cluster-Unique-Name>
   prometheus:
     server:
@@ -210,7 +212,7 @@ kubectl create secret generic prometheus-ca-cert-secret \
 ### If You Deploy K10 via the Operator
 The examples in this post use Helm because it’s the simplest and most common way to configure remote writes in K10. But if you're running K10 via the **Kasten Operator**, the same remote write configuration still applies — it just lives under the spec field of the K10 operand.
 
-```
+```yaml
 spec:
   <helmValues>
 ```
@@ -219,7 +221,7 @@ Conceptually, you can think of the Operator mapping like this:
 - `clusterName` → `spec.clusterName`
 
 A typical Operator patch file with the configuration for custom auth header and TLS certs looks like this:
-```
+```yaml
 spec:
   clusterName: <Cluster-Unique-Name>
   prometheus:
@@ -245,7 +247,7 @@ spec:
 ```
 To apply it, save the patch as patch.yaml and run:
 
-```
+```bash
 kubectl patch k10s.apik10.kasten.io k10 \
   -n kasten-io \
   --type=merge \
@@ -262,7 +264,7 @@ Once you’ve updated your K10 configuration and rolled out the change (via helm
 
 First, make sure the K10 Prometheus server isn’t failing the remote write:
 
-```
+```bash
 kubectl logs -n kasten-io deploy/k10-prometheus-server | grep -i "remote_write" -A3 -B3
 ```
 
