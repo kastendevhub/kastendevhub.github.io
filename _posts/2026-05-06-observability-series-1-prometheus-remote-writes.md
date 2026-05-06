@@ -77,12 +77,25 @@ This post is strictly about setting up a reliable metrics pipeline out of the cl
 By default, Prometheus will remote write **everything** it scrapes, including internal Kasten and Prometheus metrics. 
 
 The write_relabel_configs in the examples intentionally **keep only Kasten-specific metrics** you care about so you don’t flood the receiver with unrelated samples or explode label cardinality.
-
+Refer to this [Kasten documentation](https://docs.kasten.io/latest/operating/monitoring/#k10_action_metrics) page for an overview of the metrics that it exposes.
 ```yaml
 write_relabel_configs:
-- action: keep
-  source_labels: [__name__]
-  regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count
+  - action: keep
+    source_labels: [__name__]
+    regex: |
+      action_.*
+      |.*_persistent_volume_.*
+      |repository_data_.*
+      |data_operation_.*
+      |data_upload_session_.*
+      |exec_.*
+      |limiter_.*
+      |export_storage_.*
+      |snapshot_storage_.*
+      |metering_license_.*
+      |events_service_.*
+      |process_.*
+      |compliance_count
 ```
 If you skip relabeling, Prometheus will happily ship every scraped metric — including its own internals and anything else running in the K10 namespace. That’s a fast path to high costs, noisy dashboards, and cardinality issues in your remote backend.
 
