@@ -3,7 +3,7 @@ author: jaikarthikeyan
 date: 2026-05-04 13:06:02 +0300
 description: "In this blog, We will look at how to enable remote_writes from Kasten's internal prometheus to push metrics to a centralized prometheus receiver."
 featured: false
-image: "/images/posts/observability-prometheus-remote-writes/kasten-central-prom.png"
+image: "/images/posts/2026-05-06-observability-prometheus-remote-writes/kasten-central-prom.png"
 image_caption: ""
 layout: post
 published: true
@@ -27,7 +27,7 @@ Once remote_write is configured, Kasten’s Prometheus can ship metrics to **any
 
 ## Why remote_write instead of external Prometheus pulling the metrics directly?
 
-![Kasten → Prometheus remote_write flow](/images/posts/observability-prometheus-remote-writes/prometheus_remote_writes.png)
+![Kasten → Prometheus remote_write flow](/images/posts/2026-05-06-observability-prometheus-remote-writes/prometheus_remote_writes.png)
 
 Prometheus is built around a pull model, but pulling directly from Kasten’s in-built prometheus adds operational overhead:
 - You’d need to expose K10’s Prometheus externally or federate it.
@@ -136,7 +136,7 @@ The steps below all follow the same pattern, regardless of auth method:
 - Run a Helm upgrade to apply the configuration.
 
 ### Authentication Customization
-The official [Kasten documentation](https://docs.kasten.io/latest/operating/monitoring/exporting-metrics/#configuration-options)covers the general Prometheus remote_write configuration and common authentication patterns like Basic Auth and Bearer token auth. 
+The official [Kasten documentation](https://docs.kasten.io/latest/operating/monitoring/exporting-metrics/#configuration-options) covers the general Prometheus remote_write configuration and common authentication patterns like Basic Auth and Bearer token auth. 
 
 This guide complements it by showing examples for
 - Custom Authorization Header (API key or custom scheme)
