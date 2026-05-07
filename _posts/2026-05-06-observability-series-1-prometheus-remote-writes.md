@@ -13,7 +13,7 @@ title: "Aggregating Kasten metrics to a centralized Prometheus instance"
 
 Starting with **Veeam Kasten v8.5.0**, the in‑cluster Prometheus can push metrics directly to an external backend using Prometheus remote_write — no more sidecars, exporters, or custom agents.
 
-In older K10 versions, getting metrics out of the cluster often meant extra components and ad‑hoc wiring. Now, remote write is a first‑class K10 setting in both the Helm chart and the Operator. This matters if you want a centralized place to query K10 health across environments and retain metrics longer without maintaining a separate Prometheus stack per cluster.
+In older Kasten (K10) versions, getting metrics out of the cluster often meant extra components and ad‑hoc wiring. Now, remote write is a first‑class Kasten setting in both the Helm chart and the Operator. This matters if you want a centralized place to query Kasten health across environments and retain metrics longer without maintaining a separate Prometheus stack per cluster.
 
 Once remote_write is configured, Kasten’s Prometheus can ship metrics to **any backend that speaks the standard Prometheus remote_write protocol**, including:
 
@@ -30,13 +30,13 @@ Once remote_write is configured, Kasten’s Prometheus can ship metrics to **any
 ![Kasten → Prometheus remote_write flow](/images/posts/2026-05-06-observability-prometheus-remote-writes/prometheus_remote_writes.png)
 
 Prometheus is built around a pull model, but pulling directly from Kasten’s in-built prometheus adds operational overhead:
-- You’d need to expose K10’s Prometheus externally or federate it.
+- You’d need to expose Kasten’s Prometheus externally or federate it.
 - Scrape configs must be kept in sync across clusters.
 - Authentication and TLS get more complicated.
 
 With `remote_write`, we send only the filtered metrics you need. No scraping or service exposure, and one config works across all your clusters. The push model suits this use-case better.
  
-This guide is the first piece of a three‑part series focused on building an end‑to‑end, backend‑agnostic monitoring setup for K10:
+This guide is the first piece of a three‑part series focused on building an end‑to‑end, backend‑agnostic monitoring setup for Kasten:
 
 - **Part 1 (this post)**: Prometheus Remote Write Configuration with Kasten.
 
@@ -51,8 +51,8 @@ By the end of the series, you’ll have a repeatable pattern for exporting Kaste
 Before jumping into configuration, make sure you have:
 
 ### Kubernetes & Kasten
-- A running Kubernetes cluster with Kasten K10 v8.5.0 or later installed
-- Access to upgrade the Helm release or modify the k10 operand
+- A Kubernetes cluster running a version [supported by Kasten](https://docs.kasten.io/latest/operating/support) with Kasten v8.5.0 or later installed
+- Access to upgrade the Helm release or modify the Kasten operand
 
 ### Prometheus / Remote Write Receiver
 - An endpoint that supports Prometheus remote_write.
@@ -64,7 +64,7 @@ Before jumping into configuration, make sure you have:
 
 ## What This Guide Does Not Cover
 To keep this part focused on remote writes, we’re intentionally not covering:
-- Installing or upgrading K10 itself.
+- Installing or upgrading Kasten itself.
 - Running or tuning your own Prometheus stack.
 - Managing or scaling the external metrics backend.
 - Alerting, which we will cover in the next parts of the series.
@@ -97,7 +97,7 @@ write_relabel_configs:
       |process_.*
       |compliance_count
 ```
-If you skip relabeling, Prometheus will happily ship every scraped metric — including its own internals and anything else running in the K10 namespace. That’s a fast path to high costs, noisy dashboards, and cardinality issues in your remote backend.
+If you skip relabeling, Prometheus will happily ship every scraped metric — including its own internals and anything else running in the Kasten namespace. That’s a fast path to high costs, noisy dashboards, and cardinality issues in your remote backend.
 
 ### What this does
 - `source_labels: [__name__]` — we’re matching on the metric name.
@@ -126,13 +126,13 @@ This value comes directly from the Helm chart’s `clusterName` field.
 This becomes essential when you build multi‑cluster dashboards and alerts.
 
 
-{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics." %}
+{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics. A cluster_name can always be added after Kasten is installed using a `helm upgrade`" %}
 
 ## Setup
 The steps below all follow the same pattern, regardless of auth method:
 
 - Create Kubernetes Secrets for credentials or certificates.
-- Reference those secrets in your K10 Helm values.
+- Reference those secrets in your Kasten Helm values.
 - Run a Helm upgrade to apply the configuration.
 
 ### Authentication Customization
@@ -145,7 +145,7 @@ This guide complements it by showing examples for
 Each example follows the same structure so you can plug in whichever method your metrics backend expects.
 
 ### Custom Authorization Header
-Use this when the backend requires something other than Authorization: Bearer <token>.
+Use this when the backend requires something other than `Authorization: Bearer <token>`.
 
 Examples:
 
@@ -222,8 +222,8 @@ kubectl create secret generic prometheus-ca-cert-secret \
           source_labels: [__name__]
 ```
 
-### If You Deploy K10 via the Operator
-The examples in this post use Helm because it’s the simplest and most common way to configure remote writes in K10. But if you're running K10 via the **Kasten Operator**, the same remote write configuration still applies — it just lives under the spec field of the K10 operand.
+### If You Deploy Kasten via the Operator
+The examples in this post use Helm because it’s the simplest and most common way to configure remote writes in Kasten. But if you're running Kasten via the **Kasten Operator**, the same remote write configuration still applies — it just lives under the spec field of the Kasten operand.
 
 ```yaml
 spec:
@@ -269,13 +269,13 @@ kubectl patch k10s.apik10.kasten.io k10 \
 
 That’s effectively the Operator equivalent of running a helm upgrade with updated values.
 
-## Validating That Remote Write Is Working
+## Verifying That Remote Write is Working
 
-Once you’ve updated your K10 configuration and rolled out the change (via helm upgrade or an Operator patch), you should verify that metrics are actually making it to your remote backend. The exact UI will vary by platform (Grafana, Grafana Cloud, Thanos, Cortex/Mimir, etc.), but the overall steps are the same.
+Once you’ve updated your Kasten configuration and rolled out the change (via helm upgrade or an Operator patch), you should verify that metrics are actually making it to your remote backend. The exact UI will vary by platform (Grafana, Grafana Cloud, Thanos, Cortex/Mimir, etc.), but the overall steps are the same.
 
 ### Confirm in‑cluster Prometheus is healthy
 
-First, make sure the K10 Prometheus server isn’t failing the remote write:
+First, make sure the Kasten Prometheus server isn’t failing the remote write:
 
 ```bash
 kubectl logs -n kasten-io deploy/k10-prometheus-server | grep -i "remote_write" -A3 -B3
@@ -291,7 +291,7 @@ If you see persistent errors, fix those before moving on (usually TLS or credent
 Next, open the **query UI** for your remote backend (Prometheus, Grafana Explore, or the equivalent) and run a basic PromQL query that:
 
 - Targets a **known Kasten metric**
-- Filters on your K10 **cluster’s** `clusterName` label
+- Filters on your Kasten **cluster’s** `clusterName` label
 
 For example:
 ```json
@@ -302,14 +302,14 @@ Any metric name that matches your `write_relabel_configs` regex will work here.
 If remote write is working, you should see:
 - One or more time series returned.
 - Recent timestamps (not stale data).
-- A `clusterName` label with the value you configured in your K10 Helm values or Operator spec.
+- A `clusterName` label with the value you configured in your Kasten Helm values or Operator spec.
 
 ## Conclusion
 
-That’s the entire remote write setup. Once you’ve updated your Kasten values and run a Helm upgrade (or patched the K10 operand), K10’s in‑cluster Prometheus starts streaming a **curated** set of Kasten metrics to your remote backend — with a consistent `clusterName` attached. 
+That’s the entire remote write setup. Once you’ve updated your Kasten values and run a Helm upgrade (or patched the Kasten operand), Kasten’s in‑cluster Prometheus starts streaming a **curated** set of Kasten metrics to your remote backend — with a consistent `clusterName` attached. 
 
-You’ve effectively turned K10 into a first‑class citizen of your central observability stack, without maintaining a separate Prometheus just for backups.
+You’ve effectively turned Kasten into a first‑class citizen of your central observability stack, without maintaining a separate Prometheus just for backups.
 
-From here, you don’t need to think about “Kasten’s internal Prometheus” anymore. You can treat K10 like any other workload exposing Prometheus metrics into your central stack.
+From here, you don’t need to think about “Kasten’s internal Prometheus” anymore. You can treat Kasten like any other workload exposing Prometheus metrics into your central stack.
 
 In **Part 2**, we’ll take Kasten’s public Grafana dashboard, layer in multi‑cluster support, and show how to reuse it across environments. In **Part 3**, we’ll focus on alerts that actually map to “backup is healthy” rather than low-level noise.
