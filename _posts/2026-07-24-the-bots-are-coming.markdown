@@ -11,6 +11,10 @@ tags: [ai,security,agentic ai]
 title: "The Bots are Coming for Your Data"
 ---
 
+{: .alert-info }
+**Update on 31 July 2026:**
+Within six days of publishing this blog, The WSJ reported that yet [another rogue AI agent broke loose into the internet wilds](https://www.wsj.com/tech/ai/anthropic-ai-models-hacked-three-companies-during-tests-bd752c86?st=x3Bwt6&reflink=desktopwebshare_permalink), this time Anthropic's Claude attacking three unsuspecting companies. In Anthropic's case, it was a bit of a lower bar as Claude didn't break out of a sandbox environment like OpenAI's model, but rather, "simply wandered out of systems where the sandbox didn’t exist." At the time of publication, Anthropic hadn't publicly released the names of the three companies attacked, however it only underscores the original intent of this article, which is to raise awareness to the risks of agentic AI pose to you and your organization's security and data.
+
 It's been a minute since I've posted about AI and the developments we're seeing in the field - in part because it's a constantly moving target, in part because there's a lot of (hyperbolic) headlines, and lastly because as a rule, I try to avoid hopping on the bandwagon to capitalize on headlines as a way to hock my company's software. However some recent headlines around rogue AI agents raised an eyebrow and merits some discussion in the context of data protection and larger security posture.
 
 The Wall Street Journal has a very good article published today, [How the Futuristic Hack by Rogue OpenAI Models Unfolded](https://www.wsj.com/tech/ai/how-the-futuristic-hack-by-rogue-openai-models-unfolded-1657bcea?st=P7wzn1&reflink=desktopwebshare_permalink), outlining the what and the how of what happened. In a nutshell, OpenAI was testing one of it's latest models, GPT-5.6 Sol, in a sandbox environment (i.e. an environment that is ostensibly isolated from other networks). The research team stripped the model of the typical safegaurds that they bake into their models that prevent misuse in order to test the model's hacking capabilities when unconstrained in OpenAI's "ExploitGym" benchmark test.
