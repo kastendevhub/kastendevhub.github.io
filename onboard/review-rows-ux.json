@@ -1,0 +1,164 @@
+[
+  {
+    "id": "UX-v3-001",
+    "sev": "significant",
+    "loc": "Lesson03_Deploying_and_Configuring_Veeam_Kasten.html · #hero / .hero__inner",
+    "orig": "Rendered at 1440x900: the 96px H1 \"Deploying and Configuring Veeam Kasten\" wraps to five lines in the 524px left column, so the title block is 1664px tall and the whole hero is 1884px (siblings: L1 963px, L2 1191px, L4 1135px, L5 950px). Because .hero__inner is align-items:center, the objectives card is vertically centred against that tall column and its top edge lands at y≈700 — leaving roughly 510px of empty black in the upper-right quadrant on first paint, and pushing the first section heading past two full viewport heights. Compare smoke/ux-L3-virgin-desktop.png with smoke/ux-L1-virgin-desktop.png.",
+    "prop": "In Lesson03's module <style> block, adopt the treatment Lesson01 already uses for a long title and top-align the pair:\n  .hero__inner { align-items: start; }\n  .hero h1 { font-size: clamp(38px, 5.2vw, 74px); }\nThis brings the hero to roughly 1150px (in family with L2/L4), removes the void, and puts the objectives card top edge level with the title.",
+    "why": "Visual hierarchy is the first thing a learner reads and this is the only page where the hero's two-column grid collapses — a 510px hole beside the headline and a hero taller than two screens. It is a render-only defect (the markup is identical to its siblings), which is why source review missed it. Type family, weight and colour are untouched, so the brand treatment is unchanged.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-002",
+    "sev": "significant",
+    "loc": "all five lessons · .wrap body prose, .note__body, .tabs__panel, .sales-aside, .widget intro",
+    "orig": "At 1440px the content column (.wrap, max-width 1080px) is used as the text measure: 54 paragraphs render 1080px wide at 16px on L3, 22 on L5, 5 on L4, 3 on L2 — about 135 characters per line. Component bodies are as wide or wider: .note__body 1032px, .tabs__panel 1072px, .sales-aside 1041px, .widget intro 1022–1026px (≈142–152 characters). The same pages render .lede at 640px, .prose p at 720px and figure.screenshot at 818px, so a single column stacks four different measures and no two right edges line up (see smoke/ux-L3-prose-measure.png).",
+    "prop": "In course.css, cap the running measure so it lands in the 60–75 character band the kit already uses for .prose (720px) and .lede (640px):\n  .wrap > p, .wrap > ul, .wrap > ol { max-width: 76ch; }\n  .note__body, .tabs__panel > p, .sales-aside p, .widget > p { max-width: 76ch; }\nLeave tables, .code-block, figures and grids at full .wrap width.",
+    "why": "Line length is the single biggest readability lever on a text-heavy page, and ~135–150 characters is roughly double the 60–75 the kit itself targets. It also reads as unconsidered: the figures are 818px wide while the prose beside them runs to 1080px, so the column has no consistent right edge. Worst on L3 and L5, present on all five — a course.css fix rather than five page fixes.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-003",
+    "sev": "significant",
+    "loc": "all five lessons · .wrap > h3 / h4 after a component block",
+    "orig": "Measured gap between adjacent .wrap children on the fully revealed page: paragraph-to-paragraph is 24px, but the gap ABOVE an h3/h4 is 0px in 11 places on L5 and 5 places on L3 (and 2 on L1) — every time a subsection heading follows a .note, .stepper, .flow, .widget or a figure, whose margin-bottom is 0. A subsection heading therefore gets less air above it than a body paragraph does, and reads as belonging to the block above it rather than starting a new one. Gap below the heading is a correct 8px.",
+    "prop": "In course.css, give the heading its own top rhythm:\n  .wrap > * + h3, .wrap > * + h4 { margin-top: 40px; }\n(40px keeps the 8pt baseline and preserves the existing 8px heading-to-paragraph gap.)",
+    "why": "Spacing rhythm is what makes a long page scannable — a heading with zero space above it destroys the block boundary the learner navigates by. It is invisible in source (the components simply have no bottom margin) and only shows up in rendered geometry, which is exactly the class of defect this pass exists to catch.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-004",
+    "sev": "significant",
+    "loc": "Lesson02_Kubernetes_Foundations_for_Backup_Admins.html · #review / .btn-row a.btn--text",
+    "orig": "\"Back to the course overview →\" renders as --info #1558B0 on the dark recap background --ink #0A0E0B at 14px: measured contrast 2.83:1 against the 4.5:1 WCAG 2.1 AA minimum. course.css line 81–84 documents --info as \"an accessible blue for TEXT/links\" — accessible on the light surfaces it was defined for, not on the near-black .review panel. It is also the only blue anywhere in the rendered course (see smoke/ux-L2-tail.png).",
+    "prop": "Remove the .btn-row from the recap (see UX-v3-009 — every sibling closes with a p.lede, and the .lesson-nav card directly below already offers Back and Next). If the row is kept, retint it for the dark surface in course.css:\n  .review .btn--text { color: var(--veeam-green-bright); }\n  .review .btn--text:hover { color: var(--paper); }",
+    "why": "A measured AA failure on an interactive control, and an off-brand colour: a blue link on black is not in the Veeam palette and appears on exactly one of five sibling pages. --veeam-green-bright (#00D344) on --ink gives 10.6:1 and keeps the accent Veeam green.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-005",
+    "sev": "significant",
+    "loc": "course.css:230 · .callout strong (renders on L1 #capture, L2 #bridge, L4 #upgrades)",
+    "orig": "The bold lead-in line of every .callout (\"The failure mode, spelled out\", \"The analogy contract\", \"Catalog space is the constraint people trip on\") renders as --warn #E89B1F on --warn-soft #FCF3DD at 14.5px: measured contrast 2.08:1 against a 4.5:1 AA minimum — the worst contrast anywhere in the course. course.css line 82 states the rule this breaks in the kit's own words: \"--warn-text is a WCAG-safe dark amber for amber TEXT — never use --warn\".",
+    "prop": "course.css line 230:\n  .callout strong { color: var(--warn); display: block; margin-bottom: 4px; }\nbecomes\n  .callout strong { color: var(--warn-text); display: block; margin-bottom: 4px; }\n(--warn-text #8A5500 on --warn-soft measures 5.6:1.) Apply the same substitution to .task__num.is-challenge (course.css:367–369), which repeats the pattern.",
+    "why": "The kit already defines the correct token and documents the prohibition; the rule simply uses the wrong one. It affects the label the learner is meant to read FIRST inside a caution block, on three of five lessons, and the fix is a one-token change with no visual restructuring.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-006",
+    "sev": "significant",
+    "loc": "course.css:790 · .widget__reveal (renders on L3 #preflight, L4 #upgrades)",
+    "orig": "The primary widget CTA (\"Check my readiness\", \"Plan my upgrade\") renders --paper #FBFCF9 on --veeam-green #00B336 at 13px: measured contrast 2.72:1 against a 4.5:1 AA minimum. The kit's own button primitive does the opposite on the same green — .btn--primary sets color: var(--ink), which measures 12.6:1 — so two buttons on the same green read as different components and only one of them is legible.",
+    "prop": "course.css line 790: change color: var(--paper) to color: var(--ink) on .widget__reveal, matching .btn--primary. Keep the hover swap to --veeam-green-bright (dark ink on #00D344 measures 15.1:1).",
+    "why": "AA failure on the interaction the widget is built around, plus a component-consistency break against the kit's own primary button. Dark ink on Veeam green is the established brand treatment; white on green is not.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-007",
+    "sev": "significant",
+    "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html · #monitor, inline <code> in .prose paragraph",
+    "orig": "At 390px the whole L4 page scrolls sideways: document.scrollWidth is 547px against a 390px viewport. The single cause is one inline <code> in a prose paragraph carrying the PromQL query sum(round(increase(action_ended_total{action=\"backup\",state=\"failed\"}[24h]))) — 515px wide, white-space:normal, no break opportunity in the string and no scrolling ancestor. Every other long command in the course (including the same query later in this section) sits inside .code-block > pre, which has overflow-x:auto and does not push the page. No other page overflows at 390px.",
+    "prop": "Two independent fixes, either sufficient — take both:\n1. course.css, so no future long token can break the page: code { overflow-wrap: anywhere; }\n2. Lesson04 #monitor: move the query out of the sentence into the .code-block used for the identical query further down the section, and refer to it in prose by name (\"the failed-action query below\").",
+    "why": "Horizontal page scroll is the most visible responsive failure there is — it breaks every subsequent screen of the lesson, not just this paragraph, and it happens on one page out of six. The CSS guard is one line and the markup change removes the cause.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-008",
+    "sev": "significant",
+    "loc": "course.css:281 · .review-grid (all five recaps) + Lesson04 module <style> override",
+    "orig": "The recap grid resolves to four 258px columns on L1, L2, L3 and L5; with five recap cards that leaves a one-card orphan row and three empty cells under it (visible in smoke/ux-L1-recap.png, smoke/ux-L2-tail.png). Lesson04 patches this locally with .review-grid { grid-template-columns: repeat(2, 1fr); } and renders two 532px columns — so the one component the learner meets at the end of every lesson looks structurally different on module 4 than on the other four.",
+    "prop": "Fix it once in course.css line 281:\n  .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 40px; }\n(5 cards resolve to 3 + 2 at 1440px — no orphan, no empty row.) Then delete the .review-grid rule from Lesson04's module <style> block.",
+    "why": "Component consistency across siblings is the point of a shared kit, and the recap is the most-repeated block in the course. The ragged 4+1 row reads as an accident; L4's local patch fixes the symptom on one page and creates the divergence.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-009",
+    "sev": "significant",
+    "loc": "all five lessons · #review last child of .review__inner, above .lesson-nav",
+    "orig": "The recap closes three different ways: L1, L4 and L5 end with a p.lede forward-look sentence; L2 ends with a .btn-row (a filled green .btn--primary \"Next: deploy and configure Veeam Kasten\" plus a blue .btn--text \"Back to the course overview →\"); L3 ends with a full-width a.next-btn (\"Continue to Module 04 …\"). All five then render the identical two-card .lesson-nav (BACK / NEXT →) immediately below, so on L2 and L3 the next-module call to action appears twice within one screen, in two different visual languages, one of them the only filled button in the course.",
+    "prop": "Standardise on the L1/L4/L5 pattern — a p.lede forward-look sentence, then .lesson-nav as the single navigation affordance. Delete the .btn-row block from Lesson02's #review and the a.next-btn from Lesson03's #review, replacing each with the one-sentence lede those pages' authors already wrote into their next-step copy.",
+    "why": "A duplicated primary action a screen apart is the kind of inconsistency a learner feels as sloppiness even when they can't name it, and three different end-of-lesson treatments across five pages written from one kit is exactly the parallel-author drift this pass looks for. It also removes the AA failure in UX-v3-004 at the source.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-010",
+    "sev": "significant",
+    "loc": "all five lessons · .hero__meta (first viewport of every lesson)",
+    "orig": "The three-item meta row under the hero blurb uses a different order and vocabulary on every page: L1 \"5 sections / Veeam Kasten 9.0.2 / No cluster needed\" (no time estimate at all); L2 \"~45 minutes / Concepts / Veeam Kasten 9.0.2\"; L3 \"6 sections / ~40 minutes / Veeam Kasten 9.0.2\"; L4 \"35–45 min / 5 sections / Veeam Kasten 9.0.2\"; L5 \"5 sections / ~50 minutes / Veeam Kasten 9.0.2\". Four orders, two duration formats (\"~NN minutes\" vs \"35–45 min\"), and the version chip is the only item in a fixed position.",
+    "prop": "Fix one order and one format across all five heroes: item 1 sections (\"N sections\" / \"plus a knowledge check\"), item 2 duration in the L2/L3/L5 format (\"~NN minutes\" / \"estimated\"), item 3 version (\"Veeam Kasten 9.0.2\" / topic descriptor). Change L4's \"35–45 min\" to \"~40 minutes\" and add a duration item to L1 (its current \"No cluster needed\" line moves into the .prereqs block below, where L1 already says the same thing).",
+    "why": "This row sits in the first viewport of all five lessons and is the learner's orientation instrument — a moving order and two time formats make the course feel assembled rather than designed. Presentation pattern rather than fact, but the wording changes route through the LXD.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-011",
+    "sev": "significant",
+    "loc": "Lesson03_Deploying_and_Configuring_Veeam_Kasten.html · .eyebrow on every section (also L2)",
+    "orig": "L3 labels its sections \"SECTION 1 OF 6 · PREREQUISITES\" … \"SECTION 6 OF 6 · YOUR FIRST LOCATION PROFILE\" and then reverts to \"KNOWLEDGE CHECK · 07\" and \"RECAP · 08\" — so the rendered page promises six sections and then numbers eight. No sibling uses the \"N OF 6\" form: L1, L4 and L5 use \"<TOPIC> · NN\" throughout, and L2 uses the generic \"CONCEPT · 02\" … \"CONCEPT · 08\" for seven consecutive sections. At 390px L3's two-part eyebrows wrap to two lines where every sibling's stays on one.",
+    "prop": "Normalise L3 to the majority pattern used by L1/L4/L5 — \"PREREQUISITES · 01\", \"PRE-FLIGHT CHECKS · 02\", \"THE HELM INSTALL · 03\", \"DASHBOARD AND AUTHENTICATION · 04\", \"STORAGE INTEGRATION · 05\", \"YOUR FIRST LOCATION PROFILE · 06\", keeping the existing \"KNOWLEDGE CHECK · 07\" and \"RECAP · 08\". Separately, replace L2's seven repeated \"CONCEPT\" labels with its section topics (CLUSTER, WORKLOADS, NAMESPACES, STORAGE, SNAPSHOTS, HELM, VEEAM KASTEN).",
+    "why": "The eyebrow is the learner's position indicator; on L3 it currently contradicts itself on the same page, and it is the one page where the label form differs from all four siblings. L2's seven identical labels give the rail no differentiation at all. Wording changes route through the LXD.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-012",
+    "sev": "minor",
+    "loc": "course.css:142–158 · focus-visible list, vs components.js:616–617 (Continue gate)",
+    "orig": "The gate handler moves focus into the newly revealed block (var h = locked.querySelector('h1, h2, h3'); h.setAttribute('tabindex','-1'); h.focus()). That heading is not in course.css's focus-visible list, so a keyboard learner gets Chromium's default white ring drawn around the full 1080px-wide heading block on every reveal — 6 to 10 times per lesson — instead of the kit's 2px Veeam-green indicator. (Mouse users see nothing: :focus-visible does not match, verified.)",
+    "prop": "Add to the course.css focus-visible group (lines 142–158) or as its own rule:\n  .continue__locked h1:focus-visible,\n  .continue__locked h2:focus-visible,\n  .continue__locked h3:focus-visible {\n    outline: 2px solid var(--veeam-green-bright);\n    outline-offset: 6px;\n    border-radius: 4px;\n  }",
+    "why": "The focus move itself is good practice and should stay; only its indicator is unstyled. A full-width white UA ring is off-brand and reads as a rendering fault, and this is the most frequently triggered focus event in the whole course.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-013",
+    "sev": "minor",
+    "loc": "course.css:315–330 · .breadcrumb / .breadcrumb__current at ≤390px (all five lessons)",
+    "orig": "At 390px the sticky breadcrumb renders 101px tall on every lesson — 12% of the viewport, held for the entire scroll — because the full title (\"Module 05 of 05 · Restores and Day-to-Day Administration\") wraps to two lines beside the \"Course overview\" link. At 1440px the same bar is 49px.",
+    "prop": "Add to the existing max-width:760px media query in course.css:\n  .breadcrumb__current { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }\nor drop the title outright at that width: .breadcrumb__current { display: none; }",
+    "why": "A persistent 101px chrome band on a 844px screen costs an eighth of every mobile viewport for information the learner already has. The module number is the part worth keeping; the full title is not.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-014",
+    "sev": "minor",
+    "loc": "all five lessons · .callout vs .note--caution (two amber aside components on the same pages)",
+    "orig": "Two visually different amber asides do the same job and appear on the same pages: .callout renders a filled --warn-soft panel with a 4px left border and a bold sentence-case label, .note--caution renders an icon chip plus an 11px uppercase mono label with no panel. Counts per page — L1 2 callouts / 6 cautions, L2 3 / 3, L3 1 / 6, L4 4 / 1, L5 1 / 5. L4 leans on the panel form, its siblings on the icon form.",
+    "prop": "Pick .note--caution as the single caution component (it is the one already in the majority, it carries the WCAG-safe --warn-text label, and it does not interrupt the column with a filled panel) and convert the remaining 11 .callout instances to <div class=\"note note--caution\"><span class=\"note__icon\">…</span><div class=\"note__body\"><div class=\"note__label\">LABEL</div><p>…</p></div></div>. Retire .callout from course.css once the last instance is gone.",
+    "why": "Two treatments for one meaning is the classic parallel-author artefact: within a single lesson the learner is taught two different visual languages for \"be careful here\". Consolidating also removes the contrast bug in UX-v3-005 by construction.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-015",
+    "sev": "minor",
+    "loc": "all five lessons · first [data-continue] gate position (virgin first-visit state)",
+    "orig": "The amount of content before the learner's first Continue varies by an order of magnitude. Virgin document height at 1440px: L2 1716px (hero plus a \"Start the module\" button and nothing else), L1 3692px, L4 3459px, L3 5566px, L5 6216px. At 390px the first chunk is 5304px on L2 against 17131px on L3 and 22561px on L5 — roughly 6 mobile screens versus 20 and 27. The first gate's label also differs: \"Start the module\" on L2, \"Continue\" on the other four.",
+    "prop": "Move L3's first gate to the end of the first subsection of #groundwork and L5's to after the first .stepper in #policies, so the opening chunk on every lesson is one to two desktop screens as it already is on L1/L2/L4. Use one label for the first gate on all five ('Start the module' if the hero-adjacent form is the intended pattern, otherwise 'Continue').",
+    "why": "Progressive reveal only paces the learner if the chunks are comparable; 27 mobile screens before the first checkpoint is not a chunk. Where the gate belongs is partly a pedagogy call, so route the placement decision through the LXD — the label consistency is presentation.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-016",
+    "sev": "minor",
+    "loc": "Lesson01 module <style> and Lesson03 hero · .hero h1 step-down",
+    "orig": "Hero H1 renders at 62px on L1 (module-local clamp(38px, 4.4vw, 62px), documented as a step-down for an unusually long title) and 96px on L2, L3, L4 and L5 (kit clamp(56px, 8vw, 96px)). Clicked through in sequence, module 01's title reads a third smaller than every other module's, and module 03 — whose title is long enough to need the same help — never got it.",
+    "prop": "Promote the step-down into the kit as one shared modifier rather than a per-module invention, e.g. in course.css:\n  .hero h1.hero__title--long { font-size: clamp(38px, 5.2vw, 74px); }\nthen put class=\"hero__title--long\" on the L1 and L3 H1s and delete L1's module-local .hero h1 rule. One long-title size (74px) instead of 62px on one page and 96px on another.",
+    "why": "The step-down is the right instinct; the problem is that it exists at a different value on one page and not at all on the page that needs it most (see UX-v3-001). A named modifier makes the decision reusable and keeps the five module titles reading as one family.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-017",
+    "sev": "minor",
+    "loc": "course.css:130 · .hero__inner grid-template-columns (visible on Lesson05)",
+    "orig": ".hero__inner uses grid-template-columns: 1.1fr 1fr, which resolves to 523.8px / 476.2px on L1–L4 but 563.3px / 436.7px on L5 — because \"Administration\" set at 96px has a min-content width larger than the 1.1fr share, and an fr track cannot shrink below min-content. The objectives card's left edge therefore sits 39px further right on module 05 than on the other four.",
+    "prop": "course.css line 130: grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); — the tracks then hold their 1.1:1 ratio regardless of the longest word in the title.",
+    "why": "Small but systematic: the hero is the page-to-page anchor, and a column edge that moves depending on the title's longest word is the kind of drift that makes five pages feel like five templates. One-line fix, no visual change on L1–L4.",
+    "rev": "UX Designer"
+  },
+  {
+    "id": "UX-v3-018",
+    "sev": "minor",
+    "loc": "Lesson02_Kubernetes_Foundations_for_Backup_Admins.html · .lesson-nav card titles",
+    "orig": "L2's prev/next cards read \"From Veeam Data Platform admin to Veeam Kasten admin\" and \"Deploying and configuring Veeam Kasten\" — no \"Module NN ·\" prefix and sentence case — while L1, L3, L4 and L5 all render \"Module NN · Title Case\". The consequence is visible: L2's back-card title wraps to two lines and its .lesson-nav renders 237px tall against 209px everywhere else (see smoke/ux-L2-tail.png).",
+    "prop": "Set L2's nav card titles to \"Module 01 · From Veeam Data Platform Admin to Veeam Kasten Admin\" and \"Module 03 · Deploying and Configuring Veeam Kasten\", matching the other four pages and the .breadcrumb wording on the target pages.",
+    "why": "The prev/next pair is the same component on every page and should be the same shape on every page; the missing module number also costs the learner the one piece of orientation the card exists to give. Wording change — routes through the LXD.",
+    "rev": "UX Designer"
+  }
+]

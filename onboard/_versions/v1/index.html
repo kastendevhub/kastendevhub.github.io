@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Course landing page — Veeam Kasten for Kubernetes Fundamentals
+  (for the Veeam Data Platform administrator). Built from
+  Reference/Templates/HTML/index-template.html; shares course.css with the
+  five lesson files in this folder.
+  Order: hero → about (who / how) → topics covered → module list → footer.
+-->
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Veeam Kasten for Kubernetes Fundamentals — Course Overview</title>
+<link rel="stylesheet" href="course.css">
+<style>
+  /* Landing-page overrides — centers the hero, sizes the H1, and pins the
+     five-item topics grid to one row on wide screens. */
+  .hero { padding: 140px 32px 100px; min-height: auto; }
+  .hero__inner { display: block; max-width: 760px; margin: 0 auto; text-align: center; }
+  .hero h1 { font-size: clamp(52px, 7.5vw, 104px); margin-bottom: 24px; }
+  .hero__tag { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--veeam-green); margin-bottom: 24px; }
+  .hero__lede { font-size: 18px; color: rgba(251,252,249,.75); max-width: 620px; margin: 0 auto 36px; line-height: 1.55; }
+  .hero__meta { justify-content: center; border-top: none; padding-top: 0; gap: 40px; flex-wrap: wrap; }
+  .hero__meta > div { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); padding: 14px 22px; border-radius: 10px; }
+  .hero__meta > div strong { display: block; margin-bottom: 4px; }
+  .covered__inner { max-width: 1180px; }
+  .covered__grid { grid-template-columns: repeat(5, 1fr); }
+  @media (max-width: 1080px) { .covered__grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); } }
+</style>
+</head>
+<body>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__corner"></div>
+  <div class="hero__inner">
+    <div class="hero__tag">Veeam · Self-Paced Curriculum</div>
+    <h1>Veeam Kasten for Kubernetes<br/><em>Fundamentals</em></h1>
+    <p class="hero__lede">
+      A self-paced path for the Veeam Data Platform administrator who has been handed Veeam Kasten and a Kubernetes cluster to protect. Veeam Kasten for Kubernetes is an application-centric platform for Kubernetes backup, disaster recovery, and application mobility — this course maps it onto the backup knowledge you already have, then takes you through deployment, ongoing maintenance, restores, and the daily admin routine.
+    </p>
+    <div class="hero__meta">
+      <div><strong>5 modules</strong>take them in order</div>
+      <div><strong>Veeam Kasten 9.0.2</strong>this course's version</div>
+    </div>
+  </div>
+</section>
+
+<main>
+<!-- ════════ ABOUT — who it's for / how to take it ════════ -->
+<section class="about">
+  <div class="about__inner">
+    <div class="about__col">
+      <span class="eyebrow mb-12">Who this course is for</span>
+      <h2>Backup admins new to Kubernetes</h2>
+      <p>This course is written for the experienced Veeam Data Platform administrator now tasked with implementing and running Veeam Kasten. You know backup jobs, repositories, retention, restore points, and the rhythm of keeping a protected estate healthy — on Windows and VMware, from a console you drive with a mouse. Kubernetes is the part that is new, and this course treats it that way.</p>
+      <p><strong>Prerequisites:</strong> hands-on Veeam Data Platform administration experience. No Kubernetes knowledge is assumed. Every Kubernetes concept here is introduced from the Veeam Data Platform equivalent you already operate, and where that parallel breaks down, the course says so instead of smoothing it over. By the end you have a working Veeam Kasten administrator's model of the product: what to deploy, what to configure, what to watch, and how to get data back.</p>
+    </div>
+    <div class="about__col">
+      <span class="eyebrow mb-12">How to take it</span>
+      <h2>Read, check, then move on</h2>
+      <p>Each module opens with its objectives and a short concept overview, then works through its topics in sequence. Within a module, sections reveal one at a time: a Continue button at the end of the visible content opens the next section, and the chapter rail or any in-page link jumps ahead without losing your place.</p>
+      <p>Take the modules in the order listed below — Module 02 builds on the concept map from Module 01, and the deployment module leans on the Kubernetes vocabulary from Module 02. Each module closes with a five-question knowledge check; treat 80% or better as your signal to move on, and reread the section behind any question you missed. Your answers, visited sections, and revealed sections are saved locally in this browser, so a module picks up where you left off; nothing leaves your machine.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TOPICS COVERED — what you'll know by the end ════════ -->
+<section class="covered">
+  <div class="covered__inner">
+    <span class="eyebrow mb-16">Topics covered</span>
+    <h2>What you'll know by the end</h2>
+    <p class="covered__lede">
+      By the end of this course you can explain Veeam Kasten in the vocabulary you already use, stand it up on a cluster, keep it healthy, and recover a Kubernetes application from the right restore point.
+    </p>
+    <div class="covered__grid">
+      <div class="covered__item">
+        <div class="covered__check">✓</div>
+        <div>
+          <div class="covered__item-title">The concept bridge</div>
+          <div class="covered__item-desc">Where your Veeam Data Platform model carries over to Veeam Kasten — and where it stops.</div>
+        </div>
+      </div>
+      <div class="covered__item">
+        <div class="covered__check">✓</div>
+        <div>
+          <div class="covered__item-title">Kubernetes fluency</div>
+          <div class="covered__item-desc">Pods, namespaces, StatefulSets, persistent volumes, StorageClass, CSI, and Helm — read through a backup admin's eyes.</div>
+        </div>
+      </div>
+      <div class="covered__item">
+        <div class="covered__check">✓</div>
+        <div>
+          <div class="covered__item-title">Deployment and configuration</div>
+          <div class="covered__item-desc">Pre-flight checks, the Helm install, dashboard access, storage integration, and a first location profile.</div>
+        </div>
+      </div>
+      <div class="covered__item">
+        <div class="covered__check">✓</div>
+        <div>
+          <div class="covered__item-title">Maintenance over time</div>
+          <div class="covered__item-desc">Upgrades, monitoring the platform itself, logs and diagnostics, catalog recovery, and housekeeping.</div>
+        </div>
+      </div>
+      <div class="covered__item">
+        <div class="covered__check">✓</div>
+        <div>
+          <div class="covered__item-title">Restores and operations</div>
+          <div class="covered__item-desc">Policies and scheduling, the restore paths, access control, and a daily and weekly admin routine.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ MODULE LIST ════════ -->
+<section class="modules">
+  <div class="modules__inner">
+    <div class="modules__head">
+      <div>
+        <span class="eyebrow mb-8">Course content</span>
+        <h2>Course content</h2>
+      </div>
+      <div class="modules__count">5 modules · designed to be taken in order</div>
+    </div>
+
+    <a class="module-card" href="Lesson01_From_VDP_Admin_to_Kasten_Admin.html">
+      <div class="module-card__num">01</div>
+      <div class="module-card__body">
+        <h3>From Veeam Data Platform Admin to Veeam Kasten Admin</h3>
+        <p>Why protecting Kubernetes is a different problem than protecting virtual machines, and the concept map that carries your Veeam Data Platform knowledge across: backup job to policy, backup repository to location profile, and the snapshot-versus-export distinction that has no tidy Veeam Data Platform equivalent. Closes with the editions and where Veeam Backup &amp; Replication integration fits.</p>
+        <div class="module-card__chips">
+          <span class="module-card__chip">Concept map</span>
+          <span class="module-card__chip">5-question check</span>
+        </div>
+      </div>
+      <div class="module-card__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </a>
+
+    <a class="module-card" href="Lesson02_Kubernetes_Foundations_for_Backup_Admins.html">
+      <div class="module-card__num">02</div>
+      <div class="module-card__body">
+        <h3>Kubernetes Foundations for Backup Admins</h3>
+        <p>The Kubernetes vocabulary a backup admin needs and no more: clusters, pods, namespaces, StatefulSets, then persistent volumes, PVCs, StorageClass, CSI drivers, VolumeSnapshots, and Helm. Each concept is mapped to its Veeam Data Platform or VMware counterpart, with what it changes about how you back the workload up.</p>
+        <div class="module-card__chips">
+          <span class="module-card__chip">Kubernetes terms mapped</span>
+          <span class="module-card__chip">5-question check</span>
+        </div>
+      </div>
+      <div class="module-card__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </a>
+
+    <a class="module-card" href="Lesson03_Deploying_and_Configuring_Veeam_Kasten.html">
+      <div class="module-card__num">03</div>
+      <div class="module-card__body">
+        <h3>Deploying and Configuring Veeam Kasten</h3>
+        <p>The install, start to finish: prerequisites and the pre-flight checks you run before touching the cluster, the Helm-based deployment of Veeam Kasten, reaching and authenticating to the dashboard, integrating your storage, and creating a first location profile so exported data has somewhere to land.</p>
+        <div class="module-card__chips">
+          <span class="module-card__chip">Install walkthrough</span>
+          <span class="module-card__chip">5-question check</span>
+        </div>
+      </div>
+      <div class="module-card__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </a>
+
+    <a class="module-card" href="Lesson04_Maintaining_Veeam_Kasten_Over_Time.html">
+      <div class="module-card__num">04</div>
+      <div class="module-card__body">
+        <h3>Maintaining Veeam Kasten Over Time</h3>
+        <p>Day-two ownership of the platform itself: upgrades and how to think about version policy, monitoring Veeam Kasten as a workload on the cluster, where the logs and diagnostics live when something looks wrong, disaster recovery of Veeam Kasten's own catalog, and the housekeeping that keeps the deployment tidy.</p>
+        <div class="module-card__chips">
+          <span class="module-card__chip">Day-two operations</span>
+          <span class="module-card__chip">5-question check</span>
+        </div>
+      </div>
+      <div class="module-card__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </a>
+
+    <a class="module-card" href="Lesson05_Restores_and_Day_to_Day_Administration.html">
+      <div class="module-card__num">05</div>
+      <div class="module-card__body">
+        <h3>Restores and Day-to-Day Administration</h3>
+        <p>The work you do every week: building policies and scheduling them, then the restore paths — from a local snapshot, from an exported restore point, and by importing an application into another cluster — plus role-based access control (RBAC) basics and a daily and weekly routine for running Veeam Kasten.</p>
+        <div class="module-card__chips">
+          <span class="module-card__chip">Restore paths</span>
+          <span class="module-card__chip">5-question check</span>
+        </div>
+      </div>
+      <div class="module-card__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </a>
+
+    <div class="final-exam">
+      <div class="final-exam__body">
+        <h3>Finished all five modules?</h3>
+        <p>There is no exam attached to this course. The next step is your own cluster: run one policy end to end, export a restore point, then restore the application somewhere else and time yourself.</p>
+      </div>
+      <span class="final-exam__btn is-disabled">Course complete</span>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  Veeam Kasten for Kubernetes Fundamentals · self-paced v1 · built against Veeam Kasten 9.0.2 · 2026
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1387 @@
+{
+  "schema_version": "1.0",
+  "module": "Kasten_SelfPaced_VDP_to_Kasten",
+  "version": "v1",
+  "draft_file": "Work\\Kasten_SelfPaced_VDP_to_Kasten\\Lesson05_Restores_and_Day_to_Day_Administration.html",
+  "extractor": "bin/extract-claims.py v1.0",
+  "generated_at": "2026-08-06T12:51:37-04:00",
+  "totals": {
+    "cited": 112,
+    "verify": 0,
+    "uncited": 3,
+    "total": 115
+  },
+  "claims": [
+    {
+      "claim_id": "C-v1-001",
+      "text": "Protecting an application with Veeam Kasten, which is accomplished by creating a policy, rests on three concepts:         snapshots and exports          (one or both of the data-capture mechanisms),         scheduling          (capture frequency plus snapshot and backup retention objectives), and         selection          (which applications the policy protects, with resource filtering when finer control is needed) [Src: Kasten Docs 9.0.2 p.346]. If you read \"job settings, schedule, and job scope\" while you read that sentence, your mental model is close enough to start.",
+      "location": {
+        "line": 78
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.346",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 346,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-002",
+      "text": "What a policy protects is an     application     , and Veeam Kasten defines that term precisely: a collection of namespaced Kubernetes resources, the relevant non-namespaced resources the application uses, the Kubernetes workloads, deployment and release information available from Helm v3, and all of the persistent storage resources associated with those workloads [Src: Kasten Docs 9.0.2 p.346]. A new policy can be created from the Policies page or from the Applications page, and starting from the Applications page pre-populates the policy name and the namespace selection [Src: Kasten Docs 9.0",
+      "location": {
+        "line": 79
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.346",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 346,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-003",
+      "text": "All policies centre on the execution of actions, and for protecting applications you start with the snapshot action and add an optional export action to produce a durable backup [Src: Kasten Docs 9.0.2 p.348]. Those are not two names for one thing. The difference is the single most important idea in this module, because it decides where a restore can come from.",
+      "location": {
+        "line": 83
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.348",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 348,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-004",
+      "text": "Where does it live?                              On the storage system that holds the volumes, alongside the primary data [Src: Kasten Docs 9.0.2 p.349].",
+      "location": {
+        "line": 92
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.349",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 349,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-005",
+      "text": "What is it good at?                              Low performance impact on the primary workload, no downtime, fast restore times, and incremental data capture [Src: Kasten Docs 9.0.2 p.349].",
+      "location": {
+        "line": 93
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.349",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 349,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-006",
+      "text": "Where does it fall down?                              Storage systems set relatively low limits on snapshots per volume or per array, and snapshots are not always durable: catastrophic storage failure destroys them along with the primary data, and in a number of systems a snapshot's lifecycle is tied to the source volume, so deleting the volume can garbage-collect the snapshots with it [Src: Kasten Docs 9.0.2 p.349].",
+      "location": {
+        "line": 94
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.349",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 349,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-007",
+      "text": "Where does it live?                              In a target location outside the cluster's primary storage. The metadata destination is an Object Storage Location, an NFS/SMB File Storage Location, or a Veeam Repository Location, named in the Export Location Profile field [Src: Kasten Docs 9.0.2 p.352].",
+      "location": {
+        "line": 103
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.352",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 352,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-008",
+      "text": "What is it good at?                              Export operations convert application and volume snapshots into backups by transforming them into an infrastructure-independent format and storing them in that target location [Src: Kasten Docs 9.0.2 p.351] \u2014 which is what makes them durable, portable, and restorable on a different cluster.",
+      "location": {
+        "line": 104
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.351",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 351,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-009",
+      "text": "How do I turn it on?                              Select         Enable Backups via Snapshot Exports          during policy creation; the destination and the control over exporting snapshot data versus a reference appear there too [Src: Kasten Docs 9.0.2 p.352].",
+      "location": {
+        "line": 105
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.352",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 352,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-010",
+      "text": "A snapshot-only policy is a policy with no durable copy. Because of the limitations of snapshots, setting up backups of your application stack is advisable, and durable backups are created by exporting data [Src: Kasten Docs 9.0.2 p.349]. Treat \"snapshot plus export\" as the default shape of a production policy and make yourself justify any policy that stops at the snapshot.",
+      "location": {
+        "line": 114
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.349",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 349,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-011",
+      "text": "Exported data is organized into storage repositories that are exclusively controlled and maintained by the Veeam Kasten instance. Independently using, interacting with, connecting to, modifying, copying, upgrading, or in any way accessing or manipulating a Veeam Kasten storage repository is unsupported and can cause data corruption or loss to some or all of the restore points [Src: Kasten Docs 9.0.2 p.352]. Whatever housekeeping habits you have for a backup repository you can browse, leave them at the door for this one.",
+      "location": {
+        "line": 122
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.352",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 352,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-012",
+      "text": "Scheduling in Veeam Kasten breaks into four components: how frequently the primary snapshot action runs, how often snapshots are exported into backups, the retention schedule of snapshots and backups, and when the primary snapshot action runs [Src: Kasten Docs 9.0.2 p.362]. Work through them in that order and the form stops feeling crowded.",
+      "location": {
+        "line": 127
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.362",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 362,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-013",
+      "text": "Actions can be set to execute at an hourly, daily, weekly, monthly, or yearly granularity, or on demand. By default, actions set to hourly execute at the top of the hour and other actions execute at midnight UTC [Src: Kasten Docs 9.0.2 p.362]. You can also select the time at which scheduled actions execute, and sub-frequencies that run multiple actions per frequency [Src: Kasten Docs 9.0.2 p.362].",
+      "location": {
+        "line": 139
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.362",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 362,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-014",
+      "text": "Sub-hourly actions are useful when what you are protecting is chiefly Kubernetes objects or small data sets; care should be taken with more general-purpose workloads because of the risk of stressing the underlying storage infrastructure or running into storage API rate limits [Src: Kasten Docs 9.0.2 p.362]. Sub-frequencies also interact with retention: retaining 24 hourly snapshots at 15-minute intervals would only retain six hours of snapshots [Src: Kasten Docs 9.0.2 p.362]. That single sentence has caught out more people than any other line on this page.",
+      "location": {
+        "line": 140
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.362",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 362,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-015",
+      "text": "Backups performed via exports are, by default, set up to export every snapshot into a backup, and it is also possible to select a subset of snapshots for exports \u2014 for example, converting only every daily snapshot into a backup [Src: Kasten Docs 9.0.2 p.362]. That subset choice is the lever you pull when hourly snapshots are cheap on the array and expensive in the object store.",
+      "location": {
+        "line": 147
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.362",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 362,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-016",
+      "text": "One constraint to design around before you save: to maintain backup recovery points, once the policy is saved the export location profile can only be changed to a compatible location profile. The interface enforces compatibility when you edit a policy, but no compatibility enforcement is performed when editing the policy custom resource directly [Src: Kasten Docs 9.0.2 p.363].",
+      "location": {
+        "line": 148
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.363",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 363,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-017",
+      "text": "Veeam Kasten can use a grandfather-father-son (GFS) retention scheme for cost and compliance reasons. Under that backup rotation scheme, hourly snapshots and backups rotate on an hourly basis with one graduating to daily every day, and so on; you set the number of hourly, daily, weekly, monthly, and yearly copies to retain, and Veeam Kasten handles both cleanup at every retention tier and graduation to the next one. For on-demand policies it is not possible to set a retention schedule [Src: Kasten Docs 9.0.2 p.364].",
+      "location": {
+        "line": 155
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.364",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 364,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-018",
+      "text": "Backup retention schedules default to the same values as snapshot retention schedules, and can be set to independent schedules if needed \u2014 which lets you keep a limited number of snapshots for fast recovery from accidental outages while storing a larger number of backups for long-term recovery needs [Src: Kasten Docs 9.0.2 p.364].",
+      "location": {
+        "line": 156
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.364",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 364,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-019",
+      "text": "Two behaviours worth knowing before they surprise you. The retention schedule for a policy does not apply to snapshots and backups produced by manual policy runs; any artifacts created by a manual run need to be cleaned up manually [Src: Kasten Docs 9.0.2 p.364]. And restore points created by failed policy runs do not count towards retiring older restore points \u2014 they are retained until there are enough newer restore points from successful runs to satisfy the retention counts, which can leave you with more restore points than you expected while a policy is failing [Src: Kasten Docs 9.0.2 p.364",
+      "location": {
+        "line": 157
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.364",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 364,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-020",
+      "text": "The Advanced Options settings let you pick how many times and when actions execute within the interval of the frequency \u2014 for a daily frequency, which hour or hours within each day and which minute within each hour [Src: Kasten Docs 9.0.2 p.366]. By default hourly retention counts apply to the hourly action at the top of the hour, daily counts to the action at midnight, weekly counts to midnight Sunday, monthly counts to midnight on the first of each month, and yearly counts to midnight on 1 January, all in UTC [Src: Kasten Docs 9.0.2 p.366]. Advanced Options lets you display and enter times i",
+      "location": {
+        "line": 164
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.366",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 366,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-021",
+      "text": "The Backup Window settings let you select a time interval within which the policy will run. The policy is scheduled to run once at the Backup Window start time, and if the selected interval is too short the policy run will not finish and will be canceled [Src: Kasten Docs 9.0.2 p.367]. If the policy has an hourly frequency and the window exceeds one hour, the policy is also scheduled to run every 60 minutes thereafter within the window [Src: Kasten Docs 9.0.2 p.367].",
+      "location": {
+        "line": 165
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.367",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 367,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-022",
+      "text": "With staggering enabled, Veeam Kasten automatically finds an optimal start time and runs the policy within the selected interval, which lets it stagger runs of multiple policies and reduce peak load on the overall system [Src: Kasten Docs 9.0.2 p.367].",
+      "location": {
+        "line": 166
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.367",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 367,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-023",
+      "text": "Job scope: pick the objects                                                     Application selection \u2014 by application name, by an application name wildcard, or by labels [Src: Kasten Docs 9.0.2 p.367]                                A wildcard is a standing instruction, not a list. Selecting all applications with a       *        wildcard is possible [Src: Kasten Docs 9.0.2 p.368], and every namespace created after you save is then in scope.",
+      "location": {
+        "line": 177
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.367",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 367,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-024",
+      "text": "Retention points and GFS tiers                                                     Retention counts for hourly, daily, weekly, monthly, and yearly copies, with graduation handled for you [Src: Kasten Docs 9.0.2 p.364]                                Snapshot and backup retention can be independent [Src: Kasten Docs 9.0.2 p.364]. Short on the array, long in the object store, is the shape most estates settle on.",
+      "location": {
+        "line": 178
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.364",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 364,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-025",
+      "text": "Backup window                                                     Backup Window, plus staggering to spread load across policies [Src: Kasten Docs 9.0.2 p.367]                                A window that is too short cancels the run rather than letting it overrun [Src: Kasten Docs 9.0.2 p.367].",
+      "location": {
+        "line": 179
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.367",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 367,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-026",
+      "text": "Run the job now                                                     The         Run Once          menu option on the Policies page, or the Run Once button on the Policy View page [Src: Kasten Docs 9.0.2 p.385]                                Unless an expiration time is specified, artifacts created by that action are not eligible for automatic retirement and need to be removed manually [Src: Kasten Docs 9.0.2 p.385].",
+      "location": {
+        "line": 180
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.385",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 385,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-027",
+      "text": "Disable the job for a maintenance weekend                                                     The         Pause          and         Resume          menu options, on the Policies page or the Policy View page [Src: Kasten Docs 9.0.2 p.385]                                Paused policies do not generate skipped jobs and are ignored for compliance purposes, and applications protected only by paused policies are marked as unmanaged [Src: Kasten Docs 9.0.2 p.387]. Your green dashboard is telling you nothing while a policy is paused.",
+      "location": {
+        "line": 181
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.385",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 385,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-028",
+      "text": "Edit the job; it takes effect next run                                                     Edit from the Policies page or the Policy View page; changes take effect during the next scheduled policy run [Src: Kasten Docs 9.0.2 p.388]                                Careful attention should be paid to changing a policy's retention schedule, as that action automatically retires and deletes restore points that no longer fall under the new scheme [Src: Kasten Docs 9.0.2 p.388].",
+      "location": {
+        "line": 182
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.388",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 388,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-029",
+      "text": "Delete the job when the workload retires                                                     Delete from the Policies page, the Policy View page, or the API [Src: Kasten Docs 9.0.2 p.390]                                For safety, deleting a policy does not remove the restore points it generated; those must be deleted manually from the application restore point view or via the API [Src: Kasten Docs 9.0.2 p.390].",
+      "location": {
+        "line": 183
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.390",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 390,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-030",
+      "text": "Retention edits are not retroactive in the way you might fear. Restore points graduate to higher retention tiers according to the retention schedule in effect when the restore point is created, which protects previous restore points when the retention schedule changes [Src: Kasten Docs 9.0.2 p.388].",
+      "location": {
+        "line": 191
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.388",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 388,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-031",
+      "text": "One habit to add rather than transfer: everything the policy form produces is a Kubernetes custom resource, and you can read or edit it directly. A Policy represents a collection of data management actions configured to occur on a periodic or event-driven basis, encoding business rules and translating them into the specific actions Veeam Kasten applies to the applications it has discovered [Src: Kasten Docs 9.0.2 p.620]. Policies can also be edited directly by modifying the custom resource YAML through the dashboard or the command line [Src: Kasten Docs 9.0.2 p.388]. The excerpt below is the t",
+      "location": {
+        "line": 196
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.620",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 620,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-032",
+      "text": "Reading a policy this way pays off the first time someone asks why a run did not happen: the schedule and the retention counts are right there, in one object, with no form to navigate. It also explains the compatibility warning above \u2014 the interface guards you when you edit through it, and does not when you edit the resource directly [Src: Kasten Docs 9.0.2 p.363].",
+      "location": {
+        "line": 216
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.363",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 363,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-033",
+      "text": "After you create a policy and return to the dashboard, the application status updates from         Unmanaged          to         Non-Compliant         , which indicates that a policy exists but has not successfully run within the specified frequency; the status changes to         Compliant          on successful completion of a scheduled or manual run [Src: Kasten Docs 9.0.2 p.384]. Those labels are defined on the dashboard as: Unmanaged, meaning no protection policies cover the object; Non-compliant, meaning a policy applies but its actions are failing or have not been invoked yet; Compliant,",
+      "location": {
+        "line": 219
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.384",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 384,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-034",
+      "text": "A policy that has gone invalid will not run, and that can produce a compliance breach; revalidation exists for exactly that case, through the         Revalidate          menu option on the Policies page [Src: Kasten Docs 9.0.2 p.387]. Worth knowing the option is there before you go looking for a deeper problem.",
+      "location": {
+        "line": 225
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.387",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 387,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-035",
+      "text": "Once applications have been protected via a policy or a manual action, it is possible to restore them in place or clone them into a different namespace [Src: Kasten Docs 9.0.2 p.392]. Restoring an existing application is done from the Applications page by clicking the Restore option in the dropdown; alternatively, the Restore Points page can be used to find a specific restore point and initiate the restore from it [Src: Kasten Docs 9.0.2 p.393].",
+      "location": {
+        "line": 248
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.392",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 392,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-036",
+      "text": "Set expectations on duration before you promise anything to an application owner. A restore can take a few minutes, depending on the amount of data captured by the restore point, and the time is dominated by how long it takes to rehydrate captured data followed by recreating the application containers, so it tracks the speed of the underlying storage infrastructure [Src: Kasten Docs 9.0.2 p.392]. Retries are built in: to speed up the restore and account for failures during the first or second attempt, up to a maximum of three attempts, all successfully restored volumes are retained for the nex",
+      "location": {
+        "line": 249
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.392",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 392,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-037",
+      "text": "restore point                                                                       restore point         Created as a result of a backup or import action, it represents a version-in-time of an application that Veeam Kasten has captured and that can be restored using a restore action [Src: Kasten Docs 9.0.2 p.620].              ,",
+      "location": {
+        "line": 254
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.620",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 620,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-038",
+      "text": "a grouped collection of data artifacts belonging to the application, and the view distinguishes manually generated restore points from automated policy-generated ones [Src: Kasten Docs 9.0.2 p.395]. It also distinguishes between snapshots and backups: when both are present a layered box indicates that more than one kind of restore point exists for the same data, and clicking that layered restore point presents the option to select between the local snapshot and the exported backup [Src: Kasten Docs 9.0.2 p.395]. Selecting a restore point brings up a side panel with more detail on it, so you ca",
+      "location": {
+        "line": 255
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.395",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 395,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-039",
+      "text": "The word \"export\" in the interface does not mean you need an import policy to use the result. While the interface uses the Export term for backups, no import policy is needed to restore from a backup; import policies are only needed when you want to restore the application into a different cluster [Src: Kasten Docs 9.0.2 p.395]. Restoring on the same cluster from an exported backup is the ordinary restore workflow.",
+      "location": {
+        "line": 261
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.395",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 395,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-040",
+      "text": "The local snapshot is the fast path while the storage under it is intact \u2014 snapshots support fast restore times and implement incremental data capture, with low performance impact on the primary workload [Src: Kasten Docs 9.0.2 p.349]. The exported backup would also work, and would cost you a rehydration you did not need to pay for.",
+      "location": {
+        "line": 282
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.349",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 349,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-041",
+      "text": "This is the scenario the export tier exists for. Snapshots are not always durable: catastrophic storage system failure destroys your snapshots along with your primary data, and in a number of storage systems a snapshot's lifecycle is tied to the source volume [Src: Kasten Docs 9.0.2 p.349]. The exported backup sits in an infrastructure-independent format in a separate target location [Src: Kasten Docs 9.0.2 p.351], which is why it survives.",
+      "location": {
+        "line": 295
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.349",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 349,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-042",
+      "text": "By default Veeam Kasten restores applications into the original namespace the restore point was created from, but the target namespace can be changed and new namespaces can be created at that point; debugging, test and development, and cloning are documented uses of exactly that [Src: Kasten Docs 9.0.2 p.416]. Restoring in place would recreate the entire application stack into the selected namespace [Src: Kasten Docs 9.0.2 p.396] \u2014 an outage you did not need to take.",
+      "location": {
+        "line": 308
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.416",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 416,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-043",
+      "text": "Veeam Kasten provides the       FileRecoverySession        custom resource to request network access to files from exported restore points without requiring a full restore of volume data [Src: Kasten Docs 9.0.2 p.419]. A Volume-Clones restore is the next-best answer and a good one: it restores individual volumes into the existing application namespace without disrupting its operation or workloads [Src: Kasten Docs 9.0.2 p.408], though you then mount and copy by hand. A full application restore is the sledgehammer.",
+      "location": {
+        "line": 321
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.419",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 419,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-044",
+      "text": "You need the applications running on a cluster that has never seen them.",
+      "location": {
+        "line": 328
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-045",
+      "text": "Import policies are supported for importing applications into a cluster that is different from where the application was captured [Src: Kasten Docs 9.0.2 p.460], and this is the path section 03 walks. One dependency decided months earlier: if migration across clusters in different clouds or between on-premises and public cloud is needed, the Export Snapshot Data option must be enabled on the source policy, because without it the application data is not exported and the subsequent import will fail [Src: Kasten Docs 9.0.2 p.455].",
+      "location": {
+        "line": 334
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.460",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 460,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-046",
+      "text": "Is the local snapshot still trustworthy? If the storage under it is intact, take the snapshot; if the storage failed, take the exported backup, because that is the copy in an infrastructure-independent format outside the cluster's primary storage [Src: Kasten Docs 9.0.2 p.351]. Then: does the data have to land on top of the running application? If not, restore into a different namespace instead, which is a supported target choice at restore time [Src: Kasten Docs 9.0.2 p.416]. Only when the source cluster itself is unavailable does the answer become an import policy, because import policies ar",
+      "location": {
+        "line": 344
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.351",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 351,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-047",
+      "text": "This is where \"restore an application\" stops behaving like \"restore a virtual machine\". When you click Restore, the system recreates the entire application stack into the selected namespace, including the data associated with the original application and the versioned container images [Src: Kasten Docs 9.0.2 p.396]. A resource that does not currently exist in the namespace is always restored; the treatment of namespaced resources that do already exist depends on the type of resource and the       overwriteExisting        flag [Src: Kasten Docs 9.0.2 p.396]. Read the table before your first pro",
+      "location": {
+        "line": 348
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.396",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 396,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-048",
+      "text": "Nothing \u2014 the resource is missing                                                Restored                                             Restored [Src: Kasten Docs 9.0.2 p.396]",
+      "location": {
+        "line": 353
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.396",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 396,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-049",
+      "text": "Workloads (Deployments, StatefulSets, and the like)                                                Always restored                                             Always restored [Src: Kasten Docs 9.0.2 p.396]",
+      "location": {
+        "line": 354
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.396",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 396,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-050",
+      "text": "ServiceAccounts and non-namespaced resources, such as a storage class                                                Restored only when missing from the namespace or cluster                                             Restored only when missing from the namespace or cluster [Src: Kasten Docs 9.0.2 p.396]",
+      "location": {
+        "line": 355
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.396",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 396,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-051",
+      "text": "Other existing resources                                                Not restored; they maintain their current state                                             Restored to the restore point version. Immutable Secrets and ConfigMaps are also restored, by re-creating the resources [Src: Kasten Docs 9.0.2 p.397]",
+      "location": {
+        "line": 356
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.397",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 397,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-052",
+      "text": "If you want tighter control than the flag gives you, restore filtering can selectively control which namespaced objects are restored [Src: Kasten Docs 9.0.2 p.397]. And if the application is gone rather than damaged, the process of restoring a deleted application is nearly identical: by default removed applications are not shown on the Applications page, so you filter and select         Removed          to find them, after which they can be restored using the normal restore workflow [Src: Kasten Docs 9.0.2 p.397].",
+      "location": {
+        "line": 360
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.397",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 397,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-053",
+      "text": "By default a restore brings back all artifacts and data captured during the backup process. Where only a subset is required, the restore workflow supports artifact filtering for full control over what artifacts and data to restore, a data-only restore for a running application, and a volume-clones restore for restoring volumes only [Src: Kasten Docs 9.0.2 p.406].",
+      "location": {
+        "line": 363
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.406",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 406,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-054",
+      "text": "You can selectively bring back restore point artifacts, including volume snapshots, which is useful for scenarios such as a single persistent volume claim restore or rolling back configuration updates; by default all artifacts are selected for restore [Src: Kasten Docs 9.0.2 p.406]. One trap to design around: to preserve owner references, both the resource and its owners must be included by the filters [Src: Kasten Docs 9.0.2 p.407].",
+      "location": {
+        "line": 372
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.406",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 406,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-055",
+      "text": "A data-only restore looks like selecting all volume snapshots and no Kubernetes specifications, but it carries safety guardrails: the Kubernetes workloads captured in the restore point must exist in the namespace the application is being restored into, the running workloads must have the same number of replicas as captured in the restore point, and they must have the same volumes as were gathered \u2014 the same number of volumes, with the same names [Src: Kasten Docs 9.0.2 p.407]. Those checks exist because data-only restore is frequently used to bring older versions of data into a newer version o",
+      "location": {
+        "line": 375
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.407",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 407,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-056",
+      "text": "Know what it does to the volumes underneath: a data-only restore follows a delete-and-restore-from-backup approach for the persistent volume claims, to maintain data integrity [Src: Kasten Docs 9.0.2 p.408]. This is not an in-place merge.",
+      "location": {
+        "line": 376
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.408",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 408,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-057",
+      "text": "Volume-clones restore enables restoring individual volumes into the existing application namespace without disrupting its operation or workloads, which suits recovering specific files from a backup when restoring the volume to an alternative namespace is not permitted or desirable [Src: Kasten Docs 9.0.2 p.408]. The workloads captured in the restore point can exist in the target namespace without being affected [Src: Kasten Docs 9.0.2 p.408].",
+      "location": {
+        "line": 379
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.408",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 408,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-058",
+      "text": "Three consequences to plan for. The restored claims follow a naming convention that appends the restore point's creation timestamp to the original claim name to denote that they are clones; the restore does not automatically mount volumes to any pods, so mounting them is your responsibility; and each cloned claim carries the label       k10.kasten.io/cloned: \"true\"       , which can be used as a policy exclusion to prevent the cloned volumes from being included in a backup policy by accident [Src: Kasten Docs 9.0.2 p.409]. Once the cloned claims have served their purpose, removing them from th",
+      "location": {
+        "line": 380
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.409",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 409,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-059",
+      "text": "Veeam Kasten provides the       FileRecoverySession        custom resource to request network access to files from exported restore points without requiring a full restore of volume data, and the       k10tools frs        sub-command provides a command-line interface for the related operations, including a built-in file transfer client [Src: Kasten Docs 9.0.2 p.419]. File data is made available through the OpenSSH implementation of the Secure File Transport Protocol, via a dedicated service created for each custom resource instance, and the service only permits access by the principal whose pu",
+      "location": {
+        "line": 391
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.419",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 419,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-060",
+      "text": "Two constraints shape whether this is available to you at all. Only exported restore points should be specified in the request [Src: Kasten Docs 9.0.2 p.420] \u2014 a local snapshot is not enough. And the files must sit in a volume that was exported in filesystem mode, or exported in block mode where the volume is unpartitioned and contains an ext4, xfs or ntfs filesystem, or has a GPT or MBR partition table with one or more filesystem partitions containing those filesystems, with the guest filesystem not encrypted [Src: Kasten Docs 9.0.2 p.419].",
+      "location": {
+        "line": 392
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.420",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 420,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-061",
+      "text": "Exported restore points can be distinguished from local restore points with a label query [Src: Kasten Docs 9.0.2 p.420]:",
+      "location": {
+        "line": 393
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.420",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 420,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-062",
+      "text": "Sessions are not permanent. A session in the Ready state has a limited lifetime, and at the time given in its expiry field its state changes to Failed; the session is terminated by deleting the custom resource, which releases the accumulated system and Kubernetes resources [Src: Kasten Docs 9.0.2 p.421]. The default session expiry is 30 minutes, set by the       frs.sessionExpiryTimeInMinutes        Helm parameter [Src: Kasten Docs 9.0.2 p.419].",
+      "location": {
+        "line": 401
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.421",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 421,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-063",
+      "text": "To restore several applications together you select them in the table and use the         Restore selected          option in the Options menu; you then select restore points for each application, with the most recent available restore point preselected by default, and applications can be excluded from the operation if no valid restore point satisfies the need [Src: Kasten Docs 9.0.2 p.401]. The workflow then differs from the single-application one in useful ways: you can add a prefix or suffix to the target namespace or filter resources in the Restore Configuration step, a Summary screen give",
+      "location": {
+        "line": 406
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.401",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 401,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-064",
+      "text": "One control in the multiple-application workflow is built for the worst day. You can specify a date range \u2014 during a ransomware attack, for example \u2014 in order to choose the latest restore point containing unencrypted data even when more recent restore points exist that may contain corrupted data; when a date range is selected, the most recent restore point within that range is automatically selected for each application [Src: Kasten Docs 9.0.2 p.401]. Practise using it before you need it.",
+      "location": {
+        "line": 412
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.401",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 401,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-065",
+      "text": "One place where the application-shaped model meets your existing world: Veeam Kasten also protects virtual machines running on KubeVirt-based platforms such as Red Hat OpenShift Virtualization or SUSE Virtualization, through virtual-machine-based policies that allow fine-grained protection of individual virtual machines without backing up entire namespaces [Src: Kasten Docs 9.0.2 p.347]. The process of restoring virtual machine backups is similar to restoring any other application using the Veeam Kasten dashboard [Src: Kasten Docs 9.0.2 p.544]. Restore points even record the difference, carryi",
+      "location": {
+        "line": 417
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.347",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 347,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-066",
+      "text": "Do not let the familiarity carry you too far, though. Virtual machines can only be restored into a new namespace [Src: Kasten Docs 9.0.2 p.417]. The in-place restore you would reach for out of habit is not on the menu for that object type.",
+      "location": {
+        "line": 418
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.417",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 417,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-067",
+      "text": "At overview depth: how an export policy on one cluster and an import policy on another combine into a path that lands a running application somewhere it has never run. By the end of this section you can name the four stages, say which policy setting decides whether the path works at all, and explain what an import policy does when nobody has asked for a restore yet.",
+      "location": {
+        "line": 436
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-068",
+      "text": "The workflow for exporting applications into another cluster is close to the workflow for protecting them: when a policy is created to capture an application, you also select the Enable Backups via Snapshot Exports option, and one export action is created for each backup action when the export schedule triggers. Once all the export actions finish for that scheduled time, the metadata is uploaded to the location specified by the profile, and after that upload the backups are available for import [Src: Kasten Docs 9.0.2 p.455].",
+      "location": {
+        "line": 439
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.455",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 455,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-069",
+      "text": "That \"available for import\" is the hinge. Nothing about the export knows which cluster will consume it. Location profiles are also used for importing applications into a cluster that is different from the source cluster where the application was captured [Src: Kasten Docs 9.0.2 p.338] \u2014 the shared location is the whole handshake, plus one encoded string.",
+      "location": {
+        "line": 440
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.338",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 338,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-070",
+      "text": "Stage 01 \u2014 Export on the source.          The Export Snapshot Data option stores the exported data and metadata to the configured store, while the Export Snapshot References Only option stores only metadata about the application restore points [Src: Kasten Docs 9.0.2 p.455]. This is the setting that decides whether the path works: if migration is desired across Kubernetes clusters in different clouds or between on-premises and public cloud environments, the Export Snapshot Data option must be enabled to migrate both the application data and the metadata, because without it the application data",
+      "location": {
+        "line": 452
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.455",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 455,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-071",
+      "text": "Stage 02 \u2014 Copy the handshake.          When the application is imported into another cluster, initial handshake configuration is required. It is obtained from the policy by clicking         Show import details         , which displays the encoded configuration [Src: Kasten Docs 9.0.2 p.458]. For a manual export, the encoded import configuration required by the destination cluster is presented after you confirm the export [Src: Kasten Docs 9.0.2 p.459]. Treat that string the way you treat any other credential material \u2014 it is what allows the destination cluster to establish the data export and",
+      "location": {
+        "line": 459
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.458",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 458,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-072",
+      "text": "Stage 03 \u2014 Import on the destination.          Importing an application snapshot is similar to the policy creation workflow for protecting applications: from the Policies page you select Create New Policy, then select Import for the action [Src: Kasten Docs 9.0.2 p.460]. You also specify a frequency, but that frequency only controls how often to check the shared object storage or file storage location; if data in the store is not refreshed at the same frequency no duplicate work is performed, and multiple restore points may be imported by a single action if there is catching-up to do [Src: Kas",
+      "location": {
+        "line": 466
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.460",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 460,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-073",
+      "text": "Stage 04 \u2014 Restore, then or later.          After the Create Policy button is clicked the system starts scheduling jobs based on the policy definition; when new data is detected its metadata is imported into the cluster, associated with the application stack already running, and made available as a restore point [Src: Kasten Docs 9.0.2 p.464]. Unless         Restore after Import          is selected, only metadata is brought into the cluster, and data volumes residing in an object store or file store are not converted into native volumes until a restore operation is initiated [Src: Kasten Docs",
+      "location": {
+        "line": 473
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.464",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 464,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-074",
+      "text": "Care should be taken when auto-restoring the application during import: ensure the newly restored application does not conflict with the application running in the source cluster, and examples of potential conflicts include accidental credential reuse, access to and use of external services, and services conflicting for exclusive ownership of shared resources [Src: Kasten Docs 9.0.2 p.462]. Two live copies of the same application, both convinced they own the same external queue, is a failure mode you cause rather than suffer.",
+      "location": {
+        "line": 483
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.462",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 462,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-075",
+      "text": "Running an import policy keeps the list of local restore points in sync with the retention settings of the originating policy. If a restore point is marked for retirement by the source cluster it is cleaned up, and the next time the import policy runs that retired restore point is removed from the destination cluster, reflecting the fact that it can no longer be used to restore the application [Src: Kasten Docs 9.0.2 p.464].",
+      "location": {
+        "line": 491
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.464",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 464,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-076",
+      "text": "By default Veeam Kasten restores Kubernetes resources as they exist in the restore point, but when the restore target does not match the environment of the backup, resource artifacts can be transformed on restore \u2014 for example, updating container image URLs or changing storage class settings when moving between cloud providers [Src: Kasten Docs 9.0.2 p.464]. Transforms are applied by enabling         Apply transforms to restored resources          under Restore After Import [Src: Kasten Docs 9.0.2 p.465].",
+      "location": {
+        "line": 495
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.464",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 464,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-077",
+      "text": "Import is for crossing cluster boundaries. The entire application stack can be migrated across different namespaces in the same cluster, and that is covered by the restore workflow rather than by an import policy [Src: Kasten Docs 9.0.2 p.451]. If you find yourself building an import policy to move a namespace inside one cluster, stop and go back to section 02.",
+      "location": {
+        "line": 499
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.451",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 451,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-078",
+      "text": "The documented resiliency strategies give you a clean way to frame cost against recovery time. A Rebuild approach carries a high recovery time and low infrastructure cost, and suits pre-production or smaller organizations with constrained budgets: policies export backups off-site, and after a site loss a new cluster is deployed, Veeam Kasten is redeployed, a location profile is pointed at the off-site repository, and the catalog is imported [Src: Kasten Docs 9.0.2 p.1093]. A Replicate approach carries a medium recovery time and high infrastructure cost and suits production or enterprise worklo",
+      "location": {
+        "line": 505
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-079",
+      "text": "For role-based access control (RBAC), Veeam Kasten builds on Kubernetes ClusterRoles and Bindings, and each deployment includes default Kubernetes ClusterRoles and Roles for authorization of both full and partial administrator personas [Src: Kasten Docs 9.0.2 p.264]. There is no separate account store to manage: a role is a Kubernetes object, an assignment is a binding, and the scope of the binding is the whole security design.",
+      "location": {
+        "line": 527
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.264",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 264,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-080",
+      "text": "That is the conceptual jump. In your Veeam Data Platform work, \"who can restore this\" is a property you set on a user inside a console you administer. Here it is a Kubernetes object that a cluster administrator can also see, audit, and change with the same tools they use for everything else on the cluster. Different plumbing, and the same question underneath: who can protect, who can restore, and who can only look.",
+      "location": {
+        "line": 528
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-081",
+      "text": "Uninterrupted access to all Veeam Kasten operations. The holder may work with all Veeam Kasten APIs including profiles, policies, policy presets, actions, restore points, transform sets and blueprint bindings [Src: Kasten Docs 9.0.2 p.264].",
+      "location": {
+        "line": 537
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.264",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 264,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-082",
+      "text": "Requires a ClusterRoleBinding for cluster-wide access. Veeam Kasten creates a binding for a default group       k10:admins       , and admin users added to that group can use the role [Src: Kasten Docs 9.0.2 p.266].",
+      "location": {
+        "line": 538
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.266",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 266,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-083",
+      "text": "Operational access in specific namespaces. Within assigned namespaces the holder may manually back up and restore applications, create and modify policies, view application, action and restore point details, and cancel actions [Src: Kasten Docs 9.0.2 p.272].",
+      "location": {
+        "line": 542
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.272",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 272,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-084",
+      "text": "Needs a RoleBinding in the namespace or namespaces the user requires access to [Src: Kasten Docs 9.0.2 p.274].",
+      "location": {
+        "line": 543
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.274",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 274,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-085",
+      "text": "Read-only access to all configuration resources, for operators without full administrator privileges [Src: Kasten Docs 9.0.2 p.275] \u2014 get and list on profiles, policies, policy presets, transform sets, blueprint bindings, and the storage security context resources [Src: Kasten Docs 9.0.2 p.276].",
+      "location": {
+        "line": 547
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.275",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 275,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-086",
+      "text": "Requires a ClusterRoleBinding to provide cluster-wide access [Src: Kasten Docs 9.0.2 p.276].",
+      "location": {
+        "line": 548
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.276",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 276,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-087",
+      "text": "Permission to patch and edit VirtualMachine resources, which is required to annotate virtual machines and so control whether Veeam Kasten freezes a guest filesystem during snapshot operations [Src: Kasten Docs 9.0.2 p.272].",
+      "location": {
+        "line": 552
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.272",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 272,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-088",
+      "text": "A ClusterRoleBinding to view and manage virtual machines across all namespaces, or a RoleBinding for a specific namespace [Src: Kasten Docs 9.0.2 p.272].",
+      "location": {
+        "line": 553
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.272",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 272,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-089",
+      "text": "Read those two columns together and the design becomes obvious. Administrative access means authenticating with a user that has a ClusterRoleBinding to the predefined       k10-admin        role; non-administrators are granted limited permissions, with read-only dashboard configuration access through a ClusterRoleBinding to       k10-config-view        and operational access to their own applications through a RoleBinding to       k10-basic        in the application's namespace [Src: Kasten Docs 9.0.2 p.263]. Veeam Kasten also supports a more flexible permissions model that scopes a user's per",
+      "location": {
+        "line": 558
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.263",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 263,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-090",
+      "text": "That is the command form for an individual user or service account [Src: Kasten Docs 9.0.2 p.266]. You will do it from the dashboard most of the time, which is the next part.",
+      "location": {
+        "line": 567
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.266",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 266,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-091",
+      "text": "The Veeam Kasten role-based access control dashboard can be used to set up varying levels of access to the dashboard and the APIs [Src: Kasten Docs 9.0.2 p.279]. Veeam Kasten allows users to manage Kubernetes access through it, creating Role Bindings as well as Cluster Role Bindings by choosing existing Roles and Cluster Roles or creating new ones [Src: Kasten Docs 9.0.2 p.280]. One prerequisite catches people out: the dashboard can be viewed only if the user is authorized to view Kubernetes namespace-scoped Roles, Role Bindings and Cluster Roles and Cluster Role Bindings [Src: Kasten Docs 9.0",
+      "location": {
+        "line": 570
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.279",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 279,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-092",
+      "text": "Administrator access \u2014 the whole cluster.          To set up administrator access for a user or group, a Cluster Role Binding is created and the Cluster Role named       k10-admin        is selected from the drop-down, with one or more users or groups configured as the subjects [Src: Kasten Docs 9.0.2 p.280].",
+      "location": {
+        "line": 577
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.280",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 280,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-093",
+      "text": "Tenant access \u2014 named namespaces only.          To let users perform data protection operations only in their own namespaces, Role Bindings are created in a specific list of namespaces with the Cluster Role named       k10-basic        selected, and one or more users or groups configured as the subjects [Src: Kasten Docs 9.0.2 p.282]. This is the form an application team's self-service access takes.",
+      "location": {
+        "line": 585
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.282",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 282,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-094",
+      "text": "Read-only access \u2014 look, do not touch.          To set up read-only access, a Cluster Role Binding is created with the Cluster Role named       k10-config-view        selected from the drop-down [Src: Kasten Docs 9.0.2 p.284]. This is the assignment for an auditor, a service desk, or a colleague who needs to answer \"did it run\" without being able to change anything.",
+      "location": {
+        "line": 593
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.284",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 284,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-095",
+      "text": "Service accounts are bound through the same form, using a naming convention rather than a separate control. Bindings are available for the subject types Users and Groups; where a service account binding is required, the format       system:serviceaccount:&lt;sa_namespace&gt;:&lt;sa_name&gt;        is used in the User field for a single service account in a specific namespace, or the format       system:serviceaccounts:&lt;sa_name&gt;        is used in the Group field for a service account in all namespaces [Src: Kasten Docs 9.0.2 p.280].",
+      "location": {
+        "line": 602
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.280",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 280,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-096",
+      "text": "Granting people the ability to manage access is a bigger grant than it looks. Viewing and managing Veeam Kasten-specific Kubernetes RBAC resources from the dashboard requires additional permissions, and while a read-only view can be granted with list and get verbs, additional verbs such as create, update, and delete should be added with caution because they allow those users to escalate their own privileges [Src: Kasten Docs 9.0.2 p.277][Src: Kasten Docs 9.0.2 p.278].",
+      "location": {
+        "line": 610
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.277",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 277,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-097",
+      "text": "Two scoping facts are worth carrying into your first design. Cluster-scoped restore points sit outside the namespace model: access to a ClusterRestorePoint is reserved for users with Veeam Kasten administrative privileges through Kubernetes RBAC, because the resources are cluster-scoped [Src: Kasten Docs 9.0.2 p.718]. And the direction of travel is worth planning for rather than resisting \u2014 the documented guidance is to consider implementing multi-tenancy and turning Veeam Kasten into a backup-as-a-service model rather than restricting its usage to a select group of trusted users, which enable",
+      "location": {
+        "line": 616
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.718",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 718,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-098",
+      "text": "Read that guidance as a job description change. Under it, application teams create and manage their own backup policies, set schedules, and determine retention settings [Src: Kasten Docs 9.0.2 p.1092], and your role moves from operating every job to designing the guardrails those teams work inside. The routine in the next section is what that role looks like day to day.",
+      "location": {
+        "line": 617
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1092",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1092,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-099",
+      "text": "Start with where the answers live. The top of the Veeam Kasten dashboard displays a list of applications, currently mapped to namespaces, any policies that exist in the system, and a summary of the cluster's backup data footprint; after filtering to applications that have stateful services, each section breaks down into Unmanaged, Non-compliant, Compliant, and Removed [Src: Kasten Docs 9.0.2 p.301]. Choosing one of those buttons filters the applications automatically [Src: Kasten Docs 9.0.2 p.301], which makes \"show me everything that is not protected\" a single click rather than a report.",
+      "location": {
+        "line": 639
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-100",
+      "text": "Below the policy management section you will find activity data: a graph of all activity in the system, where mousing over the graph displays action information such as status, action duration, action start time, and action completion time [Src: Kasten Docs 9.0.2 p.311]. The same information appears in tabular form under the graph, beginning with a summary of total actions, average action duration, the number of data artifacts and their size, followed by recent actions including the policy that generated each one, the number of child actions, the number of applications included in the run, and",
+      "location": {
+        "line": 640
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.311",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 311,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-101",
+      "text": "Alerts surface separately. An alert notification appears in the upper right corner of the dashboard, and clicking the alert icon opens a side pane containing a list of outstanding errors and warnings, each with a description of what went wrong [Src: Kasten Docs 9.0.2 p.490]. Check the corner before you check the graph.",
+      "location": {
+        "line": 641
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.490",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 490,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-102",
+      "text": "1                                   Every day                                  Alert pane, then the failed-actions filter on the activity table, then the Non-compliant count [Src: Kasten Docs 9.0.2 p.301][Src: Kasten Docs 9.0.2 p.311][Src: Kasten Docs 9.0.2 p.490].",
+      "location": {
+        "line": 646
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-103",
+      "text": "2                                   Every week                                  Test a restore, and look for orphaned artifacts from manual runs on the Restore Points page [Src: Kasten Docs 9.0.2 p.306][Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 647
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.306",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 306,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-104",
+      "text": "3                                   Every month                                  Widen the restore test: a different namespace, then a different cluster [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 648
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-105",
+      "text": "4                                   Every quarter                                  Review retention against cost, and review who holds which role [Src: Kasten Docs 9.0.2 p.1092].",
+      "location": {
+        "line": 649
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1092",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1092,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-106",
+      "text": "The interface has a centralized view listing all restore points created or imported by the cluster, reached from the Restore Points item in the left side menu [Src: Kasten Docs 9.0.2 p.304]. Its filtering is what makes it a weekly tool rather than a lookup. Filtering by type lets you identify local snapshot-based restore points, exported restore points managed by the cluster, or imported restore points created by another cluster; selecting         Include manual runs only          lists the restore points created by backup or export actions that are not associated with a policy, or by manually",
+      "location": {
+        "line": 653
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.304",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 304,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-107",
+      "text": "Pair those two filters together \u2014 manual runs only, no expiration \u2014 and run it weekly. Artifacts from manual runs are outside the policy's retention schedule and must be cleaned up manually [Src: Kasten Docs 9.0.2 p.364], and that pair of filters is how you find the ones you forgot. Nothing else on the dashboard will nag you about them.",
+      "location": {
+        "line": 659
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.364",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 364,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-108",
+      "text": "The strongest operational guidance in the documentation is also the easiest to postpone: test restores regularly and do not wait for a disaster to happen, testing application restores within the same namespace, in a different namespace on the same Kubernetes cluster, and on different clusters [Src: Kasten Docs 9.0.2 p.1093]. Test granular application restores as well as full application restores, and restore applications based on priority to meet recovery time objective (RTO) requirements [Src: Kasten Docs 9.0.2 p.1093]. Those three destinations map exactly onto the three paths in section 02, ",
+      "location": {
+        "line": 664
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-109",
+      "text": "To optimize storage costs, the documented recommendation is to reduce local retention, which can be more expensive, and increase remote retention, and to strike a balance that prevents storage from filling up [Src: Kasten Docs 9.0.2 p.1092]. Shorter on snapshots and extended periods for exports is the same advice from the policy side [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 670
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1092",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1092,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-110",
+      "text": "Avoid creating a policy with a wildcard namespace selector; create policies per application or per application group and use the backup window and staggering instead, which reduces load on both Veeam Kasten and the cluster API [Src: Kasten Docs 9.0.2 p.1093]. Define a backup window that does not conflict with multiple policies, to prevent system overload [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 674
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-111",
+      "text": "Use a policy preset to standardize backup and export retention across policies, configure a dedicated policy for protecting cluster-scoped resources, and use labels to target specific resources so one policy can serve a group of them [Src: Kasten Docs 9.0.2 p.1093]. Presets are what make self-service safe: each policy created from a preset refers to it rather than copying it, so every preset change also changes the corresponding policies [Src: Kasten Docs 9.0.2 p.384].",
+      "location": {
+        "line": 678
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-112",
+      "text": "Regularly verify the readiness of your applications; if they are scaled down, experiencing issues, or not functioning correctly, enabling the \"Ignore Exceptions and Continue if Possible\" option in the policy actions ensures they are carried out to the best of their ability [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 682
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-113",
+      "text": "Veeam Kasten provides metrics about its activities; the documented approach is to gather them with Prometheus to track backups, restores, and overall system health, visualize them in Grafana, and configure alerts when metrics exceed critical levels [Src: Kasten Docs 9.0.2 p.1093]. Creating alerts for any actions where       state=failed        is recommended, along with an alert for catalog volume used space above 50 percent, because that condition can affect upgrades [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 686
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-114",
+      "text": "Regularly check the metrics and logs of your Veeam Kasten system, which helps you find and fix problems before they lead to downtime or data loss, and keep the monitoring configuration up to date as the deployment evolves so you monitor the right metrics and receive alerts for new issues [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 690
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-115",
+      "text": "There is a guided walkthrough of the dashboard built into the product. An interactive tour is available when the dashboard is accessed for the first time, or afterwards via the Interface page of the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.301]. Worth 10 minutes on day one, and worth pointing an application team at when you hand them their namespace.",
+      "location": {
+        "line": 698
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    }
+  ]
+}

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 05 · Restores and Day-to-Day Administration · Veeam Kasten for Kubernetes Fundamentals</title>
+<link rel="stylesheet" href="course.css">
+<link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+<!-- ◆ BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="index.html">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Course overview
+  </a>
+  <span class="breadcrumb__current">Module 05 of 05 · Restores and Day-to-Day Administration</span>
+</nav>
+
+<!-- ◆ PROGRESS BAR -->
+<div class="progress-bar"><div class="progress-bar__fill" id="progress"></div></div>
+
+<!-- ◆ SECTION RAIL (chapter-rail) — one dot per top-level section -->
+<nav class="rail" aria-label="Section navigation">
+  <button class="rail__dot is-active" data-target="hero"     data-label="Module overview"   aria-label="Jump to module overview"></button>
+  <button class="rail__dot"           data-target="policies" data-label="Policies"          aria-label="Jump to building and running policies"></button>
+  <button class="rail__dot"           data-target="restores" data-label="Restores"          aria-label="Jump to running a restore"></button>
+  <button class="rail__dot"           data-target="mobility" data-label="Across clusters"   aria-label="Jump to moving an application across clusters"></button>
+  <button class="rail__dot"           data-target="access"   data-label="Who can do what"   aria-label="Jump to access control"></button>
+  <button class="rail__dot"           data-target="routine"  data-label="The routine"       aria-label="Jump to the daily and weekly routine"></button>
+  <button class="rail__dot"           data-target="check"    data-label="Knowledge check"   aria-label="Jump to the knowledge check"></button>
+  <button class="rail__dot"           data-target="review"   data-label="Recap"             aria-label="Jump to the recap"></button>
+</nav>
+
+<main>
+
+<!-- ◆ HERO -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__corner"></div>
+  <div class="hero__inner">
+    <div>
+      <div class="hero__module-tag">Module 05</div>
+      <h1>Restores and<br/><em>Day-to-Day Administration</em></h1>
+      <p class="hero__blurb">
+        The four modules before this one built the platform: the concept bridge from Veeam Data Platform, the Kubernetes vocabulary, the deployment, and the maintenance you owe the deployment itself. This module is the work you do every week once all of that is standing. You build a policy and schedule it, you get data back, and you keep an eye on the estate. The center of gravity here is the restore: three sources a restore point can come from, three levels of granularity you can restore at, and one decision — which path fits the situation in front of you.
+      </p>
+      <div class="hero__meta">
+        <div><strong>5 sections</strong><br/>plus a knowledge check</div>
+        <div><strong>~50 minutes</strong><br/>estimated</div>
+        <div><strong>Veeam Kasten 9.0.2</strong><br/>policies, restores, access, operations</div>
+      </div>
+    </div>
+    <div class="objectives">
+      <div class="objectives__title">By the end of this module you'll be able to:</div>
+      <ol>
+        <li>Build a policy that snapshots on a schedule, exports to a location profile, and retires restore points on a grandfather-father-son (GFS) retention schedule</li>
+        <li>Choose between a local snapshot, an exported restore point, and an imported restore point for a given recovery situation, and defend the choice</li>
+        <li>Run a restore in place, into a different namespace, and at volume or file granularity, and predict what happens to resources that already exist in the target</li>
+        <li>Explain how an export policy on one cluster and an import policy on another combine into an application-mobility path</li>
+        <li>Assign who can protect and restore what using the built-in Veeam Kasten for Kubernetes roles, and work a daily and weekly operating routine off the dashboard</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     SECTION 01 · POLICIES
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="policies">
+  <div class="wrap">
+    <span class="eyebrow">Policies · 01</span>
+    <h2>Building a policy: schedule, snapshot, export, retention</h2>
+    <p class="lede">This is the section where your Veeam Data Platform muscle memory earns its keep. By the end of it you can build a Veeam Kasten policy from a blank form — pick what it protects, how often it runs, whether it exports, and how long each tier of restore point survives — and you will know which of your backup-job instincts to keep and which one to put down.</p>
+
+    <div class="prose">
+      <p>Protecting an application with Veeam Kasten, which is accomplished by creating a policy, rests on three concepts: <strong>snapshots and exports</strong> (one or both of the data-capture mechanisms), <strong>scheduling</strong> (capture frequency plus snapshot and backup retention objectives), and <strong>selection</strong> (which applications the policy protects, with resource filtering when finer control is needed) [Src: Kasten Docs 9.0.2 p.346]. If you read "job settings, schedule, and job scope" while you read that sentence, your mental model is close enough to start.</p>
+      <p>What a policy protects is an <em>application</em>, and Veeam Kasten defines that term precisely: a collection of namespaced Kubernetes resources, the relevant non-namespaced resources the application uses, the Kubernetes workloads, deployment and release information available from Helm v3, and all of the persistent storage resources associated with those workloads [Src: Kasten Docs 9.0.2 p.346]. A new policy can be created from the Policies page or from the Applications page, and starting from the Applications page pre-populates the policy name and the namespace selection [Src: Kasten Docs 9.0.2 p.347].</p>
+    </div>
+
+    <h3>Snapshot, export, or both</h3>
+    <p class="prose">All policies center on the execution of actions, and for protecting applications you start with the snapshot action and add an optional export action to produce a durable backup [Src: Kasten Docs 9.0.2 p.348]. Those are not two names for one thing. The difference is the single most important idea in this module, because it decides where a restore can come from.</p>
+
+    <div class="compare">
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <h3>Snapshot</h3>
+        <div>
+          <div class="compare__qa-row"><div class="compare__q">Where does it live?</div><div class="compare__a">On the storage system that holds the volumes, alongside the primary data [Src: Kasten Docs 9.0.2 p.349].</div></div>
+          <div class="compare__qa-row"><div class="compare__q">What is it good at?</div><div class="compare__a">Low performance impact on the primary workload, no downtime, fast restore times, and incremental data capture [Src: Kasten Docs 9.0.2 p.349].</div></div>
+          <div class="compare__qa-row"><div class="compare__q">Where does it fall down?</div><div class="compare__a">Storage systems set relatively low limits on snapshots per volume or per array, and snapshots are not always durable: catastrophic storage failure destroys them along with the primary data, and in a number of systems a snapshot's lifecycle is tied to the source volume, so deleting the volume can garbage-collect the snapshots with it [Src: Kasten Docs 9.0.2 p.349].</div></div>
+        </div>
+      </div>
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </div>
+        <h3>Export (the backup)</h3>
+        <div>
+          <div class="compare__qa-row"><div class="compare__q">Where does it live?</div><div class="compare__a">In a target location outside the cluster's primary storage. The metadata destination is an Object Storage Location, an NFS/SMB File Storage Location, or a Veeam Repository Location, named in the Export Location Profile field [Src: Kasten Docs 9.0.2 p.352].</div></div>
+          <div class="compare__qa-row"><div class="compare__q">What is it good at?</div><div class="compare__a">Export operations convert application and volume snapshots into backups by transforming them into an infrastructure-independent format and storing them in that target location [Src: Kasten Docs 9.0.2 p.351] — which is what makes them durable, portable, and restorable on a different cluster.</div></div>
+          <div class="compare__qa-row"><div class="compare__q">How do I turn it on?</div><div class="compare__a">Select <strong>Enable Backups via Snapshot Exports</strong> during policy creation; the destination and the control over exporting snapshot data versus a reference appear there too [Src: Kasten Docs 9.0.2 p.352].</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note note--key mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Remember</div>
+        <p>A snapshot-only policy is a policy with no durable copy. Because of the limitations of snapshots, setting up backups of your application stack is advisable, and durable backups are created by exporting data [Src: Kasten Docs 9.0.2 p.349]. Treat "snapshot plus export" as the default shape of a production policy and make yourself justify any policy that stops at the snapshot.</p>
+      </div>
+    </div>
+
+    <div class="note note--caution">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Exported data is organized into storage repositories that are exclusively controlled and maintained by the Veeam Kasten instance. Independently using, interacting with, connecting to, modifying, copying, upgrading, or in any way accessing or manipulating a Veeam Kasten storage repository is unsupported and can cause data corruption or loss to some or all of the restore points [Src: Kasten Docs 9.0.2 p.352]. Whatever housekeeping habits you have for a backup repository you can browse, leave them at the door for this one.</p>
+      </div>
+    </div>
+
+    <h3>Scheduling has four moving parts</h3>
+    <p class="prose">Scheduling in Veeam Kasten breaks into four components: how frequently the primary snapshot action runs, how often snapshots are exported into backups, the retention schedule of snapshots and backups, and when the primary snapshot action runs [Src: Kasten Docs 9.0.2 p.362]. Work through them in that order and the form stops feeling crowded.</p>
+
+    <div class="stepper">
+      <div class="widget__tag"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · the order to fill the form in</div>
+      <h3 class="stepper__h">Four decisions, in the order the form wants them</h3>
+      <p class="stepper__caption">Click a step to open it. One opens at a time.</p>
+      <div class="stepper__card">
+        <ol class="stepper__list">
+          <li class="stepper__step">
+            <span class="stepper__num" aria-hidden="true">1</span>
+            <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="stp-freq"><span class="stepper__title">Snapshot frequency — how often the primary capture runs</span><span class="stepper__chev" aria-hidden="true"></span></button>
+            <div class="stepper__detail" id="stp-freq" role="region">
+              <p>Actions can be set to execute at an hourly, daily, weekly, monthly, or yearly granularity, or on demand. By default, actions set to hourly execute at the top of the hour and other actions execute at midnight UTC [Src: Kasten Docs 9.0.2 p.362]. You can also select the time at which scheduled actions execute, and sub-frequencies that run multiple actions per frequency [Src: Kasten Docs 9.0.2 p.362].</p>
+              <p>Sub-hourly actions are useful when what you are protecting is chiefly Kubernetes objects or small data sets; care should be taken with more general-purpose workloads because of the risk of stressing the underlying storage infrastructure or running into storage API rate limits [Src: Kasten Docs 9.0.2 p.362]. Sub-frequencies also interact with retention: retaining 24 hourly snapshots at 15-minute intervals would only retain six hours of snapshots [Src: Kasten Docs 9.0.2 p.362]. That single sentence has caught out more people than any other line on this page.</p>
+            </div>
+          </li>
+          <li class="stepper__step">
+            <span class="stepper__num" aria-hidden="true">2</span>
+            <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="stp-export"><span class="stepper__title">Export frequency — how many snapshots become backups</span><span class="stepper__chev" aria-hidden="true"></span></button>
+            <div class="stepper__detail" id="stp-export" role="region">
+              <p>Backups performed via exports are, by default, set up to export every snapshot into a backup, and it is also possible to select a subset of snapshots for exports — for example, converting only every daily snapshot into a backup [Src: Kasten Docs 9.0.2 p.362]. That subset choice is the lever you pull when hourly snapshots are cheap on the array and expensive in the object store.</p>
+              <p>One constraint to design around before you save: to maintain backup recovery points, once the policy is saved the export location profile can only be changed to a compatible location profile. The interface enforces compatibility when you edit a policy, but no compatibility enforcement is performed when editing the policy custom resource directly [Src: Kasten Docs 9.0.2 p.363].</p>
+            </div>
+          </li>
+          <li class="stepper__step">
+            <span class="stepper__num" aria-hidden="true">3</span>
+            <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="stp-ret"><span class="stepper__title">Retention — how long each tier survives</span><span class="stepper__chev" aria-hidden="true"></span></button>
+            <div class="stepper__detail" id="stp-ret" role="region">
+              <p>Veeam Kasten can use a grandfather-father-son (GFS) retention scheme for cost and compliance reasons. Under that backup rotation scheme, hourly snapshots and backups rotate on an hourly basis with one graduating to daily every day, and so on; you set the number of hourly, daily, weekly, monthly, and yearly copies to retain, and Veeam Kasten handles both cleanup at every retention tier and graduation to the next one. For on-demand policies it is not possible to set a retention schedule [Src: Kasten Docs 9.0.2 p.364].</p>
+              <p>Backup retention schedules default to the same values as snapshot retention schedules, and can be set to independent schedules if needed — which lets you keep a limited number of snapshots for fast recovery from accidental outages while storing a larger number of backups for long-term recovery needs [Src: Kasten Docs 9.0.2 p.364].</p>
+              <p>Two behaviors worth knowing before they surprise you. The retention schedule for a policy does not apply to snapshots and backups produced by manual policy runs; any artifacts created by a manual run need to be cleaned up manually [Src: Kasten Docs 9.0.2 p.364]. And restore points created by failed policy runs do not count towards retiring older restore points — they are retained until there are enough newer restore points from successful runs to satisfy the retention counts, which can leave you with more restore points than you expected while a policy is failing [Src: Kasten Docs 9.0.2 p.364].</p>
+            </div>
+          </li>
+          <li class="stepper__step">
+            <span class="stepper__num" aria-hidden="true">4</span>
+            <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="stp-when"><span class="stepper__title">When it runs — advanced options, backup window, staggering</span><span class="stepper__chev" aria-hidden="true"></span></button>
+            <div class="stepper__detail" id="stp-when" role="region">
+              <p>The Advanced Options settings let you pick how many times and when actions execute within the interval of the frequency — for a daily frequency, which hour or hours within each day and which minute within each hour [Src: Kasten Docs 9.0.2 p.366]. By default hourly retention counts apply to the hourly action at the top of the hour, daily counts to the action at midnight, weekly counts to midnight Sunday, monthly counts to midnight on the first of each month, and yearly counts to midnight on 1 January, all in UTC [Src: Kasten Docs 9.0.2 p.366]. Advanced Options lets you display and enter times in either local time or UTC; all times are converted to UTC, and Veeam Kasten policy schedules do not change for daylight savings time [Src: Kasten Docs 9.0.2 p.366].</p>
+              <p>The Backup Window settings let you select a time interval within which the policy will run. The policy is scheduled to run once at the Backup Window start time, and if the selected interval is too short the policy run will not finish and will be canceled [Src: Kasten Docs 9.0.2 p.367]. If the policy has an hourly frequency and the window exceeds one hour, the policy is also scheduled to run every 60 minutes thereafter within the window [Src: Kasten Docs 9.0.2 p.367].</p>
+              <p>With staggering enabled, Veeam Kasten automatically finds an optimal start time and runs the policy within the selected interval, which lets it stagger runs of multiple policies and reduce peak load on the overall system [Src: Kasten Docs 9.0.2 p.367].</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <h3>Walking the form once, before you walk it for real</h3>
+    <p class="prose">You now have the concepts and the settings. What you do not have yet is the muscle memory of having filled the form in once, which is the thing that makes the first real policy take four minutes instead of forty. Click through the six stages below in order; each one names what you should be looking at when you get there.</p>
+
+    <div class="task__interactive-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — click each stage of the policy form</div>
+    <div class="flow">
+      <div class="flow__title">Creating a policy, end to end</div>
+      <div class="flow__desc">Click a stage to inspect it.</div>
+      <div class="flow__chain" role="tablist" aria-label="Policy creation stages">
+        <div class="flow__node is-active" role="tab" tabindex="0" aria-selected="true" aria-controls="polFlowDetail" id="polStep0">
+          <div class="flow__node-tag">STAGE 01</div>
+          <div class="flow__node-title">Open the form</div>
+          <div class="flow__node-desc">Two doors in, and one of them saves you typing.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 01 — open the form.</strong> A policy can be created on the Policies page by clicking the <strong>Create New Policy</strong> button, or by navigating to the Applications page and selecting the menu option to Create a Policy for a specific application [Src: Kasten Docs 9.0.2 p.307]. Take the second door when you can: find any unmanaged application in the Application table and select the <strong>Create a Policy</strong> menu option, and the policy creation form opens with the auto-populated policy name provided, which can be modified as needed [Src: Kasten Docs 9.0.2 p.347]. <em>What you should see:</em> the policy creation form, with the policy name and the namespace selection already filled in if you came from the Applications page [Src: Kasten Docs 9.0.2 p.347].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="polFlowDetail" id="polStep1">
+          <div class="flow__node-tag">STAGE 02</div>
+          <div class="flow__node-title">Pick the action</div>
+          <div class="flow__node-desc">Snapshot first; export is a separate switch.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 02 — pick the action.</strong> All policies center on the execution of actions, and for protecting applications you start by selecting the snapshot action with an optional export action to produce a durable backup [Src: Kasten Docs 9.0.2 p.348]. <em>What you should see:</em> a snapshot action on the form and the export option still switched off. Stop here and you have shipped a policy with no durable copy, which is why it is highly recommended that durable backups be created by exporting data [Src: Kasten Docs 9.0.2 p.349].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="polFlowDetail" id="polStep2">
+          <div class="flow__node-tag">STAGE 03</div>
+          <div class="flow__node-title">Turn on the export</div>
+          <div class="flow__node-desc">One toggle, then name the destination.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 03 — turn on the export and name the destination.</strong> To convert snapshots into backups, select <strong>Enable Backups via Snapshot Exports</strong> during policy creation; additional settings for the destination location and control over exporting snapshot data versus a reference become visible here too [Src: Kasten Docs 9.0.2 p.352]. <em>What you should see:</em> an <strong>Export Location Profile</strong> field, which is where you name the Object Storage Location, NFS/SMB File Storage Location, or Veeam Repository Location that receives the metadata [Src: Kasten Docs 9.0.2 p.352]. Get this one right on the way in: to maintain backup recovery points, once the policy is saved the export location profile can only be changed to a compatible location profile [Src: Kasten Docs 9.0.2 p.363].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="polFlowDetail" id="polStep3">
+          <div class="flow__node-tag">STAGE 04</div>
+          <div class="flow__node-title">Set the schedule</div>
+          <div class="flow__node-desc">The four decisions from the stepper above.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 04 — set the schedule.</strong> This is the stepper above, in the form: how frequently the primary snapshot action runs, how frequently snapshots are exported into backups, the retention schedule of snapshots and backups, and when the primary snapshot action runs [Src: Kasten Docs 9.0.2 p.362]. <em>What you should see:</em> retention counts for the hourly, daily, weekly, monthly, and yearly tiers, with backup retention defaulting to the same values as snapshot retention until you separate them [Src: Kasten Docs 9.0.2 p.364]. Two shortcuts and one boundary: while creating or editing a policy you can opt in to <strong>Use a Preset</strong> if your organization keeps standards centrally [Src: Kasten Docs 9.0.2 p.383]; and for on-demand policies it is not possible to set a retention schedule at all [Src: Kasten Docs 9.0.2 p.364].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="polFlowDetail" id="polStep4">
+          <div class="flow__node-tag">STAGE 05</div>
+          <div class="flow__node-title">Choose what it protects</div>
+          <div class="flow__node-desc">By name, by wildcard, or by label.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 05 — choose what it protects.</strong> Applications are selected by one of two methods, application names or labels [Src: Kasten Docs 9.0.2 p.367], and you can select multiple application names in the same policy [Src: Kasten Docs 9.0.2 p.368]. For policies that need to span similar applications, wildcard selection will match all applications that start with the wildcard specified, and all applications can be selected with a <code>*</code> wildcard [Src: Kasten Docs 9.0.2 p.368]. <em>What you should see:</em> your chosen applications listed in the selection field — already populated if you started from the Applications page [Src: Kasten Docs 9.0.2 p.347]. Where finer-grained control is needed, resource filtering selects what is captured on a per-application basis [Src: Kasten Docs 9.0.2 p.346].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="polFlowDetail" id="polStep5">
+          <div class="flow__node-tag">STAGE 06</div>
+          <div class="flow__node-title">Create it, then watch</div>
+          <div class="flow__node-desc">The status tells you whether it worked.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 06 — create it, then watch the status.</strong> <em>What you should see:</em> after creating the policy and navigating back to the dashboard, the application status is updated from <strong>Unmanaged</strong> to <strong>Non-Compliant</strong>, indicating a policy exists but has not successfully run within the specified frequency, and the status changes to <strong>Compliant</strong> upon successful completion of a scheduled or manual run [Src: Kasten Docs 9.0.2 p.384]. Non-Compliant immediately after saving is the expected reading, not a failure. Scrolling down the page provides visibility into individual action activity, and clicking an in-progress or completed job gives the detail [Src: Kasten Docs 9.0.2 p.385]. Rather than waiting for the schedule to prove the policy works, run it by hand once with the <strong>Run Once</strong> menu option [Src: Kasten Docs 9.0.2 p.385] — with the manual-run caveat in the table below firmly in mind.</div>
+        </div>
+      </div>
+      <div class="flow__detail" id="polFlowDetail" role="tabpanel" aria-labelledby="polStep0" aria-live="polite"></div>
+    </div>
+
+    <h3>What carries over from a backup job, and what does not</h3>
+    <table class="data-table">
+      <thead><tr><th scope="col">Your instinct</th><th scope="col">Where it lands in Veeam Kasten</th><th scope="col">The catch</th></tr></thead>
+      <tbody>
+        <tr><td>Job scope: pick the objects</td><td data-label="Where it lands in Veeam Kasten">Application selection — by application name, by an application name wildcard, or by labels [Src: Kasten Docs 9.0.2 p.367]</td><td data-label="The catch">A wildcard is a standing instruction, not a list. Selecting all applications with a <code>*</code> wildcard is possible [Src: Kasten Docs 9.0.2 p.368], and every namespace created after you save is then in scope.</td></tr>
+        <tr><td>Retention points and GFS tiers</td><td data-label="Where it lands in Veeam Kasten">Retention counts for hourly, daily, weekly, monthly, and yearly copies, with graduation handled for you [Src: Kasten Docs 9.0.2 p.364]</td><td data-label="The catch">Snapshot and backup retention can be independent [Src: Kasten Docs 9.0.2 p.364]. Short on the array, long in the object store, is the shape most estates settle on.</td></tr>
+        <tr><td>Backup window</td><td data-label="Where it lands in Veeam Kasten">Backup Window, plus staggering to spread load across policies [Src: Kasten Docs 9.0.2 p.367]</td><td data-label="The catch">A window that is too short cancels the run rather than letting it overrun [Src: Kasten Docs 9.0.2 p.367].</td></tr>
+        <tr><td>Run the job now</td><td data-label="Where it lands in Veeam Kasten">The <strong>Run Once</strong> menu option on the Policies page, or the Run Once button on the Policy View page [Src: Kasten Docs 9.0.2 p.385]</td><td data-label="The catch">Unless an expiration time is specified, artifacts created by that action are not eligible for automatic retirement and need to be removed manually [Src: Kasten Docs 9.0.2 p.385].</td></tr>
+        <tr><td>Disable the job for a maintenance weekend</td><td data-label="Where it lands in Veeam Kasten">The <strong>Pause</strong> and <strong>Resume</strong> menu options, on the Policies page or the Policy View page [Src: Kasten Docs 9.0.2 p.385]</td><td data-label="The catch">Paused policies do not generate skipped jobs and are ignored for compliance purposes, and applications protected only by paused policies are marked as unmanaged [Src: Kasten Docs 9.0.2 p.387]. Your green dashboard is telling you nothing while a policy is paused.</td></tr>
+        <tr><td>Edit the job; it takes effect next run</td><td data-label="Where it lands in Veeam Kasten">Edit from the Policies page or the Policy View page; changes take effect during the next scheduled policy run [Src: Kasten Docs 9.0.2 p.388]</td><td data-label="The catch">Careful attention should be paid to changing a policy's retention schedule, as that action automatically retires and deletes restore points that no longer fall under the new scheme [Src: Kasten Docs 9.0.2 p.388].</td></tr>
+        <tr><td>Delete the job when the workload retires</td><td data-label="Where it lands in Veeam Kasten">Delete from the Policies page, the Policy View page, or the API [Src: Kasten Docs 9.0.2 p.390]</td><td data-label="The catch">For safety, deleting a policy does not remove the restore points it generated; those must be deleted manually from the application restore point view or via the API [Src: Kasten Docs 9.0.2 p.390].</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note note--tip mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+      <div class="note__body">
+        <div class="note__label">Pro tip</div>
+        <p>Retention edits are not retroactive in the way you might fear. Restore points graduate to higher retention tiers according to the retention schedule in effect when the restore point is created, which protects previous restore points when the retention schedule changes [Src: Kasten Docs 9.0.2 p.388].</p>
+      </div>
+    </div>
+
+    <h3>The policy is an object on the cluster</h3>
+    <p class="prose">One habit to add rather than transfer: everything the policy form produces is a Kubernetes custom resource, and you can read or edit it directly. A Policy represents a collection of data management actions configured to occur on a periodic or event-driven basis, encoding business rules and translating them into the specific actions Veeam Kasten applies to the applications it has discovered [Src: Kasten Docs 9.0.2 p.620]. Policies can also be edited directly by modifying the custom resource YAML through the dashboard or the command line [Src: Kasten Docs 9.0.2 p.388]. The excerpt below is the top of a documented daily policy that retains seven daily and four weekly snapshots [Src: Kasten Docs 9.0.2 p.642].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">yaml · Policy custom resource</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the policy YAML to the clipboard">Copy</button>
+      </div>
+      <pre><code>apiVersion: config.kio.kasten.io/v1alpha1
+kind: Policy
+metadata:
+  name: multi-cloud-export-policy
+  namespace: kasten-io
+spec:
+  comment: Multi-region backup policy with exports to S3 primary and secondary regions
+  frequency: '@daily'
+  retention:
+    daily: 7
+    weekly: 4</code></pre>
+    </div>
+
+    <p class="prose">Reading a policy this way pays off the first time someone asks why a run did not happen: the schedule and the retention counts are right there, in one object, with no form to navigate. It also explains the compatibility warning above — the interface guards you when you edit through it, and does not when you edit the resource directly [Src: Kasten Docs 9.0.2 p.363].</p>
+
+    <h3>Reading the status your policy produces</h3>
+    <p class="prose">After you create a policy and return to the dashboard, the application status updates from <strong>Unmanaged</strong> to <strong>Non-Compliant</strong>, which indicates that a policy exists but has not successfully run within the specified frequency; the status changes to <strong>Compliant</strong> on successful completion of a scheduled or manual run [Src: Kasten Docs 9.0.2 p.384]. Those labels are defined on the dashboard as: Unmanaged, meaning no protection policies cover the object; Non-compliant, meaning a policy applies but its actions are failing or have not been invoked yet; Compliant, meaning policies apply and their service-level agreements (SLAs) are being respected; and Removed, meaning objects that no longer exist on the cluster — by default they are hidden on the Applications page, so filter to Removed to find and restore them [Src: Kasten Docs 9.0.2 p.301, p.397]. Scrolling down the page gives visibility into individual action activity, and clicking an in-progress or completed job gives the detail [Src: Kasten Docs 9.0.2 p.385].</p>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Did you know?</div>
+        <p>A policy that has gone invalid will not run, and that can produce a compliance breach; revalidation exists for exactly that case, through the <strong>Revalidate</strong> menu option on the Policies page [Src: Kasten Docs 9.0.2 p.387]. Worth knowing the option is there before you go looking for a deeper problem.</p>
+      </div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     SECTION 02 · RESTORES
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="restores">
+  <div class="wrap">
+    <span class="eyebrow">Restores · 02</span>
+    <h2>Getting data back: which path, and how far in</h2>
+    <p class="lede">This is the section you will come back to under pressure, so it is built as a decision rather than a tour. By the end of it you can pick between a local snapshot, an exported restore point, and an imported one; choose in-place, new-namespace, volume-level, or file-level granularity; and say in advance what a restore will do to a resource that already exists in the target namespace.</p>
+
+    <div class="prose">
+      <p>Once applications have been protected via a policy or a manual action, it is possible to restore them in place or clone them into a different namespace [Src: Kasten Docs 9.0.2 p.392]. Restoring an existing application is done from the Applications page by clicking the Restore option in the dropdown; alternatively, the Restore Points page can be used to find a specific restore point and initiate the restore from it [Src: Kasten Docs 9.0.2 p.393].</p>
+      <p>Set expectations on duration before you promise anything to an application owner. A restore can take a few minutes, depending on the amount of data captured by the restore point, and the time is dominated by how long it takes to rehydrate captured data followed by recreating the application containers, so it tracks the speed of the underlying storage infrastructure [Src: Kasten Docs 9.0.2 p.392]. Retries are built in: to speed up the restore and account for failures during the first or second attempt, up to a maximum of three attempts, all successfully restored volumes are retained for the next attempt and only partially restored volumes are recreated [Src: Kasten Docs 9.0.2 p.392].</p>
+    </div>
+
+    <h3>Snapshot or exported backup — the interface tells you which you have</h3>
+    <p class="prose">When you pick a restore point you are picking a
+      <span class="glossary"><span class="glossary-term" tabindex="0" role="button" aria-describedby="gloss-rp">restore point</span><span class="glossary-pop" id="gloss-rp" role="tooltip"><strong>restore point</strong>Created as a result of a backup or import action, it represents a version-in-time of an application that Veeam Kasten has captured and that can be restored using a restore action [Src: Kasten Docs 9.0.2 p.620].</span></span>,
+      a grouped collection of data artifacts belonging to the application, and the view distinguishes manually generated restore points from automated policy-generated ones [Src: Kasten Docs 9.0.2 p.395]. It also distinguishes between snapshots and backups: when both are present a layered box indicates that more than one kind of restore point exists for the same data, and clicking that layered restore point presents the option to select between the local snapshot and the exported backup [Src: Kasten Docs 9.0.2 p.395]. Selecting a restore point brings up a side panel with more detail on it, so you can preview before initiating the restore [Src: Kasten Docs 9.0.2 p.396].</p>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>The word "export" in the interface does not mean you need an import policy to use the result. While the interface uses the Export term for backups, no import policy is needed to restore from a backup; import policies are only needed when you want to restore the application into a different cluster [Src: Kasten Docs 9.0.2 p.395]. Restoring on the same cluster from an exported backup is the ordinary restore workflow.</p>
+      </div>
+    </div>
+
+    <!-- Bespoke interactive: choose the right restore path -->
+    <div class="task__interactive-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — work the decision, then read the reasoning</div>
+    <div class="decision">
+      <div class="widget__tag"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · quick self-check, nothing scored</div>
+      <h4 class="decision__heading">Choose the right restore path</h4>
+      <p class="decision__intro">Five situations. For each one, pick the path you would take and read the reasoning that comes back. Two questions decide most real cases: is the local snapshot still trustworthy, and does the data need to land back on top of the running application?</p>
+      <div class="decision__list">
+
+        <div class="decision__item" data-rec="snapshot">
+          <div class="decision__title">A bad configuration change went out half an hour ago</div>
+          <div class="decision__trigger">Context: the cluster, its nodes, and the storage behind the volumes are all healthy.</div>
+          <div class="decision__what">You need the application back at the state it held before the change.</div>
+          <div class="decision__choices">
+            <button type="button" class="decision__btn" data-choice="snapshot">Restore from the local snapshot</button>
+            <button type="button" class="decision__btn" data-choice="export">Restore from the exported backup</button>
+            <button type="button" class="decision__btn" data-choice="import">Create an import policy</button>
+          </div>
+          <p class="decision__impact">The local snapshot is the fast path while the storage under it is intact — snapshots support fast restore times and implement incremental data capture, with low performance impact on the primary workload [Src: Kasten Docs 9.0.2 p.349]. The exported backup would also work, and would cost you a rehydration you did not need to pay for.</p>
+          <div class="decision__fb" aria-live="polite"></div>
+        </div>
+
+        <div class="decision__item" data-rec="export">
+          <div class="decision__title">The storage system holding the volumes has failed</div>
+          <div class="decision__trigger">Context: the cluster is fine, the array is not, and the volume snapshots went with it.</div>
+          <div class="decision__what">You need a copy that did not live on the failed system.</div>
+          <div class="decision__choices">
+            <button type="button" class="decision__btn" data-choice="snapshot">Restore from the local snapshot</button>
+            <button type="button" class="decision__btn" data-choice="export">Restore from the exported backup</button>
+            <button type="button" class="decision__btn" data-choice="import">Wait for the array to be rebuilt</button>
+          </div>
+          <p class="decision__impact">This is the scenario the export tier exists for. Snapshots are not always durable: catastrophic storage system failure destroys your snapshots along with your primary data, and in a number of storage systems a snapshot's lifecycle is tied to the source volume [Src: Kasten Docs 9.0.2 p.349]. The exported backup sits in an infrastructure-independent format in a separate target location [Src: Kasten Docs 9.0.2 p.351], which is why it survives.</p>
+          <div class="decision__fb" aria-live="polite"></div>
+        </div>
+
+        <div class="decision__item" data-rec="newns">
+          <div class="decision__title">Developers want last night's data to reproduce a bug</div>
+          <div class="decision__trigger">Context: production must keep serving traffic while they work.</div>
+          <div class="decision__what">You need a copy of the application stack that nobody is depending on.</div>
+          <div class="decision__choices">
+            <button type="button" class="decision__btn" data-choice="newns">Restore into a different namespace</button>
+            <button type="button" class="decision__btn" data-choice="inplace">Restore in place, out of hours</button>
+            <button type="button" class="decision__btn" data-choice="pause">Pause the policy first, then restore in place</button>
+          </div>
+          <p class="decision__impact">By default Veeam Kasten restores applications into the original namespace the restore point was created from, but the target namespace can be changed and new namespaces can be created at that point; debugging, test and development, and cloning are documented uses of exactly that [Src: Kasten Docs 9.0.2 p.416]. Restoring in place would recreate the entire application stack into the selected namespace [Src: Kasten Docs 9.0.2 p.396] — an outage you did not need to take.</p>
+          <div class="decision__fb" aria-live="polite"></div>
+        </div>
+
+        <div class="decision__item" data-rec="files">
+          <div class="decision__title">Someone deleted three files inside one large volume</div>
+          <div class="decision__trigger">Context: the rest of the application is healthy and busy.</div>
+          <div class="decision__what">You need three files, not a volume and not an application.</div>
+          <div class="decision__choices">
+            <button type="button" class="decision__btn" data-choice="files">Open a file recovery session</button>
+            <button type="button" class="decision__btn" data-choice="full">Restore the whole application</button>
+            <button type="button" class="decision__btn" data-choice="clone">Restore the volume as a clone</button>
+          </div>
+          <p class="decision__impact">Veeam Kasten provides the <code>FileRecoverySession</code> custom resource to request network access to files from exported restore points without requiring a full restore of volume data [Src: Kasten Docs 9.0.2 p.419]. A Volume-Clones restore is the next-best answer and a good one: it restores individual volumes into the existing application namespace without disrupting its operation or workloads [Src: Kasten Docs 9.0.2 p.408], though you then mount and copy by hand. A full application restore is the sledgehammer.</p>
+          <div class="decision__fb" aria-live="polite"></div>
+        </div>
+
+        <div class="decision__item" data-rec="import">
+          <div class="decision__title">The cluster is gone; a replacement is running in another region</div>
+          <div class="decision__trigger">Context: the export location profile and its data are intact.</div>
+          <div class="decision__what">You need the applications running on a cluster that has never seen them.</div>
+          <div class="decision__choices">
+            <button type="button" class="decision__btn" data-choice="import">Create an import policy on the new cluster</button>
+            <button type="button" class="decision__btn" data-choice="snapshot">Restore from a local snapshot</button>
+            <button type="button" class="decision__btn" data-choice="reuse">Point the new cluster at the old policy</button>
+          </div>
+          <p class="decision__impact">Import policies are supported for importing applications into a cluster that is different from where the application was captured [Src: Kasten Docs 9.0.2 p.460], and this is the path Section 03 walks. One dependency decided months earlier: if migration across clusters in different clouds or between on-premises and public cloud is needed, the Export Snapshot Data option must be enabled on the source policy, because without it the application data is not exported and the subsequent import will fail [Src: Kasten Docs 9.0.2 p.455].</p>
+          <div class="decision__fb" aria-live="polite"></div>
+        </div>
+
+      </div>
+      <p class="decision__note">Every path above is reachable from the same restore workflow. What changes is the restore point you select and the options you set on the way through.</p>
+    </div>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Two questions settle almost every case</div>
+        <p>Is the local snapshot still trustworthy? If the storage under it is intact, take the snapshot; if the storage failed, take the exported backup, because that is the copy in an infrastructure-independent format outside the cluster's primary storage [Src: Kasten Docs 9.0.2 p.351]. Then: does the data have to land on top of the running application? If not, restore into a different namespace instead, which is a supported target choice at restore time [Src: Kasten Docs 9.0.2 p.416]. Only when the source cluster itself is unavailable does the answer become an import policy, because import policies are for clusters other than the one that captured the application [Src: Kasten Docs 9.0.2 p.460].</p>
+      </div>
+    </div>
+
+    <h3>What a restore does to what is already there</h3>
+    <p class="prose">This is where "restore an application" stops behaving like "restore a virtual machine". When you click Restore, the system recreates the entire application stack into the selected namespace, including the data associated with the original application and the versioned container images [Src: Kasten Docs 9.0.2 p.396]. A resource that does not currently exist in the namespace is always restored; the treatment of namespaced resources that do already exist depends on the type of resource and the <code>overwriteExisting</code> flag [Src: Kasten Docs 9.0.2 p.396]. Read the table before your first production restore, not after it.</p>
+
+    <table class="data-table">
+      <thead><tr><th scope="col">What is in the target namespace</th><th scope="col">Without <code>overwriteExisting</code></th><th scope="col">With <code>overwriteExisting</code></th></tr></thead>
+      <tbody>
+        <tr><td>Nothing — the resource is missing</td><td data-label="Without overwriteExisting">Restored</td><td data-label="With overwriteExisting">Restored [Src: Kasten Docs 9.0.2 p.396]</td></tr>
+        <tr><td>Workloads (Deployments, StatefulSets, and the like)</td><td data-label="Without overwriteExisting">Always restored</td><td data-label="With overwriteExisting">Always restored [Src: Kasten Docs 9.0.2 p.396]</td></tr>
+        <tr><td>ServiceAccounts and non-namespaced resources, such as a storage class</td><td data-label="Without overwriteExisting">Restored only when missing from the namespace or cluster</td><td data-label="With overwriteExisting">Restored only when missing from the namespace or cluster [Src: Kasten Docs 9.0.2 p.396]</td></tr>
+        <tr><td>Other existing resources</td><td data-label="Without overwriteExisting">Not restored; they maintain their current state</td><td data-label="With overwriteExisting">Restored to the restore point version. Immutable Secrets and ConfigMaps are also restored, by re-creating the resources [Src: Kasten Docs 9.0.2 p.397]</td></tr>
+      </tbody>
+    </table>
+
+    <p class="prose mt-24">If you want tighter control than the flag gives you, restore filtering can selectively control which namespaced objects are restored [Src: Kasten Docs 9.0.2 p.397]. And if the application is gone rather than damaged, the process of restoring a deleted application is nearly identical: by default removed applications are not shown on the Applications page, so you filter and select <strong>Removed</strong> to find them, after which they can be restored using the normal restore workflow [Src: Kasten Docs 9.0.2 p.397].</p>
+
+    <h3>Three levels of granularity</h3>
+    <p class="prose">By default a restore brings back all artifacts and data captured during the backup process. Where only a subset is required, the restore workflow supports artifact filtering for full control over what artifacts and data to restore, a data-only restore for a running application, and a volume-clones restore for restoring volumes only [Src: Kasten Docs 9.0.2 p.406].</p>
+
+    <div class="tabs">
+      <div class="tabs__list" role="tablist" aria-label="Restore filtering options">
+        <button type="button" class="tabs__tab" role="tab" id="tab-artifact" aria-controls="panel-artifact" aria-selected="true" tabindex="0">Artifact filtering</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-data" aria-controls="panel-data" aria-selected="false" tabindex="-1">Data-only restore</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-clones" aria-controls="panel-clones" aria-selected="false" tabindex="-1">Volume-clones restore</button>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="panel-artifact" aria-labelledby="tab-artifact">
+        <p>You can selectively bring back restore point artifacts, including volume snapshots, which is useful for scenarios such as a single persistent volume claim restore or rolling back configuration updates; by default all artifacts are selected for restore [Src: Kasten Docs 9.0.2 p.406]. One trap to design around: to preserve owner references, both the resource and its owners must be included by the filters [Src: Kasten Docs 9.0.2 p.407].</p>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="panel-data" aria-labelledby="tab-data" hidden>
+        <p>A data-only restore looks like selecting all volume snapshots and no Kubernetes specifications, but it carries safety guardrails: the Kubernetes workloads captured in the restore point must exist in the namespace the application is being restored into, the running workloads must have the same number of replicas as captured in the restore point, and they must have the same volumes as were gathered — the same number of volumes, with the same names [Src: Kasten Docs 9.0.2 p.407]. Those checks exist because data-only restore is frequently used to bring older versions of data into a newer version of application code [Src: Kasten Docs 9.0.2 p.407].</p>
+        <p>Know what it does to the volumes underneath: a data-only restore follows a delete-and-restore-from-backup approach for the persistent volume claims, to maintain data integrity [Src: Kasten Docs 9.0.2 p.408]. This is not an in-place merge.</p>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="panel-clones" aria-labelledby="tab-clones" hidden>
+        <p>Volume-clones restore enables restoring individual volumes into the existing application namespace without disrupting its operation or workloads, which suits recovering specific files from a backup when restoring the volume to an alternative namespace is not permitted or desirable [Src: Kasten Docs 9.0.2 p.408]. The workloads captured in the restore point can exist in the target namespace without being affected [Src: Kasten Docs 9.0.2 p.408].</p>
+        <p>Three consequences to plan for. The restored claims follow a naming convention that appends the restore point's creation timestamp to the original claim name to denote that they are clones; the restore does not automatically mount volumes to any pods, so mounting them is your responsibility; and each cloned claim carries the label <code>k10.kasten.io/cloned: "true"</code>, which can be used as a policy exclusion to prevent the cloned volumes from being included in a backup policy by accident [Src: Kasten Docs 9.0.2 p.409]. Once the cloned claims have served their purpose, removing them from the namespace is recommended, which keeps them out of future backups and prevents unnecessary data duplication [Src: Kasten Docs 9.0.2 p.409].</p>
+      </div>
+    </div>
+
+    <details class="supp mt-24">
+      <summary>
+        <span class="supp__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>Supplementary · optional</span>
+        <span class="supp__title">Going one level finer: recovering individual files</span>
+        <svg class="supp__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="supp__body">
+        <p>Veeam Kasten provides the <code>FileRecoverySession</code> custom resource to request network access to files from exported restore points without requiring a full restore of volume data, and the <code>k10tools frs</code> sub-command provides a command-line interface for the related operations, including a built-in file transfer client [Src: Kasten Docs 9.0.2 p.419]. File data is made available through the OpenSSH implementation of the Secure File Transport Protocol, via a dedicated service created for each custom resource instance, and the service only permits access by the principal whose public key was provided in the request [Src: Kasten Docs 9.0.2 p.420].</p>
+        <p>Two constraints shape whether this is available to you at all. Only exported restore points should be specified in the request [Src: Kasten Docs 9.0.2 p.420] — a local snapshot is not enough. And the files must sit in a volume that was exported in filesystem mode, or exported in block mode where the volume is unpartitioned and contains an ext4, xfs or ntfs filesystem, or has a GPT or MBR partition table with one or more filesystem partitions containing those filesystems, with the guest filesystem not encrypted [Src: Kasten Docs 9.0.2 p.419].</p>
+        <p>Exported restore points can be distinguished from local restore points with a label query [Src: Kasten Docs 9.0.2 p.420]:</p>
+        <div class="code-block">
+          <div class="code-block__bar">
+            <span class="code-block__lang">shell · list exported restore points</span>
+            <button type="button" class="code-block__copy" aria-label="Copy the label query to the clipboard">Copy</button>
+          </div>
+          <pre><code>kubectl get restorepoints -n app2 -l k10.kasten.io/exportProfile</code></pre>
+        </div>
+        <p>Sessions are not permanent. A session in the Ready state has a limited lifetime, and at the time given in its expiry field its state changes to Failed; the session is terminated by deleting the custom resource, which releases the accumulated system and Kubernetes resources [Src: Kasten Docs 9.0.2 p.421]. The default session expiry is 30 minutes, set by the <code>frs.sessionExpiryTimeInMinutes</code> Helm parameter [Src: Kasten Docs 9.0.2 p.419].</p>
+      </div>
+    </details>
+
+    <h3>Restoring many applications at once</h3>
+    <p class="prose">To restore several applications together you select them in the table and use the <strong>Restore selected</strong> option in the Options menu; you then select restore points for each application, with the most recent available restore point preselected by default, and applications can be excluded from the operation if no valid restore point satisfies the need [Src: Kasten Docs 9.0.2 p.401]. The workflow then differs from the single-application one in useful ways: you can add a prefix or suffix to the target namespace or filter resources in the Restore Configuration step, a Summary screen gives an overview of the operations and the options enabled throughout, and cluster-scoped resources can be restored along with the selected applications [Src: Kasten Docs 9.0.2 p.402].</p>
+
+    <div class="note note--tip mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+      <div class="note__body">
+        <div class="note__label">Pro tip</div>
+        <p>One control in the multiple-application workflow is built for the worst day. You can specify a date range — during a ransomware attack, for example — in order to choose the latest restore point containing unencrypted data even when more recent restore points exist that may contain corrupted data; when a date range is selected, the most recent restore point within that range is automatically selected for each application [Src: Kasten Docs 9.0.2 p.401]. Practice using it before you need it.</p>
+      </div>
+    </div>
+
+    <h3>Applications, and the virtual machines among them</h3>
+    <p class="prose">One place where the application-shaped model meets your existing world: Veeam Kasten also protects virtual machines running on KubeVirt-based platforms such as Red Hat OpenShift Virtualization or SUSE Virtualization, through virtual-machine-based policies that allow fine-grained protection of individual virtual machines without backing up entire namespaces [Src: Kasten Docs 9.0.2 p.347]. The process of restoring virtual machine backups is similar to restoring any other application using the Veeam Kasten dashboard [Src: Kasten Docs 9.0.2 p.544]. Restore points even record the difference, carrying a backup type category of <code>virtualMachine</code> for virtual-machine-based backups or <code>namespace</code> for namespace-based ones [Src: Kasten Docs 9.0.2 p.718].</p>
+    <p class="prose">Do not let the familiarity carry you too far, though. In the guide's discussion of renaming a restored application's persistent volume claims — which for a virtual machine also means renaming its DataVolumes and transforming the references and owner references to them — it states that VirtualMachines can only be restored into a new namespace [Src: Kasten Docs 9.0.2 p.417]. The virtual-machine restore workflow itself is documented as similar to restoring any other application, initiated from the Restore Points page against the Virtual Machine application type [Src: Kasten Docs 9.0.2 p.544, p.545]. Prove which target namespaces your platform actually accepts with a test restore before a runbook depends on the answer.</p>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     SECTION 03 · MOBILITY
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="mobility">
+  <div class="wrap">
+    <span class="eyebrow">Across clusters · 03</span>
+    <h2>Moving an application to another cluster</h2>
+    <p class="lede">At overview depth: how an export policy on one cluster and an import policy on another combine into a path that lands a running application somewhere it has never run. By the end of this section you can name the four stages, say which policy setting decides whether the path works at all, and explain what an import policy does when nobody has asked for a restore yet.</p>
+
+    <div class="prose">
+      <p>The workflow for exporting applications into another cluster is close to the workflow for protecting them: when a policy is created to capture an application, you also select the Enable Backups via Snapshot Exports option, and one export action is created for each backup action when the export schedule triggers. Once all the export actions finish for that scheduled time, the metadata is uploaded to the location specified by the profile, and after that upload the backups are available for import [Src: Kasten Docs 9.0.2 p.455].</p>
+      <p>That "available for import" is the hinge. Nothing about the export knows which cluster will consume it. Location profiles are also used for importing applications into a cluster that is different from the source cluster where the application was captured [Src: Kasten Docs 9.0.2 p.338] — the shared location is the whole handshake, plus one encoded string.</p>
+    </div>
+
+    <div class="task__interactive-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — click each stage</div>
+    <div class="flow">
+      <div class="flow__title">Source cluster to destination cluster</div>
+      <div class="flow__desc">Click a stage to inspect it.</div>
+      <div class="flow__chain" role="tablist" aria-label="Cross-cluster mobility stages">
+        <div class="flow__node is-active" role="tab" tabindex="0" aria-selected="true" aria-controls="flowDetail" id="flowStep0">
+          <div class="flow__node-tag">STAGE 01</div>
+          <div class="flow__node-title">Export on the source</div>
+          <div class="flow__node-desc">The policy exports data and metadata to a shared location.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 01 — Export on the source.</strong> The Export Snapshot Data option stores the exported data and metadata to the configured store, while the Export Snapshot References Only option stores only metadata about the application restore points [Src: Kasten Docs 9.0.2 p.455]. This is the setting that decides whether the path works: if migration is desired across Kubernetes clusters in different clouds or between on-premises and public cloud environments, the Export Snapshot Data option must be enabled to migrate both the application data and the metadata, because without it the application data will not be exported and the subsequent import will fail [Src: Kasten Docs 9.0.2 p.455]. Apart from policy-driven exports, a one-off application export can be created manually from the Applications page by clicking the Export icon [Src: Kasten Docs 9.0.2 p.458].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep1">
+          <div class="flow__node-tag">STAGE 02</div>
+          <div class="flow__node-title">Copy the handshake</div>
+          <div class="flow__node-desc">An encoded configuration string travels with you.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 02 — Copy the handshake.</strong> When the application is imported into another cluster, initial handshake configuration is required. It is obtained from the policy by clicking <strong>Show import details</strong>, which displays the encoded configuration [Src: Kasten Docs 9.0.2 p.458]. For a manual export, the encoded import configuration required by the destination cluster is presented after you confirm the export [Src: Kasten Docs 9.0.2 p.459]. Treat that string the way you treat any other credential material — it is what allows the destination cluster to establish the data export and import relationship for the application [Src: Kasten Docs 9.0.2 p.462].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep2">
+          <div class="flow__node-tag">STAGE 03</div>
+          <div class="flow__node-title">Import on the destination</div>
+          <div class="flow__node-desc">A policy on the far cluster watches the location.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 03 — Import on the destination.</strong> Importing an application snapshot is similar to the policy creation workflow for protecting applications: from the Policies page you select Create New Policy, then select Import for the action [Src: Kasten Docs 9.0.2 p.460]. You also specify a frequency, but that frequency only controls how often to check the shared object storage or file storage location; if data in the store is not refreshed at the same frequency no duplicate work is performed, and multiple restore points may be imported by a single action if there is catching-up to do [Src: Kasten Docs 9.0.2 p.461]. You paste the text block from the source cluster and select a location profile; the destination cluster ordinarily only needs read and list permissions on all the data in the shared storage system [Src: Kasten Docs 9.0.2 p.462]. In the Profile for Import section the list shows a "Matching Profile", which is the original export location that should contain the exported restore points, alongside a list of "Other Profiles" that are useful when a restore point has been cloned or moved from its original export location [Src: Kasten Docs 9.0.2 p.462].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep3">
+          <div class="flow__node-tag">STAGE 04</div>
+          <div class="flow__node-title">Restore, then or later</div>
+          <div class="flow__node-desc">Metadata arrives first; data follows on restore.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 04 — Restore, then or later.</strong> After the Create Policy button is clicked the system starts scheduling jobs based on the policy definition; when new data is detected its metadata is imported into the cluster, associated with the application stack already running, and made available as a restore point [Src: Kasten Docs 9.0.2 p.464]. Unless <strong>Restore after Import</strong> is selected, only metadata is brought into the cluster, and data volumes residing in an object store or file store are not converted into native volumes until a restore operation is initiated [Src: Kasten Docs 9.0.2 p.464]. From there the normal restore workflow applies, and when given the choice you select a restore point tagged with the import policy name [Src: Kasten Docs 9.0.2 p.464].</div>
+        </div>
+      </div>
+      <div class="flow__detail" id="flowDetail" role="tabpanel" aria-labelledby="flowStep0" aria-live="polite"></div>
+    </div>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Care should be taken when auto-restoring the application during import: ensure the newly restored application does not conflict with the application running in the source cluster, and examples of potential conflicts include accidental credential reuse, access to and use of external services, and services conflicting for exclusive ownership of shared resources [Src: Kasten Docs 9.0.2 p.462]. Two live copies of the same application, both convinced they own the same external queue, is a failure mode you cause rather than suffer.</p>
+      </div>
+    </div>
+
+    <h3>Two behaviors that make an import policy more than a copy</h3>
+    <div class="best">
+      <div class="best-item">
+        <h4>Retention follows the source</h4>
+        <p>Running an import policy keeps the list of local restore points in sync with the retention settings of the originating policy. If a restore point is marked for retirement by the source cluster it is cleaned up, and the next time the import policy runs that retired restore point is removed from the destination cluster, reflecting the fact that it can no longer be used to restore the application [Src: Kasten Docs 9.0.2 p.464].</p>
+      </div>
+      <div class="best-item">
+        <h4>Resources can be reshaped on the way in</h4>
+        <p>By default Veeam Kasten restores Kubernetes resources as they exist in the restore point, but when the restore target does not match the environment of the backup, resource artifacts can be transformed on restore — for example, updating container image URLs or changing storage class settings when moving between cloud providers [Src: Kasten Docs 9.0.2 p.464]. Transforms are applied by enabling <strong>Apply transforms to restored resources</strong> under Restore After Import [Src: Kasten Docs 9.0.2 p.465].</p>
+      </div>
+      <div class="best-item">
+        <h4>Same cluster, different namespace, is a restore</h4>
+        <p>Import is for crossing cluster boundaries. The entire application stack can be migrated across different namespaces in the same cluster, and that is covered by the restore workflow rather than by an import policy [Src: Kasten Docs 9.0.2 p.451]. If you find yourself building an import policy to move a namespace inside one cluster, stop and go back to Section 02.</p>
+      </div>
+    </div>
+
+    <div class="sales-aside mt-24">
+      <span class="sales-aside__label">For a customer conversation</span>
+      <p>The documented resiliency strategies give you a clean way to frame cost against recovery time. A Rebuild approach carries a high recovery time and low infrastructure cost, and suits pre-production or smaller organizations with constrained budgets: policies export backups off-site, and after a site loss a new cluster is deployed, Veeam Kasten is redeployed, a location profile is pointed at the off-site repository, and the catalog is imported [Src: Kasten Docs 9.0.2 p.1093]. A Replicate approach carries a medium recovery time and high infrastructure cost and suits production or enterprise workloads: import policies from secondary storage bring restore point data across on a schedule, and transforms can scale workloads down on import so the standby site costs less while it waits [Src: Kasten Docs 9.0.2 p.1093]. The choice is a budget conversation with a technical answer attached, which is a good conversation to be in.</p>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     SECTION 04 · ACCESS
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="access">
+  <div class="wrap">
+    <span class="eyebrow">Who can do what · 04</span>
+    <h2>Access control: who can protect and restore what</h2>
+    <p class="lede">The instinct to look for a user list inside the product is the one to unlearn here. By the end of this section you can name the four built-in roles and what each one may do, decide whether a person needs a cluster-wide or a namespace-scoped assignment, and create that assignment from the dashboard.</p>
+
+    <div class="prose">
+      <p>For role-based access control (RBAC), Veeam Kasten builds on Kubernetes ClusterRoles and Bindings, and each deployment includes default Kubernetes ClusterRoles and Roles for authorization of both full and partial administrator personas [Src: Kasten Docs 9.0.2 p.264]. There is no separate account store to manage: a role is a Kubernetes object, an assignment is a binding, and the scope of the binding is the whole security design.</p>
+      <p>That is the conceptual jump. In your Veeam Data Platform work, "who can restore this" is a property you set on a user inside a console you administer. Here it is a Kubernetes object that a cluster administrator can also see, audit, and change with the same tools they use for everything else on the cluster. Different plumbing, and the same question underneath: who can protect, who can restore, and who can only look.</p>
+    </div>
+
+    <h3>The four roles you will reach for</h3>
+    <table class="data-table">
+      <thead><tr><th scope="col">Role</th><th scope="col">What it allows</th><th scope="col">How it is bound</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>k10-admin</code></td>
+          <td data-label="What it allows">Uninterrupted access to all Veeam Kasten operations. The holder may work with all Veeam Kasten APIs including profiles, policies, policy presets, actions, restore points, transform sets and blueprint bindings [Src: Kasten Docs 9.0.2 p.264].</td>
+          <td data-label="How it is bound">Requires a ClusterRoleBinding for cluster-wide access. Veeam Kasten creates a binding for a default group <code>k10:admins</code>, and admin users added to that group can use the role [Src: Kasten Docs 9.0.2 p.266].</td>
+        </tr>
+        <tr>
+          <td><code>k10-basic</code></td>
+          <td data-label="What it allows">Operational access in specific namespaces. Within assigned namespaces the holder may manually back up and restore applications, create and modify policies, view application, action and restore point details, and cancel actions [Src: Kasten Docs 9.0.2 p.272]. Read that list as a summary, not as a limit — and read the role definition when the question is "who can delete our backups". Veeam Kasten leverages Kubernetes ClusterRoles and Bindings for role-based access [Src: Kasten Docs 9.0.2 p.264], so what the ClusterRole grants is what the holder can do: the published <code>k10-basic</code> ClusterRole sets <code>verbs:</code> to <code>'*'</code> — every verb — on the action resources, on <code>restorepoints</code> and <code>applications</code>, on <code>policies</code>, and on <code>filerecoverysessions</code> [Src: Kasten Docs 9.0.2 p.273, p.274]. All verbs includes <code>delete</code>. So in every namespace you bind this role into, the holder can delete restore points and policies as well as create them. That is the blast radius of a tenant grant — size it before you hand out the RoleBinding, and if you need protection from deletion, put it in an immutable export location profile rather than in the role.</td>
+          <td data-label="How it is bound">Needs a RoleBinding in the namespace or namespaces the user requires access to [Src: Kasten Docs 9.0.2 p.274].</td>
+        </tr>
+        <tr>
+          <td><code>k10-config-view</code></td>
+          <td data-label="What it allows">Read-only access to all configuration resources, for operators without full administrator privileges [Src: Kasten Docs 9.0.2 p.275] — get and list on profiles, policies, policy presets, transform sets, blueprint bindings, and the storage security context resources [Src: Kasten Docs 9.0.2 p.276].</td>
+          <td data-label="How it is bound">Requires a ClusterRoleBinding to provide cluster-wide access [Src: Kasten Docs 9.0.2 p.276].</td>
+        </tr>
+        <tr>
+          <td><code>k10-virtualmachines-admin</code></td>
+          <td data-label="What it allows">Permission to patch and edit VirtualMachine resources, which is required to annotate virtual machines and so control whether Veeam Kasten freezes a guest filesystem during snapshot operations [Src: Kasten Docs 9.0.2 p.272].</td>
+          <td data-label="How it is bound">A ClusterRoleBinding to view and manage virtual machines across all namespaces, or a RoleBinding for a specific namespace [Src: Kasten Docs 9.0.2 p.272].</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="prose mt-24">Read those two columns together and the design becomes obvious. Administrative access means authenticating with a user that has a ClusterRoleBinding to the predefined <code>k10-admin</code> role; non-administrators are granted limited permissions, with read-only dashboard configuration access through a ClusterRoleBinding to <code>k10-config-view</code> and operational access to their own applications through a RoleBinding to <code>k10-basic</code> in the application's namespace [Src: Kasten Docs 9.0.2 p.263]. Veeam Kasten also supports a more flexible permissions model that scopes a user's permissions to perform actions only within the context of specified applications [Src: Kasten Docs 9.0.2 p.263] — the middle ground between k10-admin's cluster-wide grant and k10-basic's namespace-wide grant, for when permissions need to follow specific applications rather than a whole cluster or namespace.</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · bind the administrator role</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the cluster role binding command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl create clusterrolebinding &lt;name&gt; --clusterrole=k10-admin --user=&lt;name&gt;</code></pre>
+    </div>
+    <p class="prose">That is the command form for an individual user or service account [Src: Kasten Docs 9.0.2 p.266], and on its own it is not the whole grant. In addition to the <code>k10-admin</code> ClusterRole, administrators also require the <code>k10-ns-admin</code> Role for Secret and ConfigMap access within the Veeam Kasten install namespace [Src: Kasten Docs 9.0.2 p.267]; that Role needs a RoleBinding in the release namespace, and Veeam Kasten creates one for the default group <code>k10:admins</code>, so adding the user to that group covers both bindings at once [Src: Kasten Docs 9.0.2 p.268].</p>
+    <p class="prose">Which raises the obvious question: where does a user get added to that group? Not in the Veeam Kasten dashboard, and not in Kubernetes either — a group is not an object you create and populate on a cluster, it is an attribute that arrives with whoever authenticated. So the answer depends on your authentication mode. With OpenID Connect (OIDC), the group name claim is what identifies the groups a user belongs to, and if the user is added to <code>k10:admins</code> in the OIDC provider and to the same group in the Kubernetes cluster, no additional role bindings need to be created because Veeam Kasten creates them as part of the installation process [Src: Kasten Docs 9.0.2 p.234]. On Amazon Elastic Kubernetes Service (EKS) with IAM authentication, the equivalent move is editing the <code>aws-auth</code> ConfigMap so the IAM role maps to the group, which is how the guide's own EKS example gives a group access to Veeam Kasten [Src: Kasten Docs 9.0.2 p.260]. The dashboard's part in this is the other half: bindings are available for subject type Users and Groups [Src: Kasten Docs 9.0.2 p.280], so it is where you bind a role <em>to</em> a group — not where you put people <em>in</em> one. Making that binding from the dashboard is the next part.</p>
+
+    <h3>Making the assignment from the dashboard</h3>
+    <p class="prose">The Veeam Kasten role-based access control dashboard can be used to set up varying levels of access to the dashboard and the APIs [Src: Kasten Docs 9.0.2 p.279]. Veeam Kasten allows users to manage Kubernetes access through it, creating Role Bindings as well as Cluster Role Bindings by choosing existing Roles and Cluster Roles or creating new ones [Src: Kasten Docs 9.0.2 p.280]. One prerequisite catches people out: the dashboard can be viewed only if the user is authorized to view Kubernetes namespace-scoped Roles, Role Bindings and Cluster Roles and Cluster Role Bindings [Src: Kasten Docs 9.0.2 p.279].</p>
+
+    <p class="prose">The three screens below are the same form, filled in three ways. Notice what changes between them: the Assignment Level, the role, and — in the middle one — the list of namespaces.</p>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0279__Accessing_Veeam_Kasten_Veeam_Kasten_RBAC_Dashboard_Veeam_Kas__958x1936__064.png" loading="lazy" alt="The Add Assignment dialog in the Veeam Kasten access control dashboard, named admin-cr-binding, with Assignment Level set to Entire Cluster, the role k10-admin selected, and one user listed as the subject.">
+      <figcaption class="screenshot__caption">
+        <strong>Administrator access — the whole cluster.</strong> To set up administrator access for a user or group, a Cluster Role Binding is created and the Cluster Role named <code>k10-admin</code> is selected from the drop-down, with one or more users or groups configured as the subjects [Src: Kasten Docs 9.0.2 p.280].
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.279. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0279__Accessing_Veeam_Kasten_Veeam_Kasten_RBAC_Dashboard_Veeam_Kas__958x1936__065.png" loading="lazy" alt="The same Add Assignment dialog, named basic-role-binding, with Assignment Level set to Specific Applications, three application namespaces listed, and the role k10-basic selected.">
+      <figcaption class="screenshot__caption">
+        <strong>Tenant access — named namespaces only.</strong> To let users perform data protection operations only in their own namespaces, Role Bindings are created in a specific list of namespaces with the Cluster Role named <code>k10-basic</code> selected, and one or more users or groups configured as the subjects [Src: Kasten Docs 9.0.2 p.282]. This is the form an application team's self-service access takes.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.279. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0279__Accessing_Veeam_Kasten_Veeam_Kasten_RBAC_Dashboard_Veeam_Kas__960x1938__066.png" loading="lazy" alt="The same Add Assignment dialog, named config-cr-binding, with Assignment Level set to Entire Cluster and the read-only role k10-config-view selected.">
+      <figcaption class="screenshot__caption">
+        <strong>Read-only access — look, do not touch.</strong> To set up read-only access, a Cluster Role Binding is created with the Cluster Role named <code>k10-config-view</code> selected from the drop-down [Src: Kasten Docs 9.0.2 p.284]. This is the assignment for an auditor, a service desk, or a colleague who needs to answer "did it run" without being able to change anything.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.279. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <div class="note note--tip mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+      <div class="note__body">
+        <div class="note__label">Pro tip</div>
+        <p>Service accounts are bound through the same form, using a naming convention rather than a separate control. Bindings are available for the subject types Users and Groups; where a service account binding is required, the format <code>system:serviceaccount:&lt;sa_namespace&gt;:&lt;sa_name&gt;</code> is used in the User field for a single service account in a specific namespace, or the format <code>system:serviceaccounts:&lt;sa_name&gt;</code> is used in the Group field for a service account in all namespaces [Src: Kasten Docs 9.0.2 p.280].</p>
+      </div>
+    </div>
+
+    <div class="note note--caution">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Granting people the ability to manage access is a bigger grant than it looks. Viewing and managing Veeam Kasten-specific Kubernetes RBAC resources from the dashboard requires additional permissions, and while a read-only view can be granted with list and get verbs, additional verbs such as create, update, and delete should be added with caution because they allow those users to escalate their own privileges [Src: Kasten Docs 9.0.2 p.277][Src: Kasten Docs 9.0.2 p.278].</p>
+      </div>
+    </div>
+
+    <h3>Where the boundaries land in practice</h3>
+    <div class="prose">
+      <p>Two scoping facts are worth carrying into your first design. Cluster-scoped restore points sit outside the namespace model: access to a ClusterRestorePoint is <em>typically</em> reserved for users with Veeam Kasten administrative privileges through Kubernetes RBAC, because the resources are cluster-scoped [Src: Kasten Docs 9.0.2 p.718] — the guide's hedge is worth keeping, because nothing stops a cluster administrator writing a ClusterRole that grants them more widely, so verify the bindings on your own cluster rather than assuming the default. And the direction of travel is worth planning for rather than resisting — the documented guidance is to consider implementing multi-tenancy and turning Veeam Kasten into a backup-as-a-service model rather than restricting its usage to a select group of trusted users, which enables user management based on the principle of least privileges while also supporting self-service [Src: Kasten Docs 9.0.2 p.1092].</p>
+      <p>Read that guidance as a job description change. Under it, application teams create and manage their own backup policies, set schedules, and determine retention settings [Src: Kasten Docs 9.0.2 p.1092], and your role moves from operating every job to designing the guardrails those teams work inside. Settle one ownership question before you delegate: does your team still own reporting the aggregate compliance number to leadership once application teams own their own policies? The documented guidance sets up the operating model but does not assign that accountability, and it is the first thing to agree on before self-service rolls out — afterwards it becomes an argument rather than a decision. The routine in the next section is what that role looks like day to day.</p>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     SECTION 05 · ROUTINE
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="routine">
+  <div class="wrap">
+    <span class="eyebrow">The routine · 05</span>
+    <h2>The daily and weekly routine</h2>
+    <p class="lede">Everything above is a thing you do once. This is the thing you do forever. By the end of this section you can walk the dashboard in a fixed order, find failures faster than they find you, and hold a weekly and monthly rhythm that includes the one task everybody skips — testing a restore.</p>
+
+    <div class="prose">
+      <p>Start with where the answers live. The top of the Veeam Kasten dashboard displays a list of applications, currently mapped to namespaces, any policies that exist in the system, and a summary of the cluster's backup data footprint; after filtering to applications that have stateful services, each section breaks down into Unmanaged, Non-compliant, Compliant, and Removed [Src: Kasten Docs 9.0.2 p.301]. Choosing one of those buttons filters the applications automatically [Src: Kasten Docs 9.0.2 p.301], which makes "show me everything that is not protected" a single click rather than a report.</p>
+      <p>Below the policy management section you will find activity data: a graph of all activity in the system, where mousing over the graph displays action information such as status, action duration, action start time, and action completion time [Src: Kasten Docs 9.0.2 p.311]. The same information appears in tabular form under the graph, beginning with a summary of total actions, average action duration, the number of data artifacts and their size, followed by recent actions including the policy that generated each one, the number of child actions, the number of applications included in the run, and start and completion times [Src: Kasten Docs 9.0.2 p.311]. You can filter those actions by originating policy, type of action, failed actions, and completed actions [Src: Kasten Docs 9.0.2 p.311] — and the failed-actions filter is your morning. Notice what that table does and does not carry: it names the policy that generated an action, not the person who triggered one. "Who ran this restore" is a different question with a different answer, and the note below is where it lives.</p>
+      <p>Alerts surface separately. An alert notification appears in the upper right corner of the dashboard, and clicking the alert icon opens a side pane containing a list of outstanding errors and warnings, each with a description of what went wrong [Src: Kasten Docs 9.0.2 p.490]. Check the corner before you check the graph.</p>
+    </div>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Everything above answers "what happened". "Who did it" is answered somewhere else entirely, and you will be asked for it in your first audit conversation. There is no user column on the activity table and no separate audit screen in the product; independent of whether the dashboard, the command line, or the API is used to access Veeam Kasten, the usage translates into native Kubernetes API calls, so Veeam Kasten usage can be transparently audited using the Kubernetes Auditing feature without requiring any additional changes [Src: Kasten Docs 9.0.2 p.818]. Attribution depends on how you set authentication up: for correct user attribution, Veeam Kasten has to be set up with OIDC or token-based authentication, and actions triggered by the dashboard, the command line, or the API are then attributed to the user that initiated them, while other system actions such as validating a profile or policy are attributed to the Veeam Kasten service account [Src: Kasten Docs 9.0.2 p.819]. Two limits to state out loud before anyone treats this as complete: the Kubernetes Auditing feature only has access to Kubernetes API calls, so any internal Veeam Kasten event that does not use that API will not get logged [Src: Kasten Docs 9.0.2 p.819]; and managed Kubernetes providers such as EKS, GKE and AKS do not allow modifications to the kube-apiserver flags, so in practice those providers log the audit events at the metadata level, which loses important information within the request and response bodies [Src: Kasten Docs 9.0.2 p.818]. To get those logs off the cluster, an <code>AuditConfig</code> custom resource sends Veeam Kasten audit event logs to a cloud object store by using a reference to a location profile [Src: Kasten Docs 9.0.2 p.621].</p>
+      </div>
+    </div>
+
+    <h3>A rhythm that holds</h3>
+    <ol class="timeline">
+      <li class="timeline__phase"><div class="timeline__dot">1</div><div class="timeline__title">Every day</div><div class="timeline__desc">Alert pane, then the failed-actions filter on the activity table, then the Non-compliant count [Src: Kasten Docs 9.0.2 p.301][Src: Kasten Docs 9.0.2 p.311][Src: Kasten Docs 9.0.2 p.490].</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">2</div><div class="timeline__title">Every week</div><div class="timeline__desc">Test a restore, and look for orphaned artifacts from manual runs on the Restore Points page [Src: Kasten Docs 9.0.2 p.306][Src: Kasten Docs 9.0.2 p.1093].</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">3</div><div class="timeline__title">Every month</div><div class="timeline__desc">Widen the restore test: a different namespace, then a different cluster [Src: Kasten Docs 9.0.2 p.1093].</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">4</div><div class="timeline__title">Every quarter</div><div class="timeline__desc">Review retention against cost, and review who holds which role [Src: Kasten Docs 9.0.2 p.1092].</div></li>
+    </ol>
+
+    <h3>The Restore Points page is your housekeeping surface</h3>
+    <p class="prose">The interface has a centralized view listing all restore points created or imported by the cluster, reached from the Restore Points item in the left side menu [Src: Kasten Docs 9.0.2 p.304]. Its filtering is what makes it a weekly tool rather than a lookup. Filtering by type lets you identify local snapshot-based restore points, exported restore points managed by the cluster, or imported restore points created by another cluster; selecting <strong>Include manual runs only</strong> lists the restore points created by backup or export actions that are not associated with a policy, or by manually running a policy; and selecting <strong>No expiration</strong> lists those manually created restore points that have no specified expiration date, which allows simple identification and removal of orphaned backup data [Src: Kasten Docs 9.0.2 p.306]. Restore points can be deleted in bulk by selecting them first, or individually from the action dropdown menu [Src: Kasten Docs 9.0.2 p.306], and local restore points can be exported from that dropdown while exported restore points can be validated from it [Src: Kasten Docs 9.0.2 p.305].</p>
+
+    <div class="note note--key mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Remember</div>
+        <p>Pair those two filters together — manual runs only, no expiration — and run it weekly. Artifacts from manual runs are outside the policy's retention schedule and must be cleaned up manually [Src: Kasten Docs 9.0.2 p.364], and that pair of filters is how you find the ones you forgot. Nothing else on the dashboard will nag you about them.</p>
+      </div>
+    </div>
+
+    <h3>Test restores, on purpose, on a schedule</h3>
+    <p class="prose">The strongest operational guidance in the documentation is also the easiest to postpone: test restores regularly and do not wait for a disaster to happen, testing application restores within the same namespace, in a different namespace on the same Kubernetes cluster, and on different clusters [Src: Kasten Docs 9.0.2 p.1093]. Test granular application restores as well as full application restores, and restore applications based on priority to meet recovery time objective (RTO) requirements [Src: Kasten Docs 9.0.2 p.1093]. Those three destinations map exactly onto the three paths in Section 02, which is a convenient way to build a rotation: same namespace this week, new namespace next week, another cluster the week after.</p>
+
+    <h3>Policy and retention hygiene worth scheduling</h3>
+    <div class="best">
+      <div class="best-item">
+        <h4>Bias retention outward</h4>
+        <p>To optimize storage costs, the documented recommendation is to reduce local retention, which can be more expensive, and increase remote retention, and to strike a balance that prevents storage from filling up [Src: Kasten Docs 9.0.2 p.1092]. Shorter on snapshots and extended periods for exports is the same advice from the policy side [Src: Kasten Docs 9.0.2 p.1093].</p>
+      </div>
+      <div class="best-item">
+        <h4>Do not protect with a wildcard</h4>
+        <p>Avoid creating a policy with a wildcard namespace selector; create policies per application or per application group and use the backup window and staggering instead, which reduces load on both Veeam Kasten and the cluster API [Src: Kasten Docs 9.0.2 p.1093]. Define a backup window that does not conflict with multiple policies, to prevent system overload [Src: Kasten Docs 9.0.2 p.1093].</p>
+      </div>
+      <div class="best-item">
+        <h4>Standardize, then delegate</h4>
+        <p>Use a policy preset to standardize backup and export retention across policies, configure a dedicated policy for protecting cluster-scoped resources, and use labels to target specific resources so one policy can serve a group of them [Src: Kasten Docs 9.0.2 p.1093]. Presets are what make self-service safe: each policy created from a preset refers to it rather than copying it, so every preset change also changes the corresponding policies [Src: Kasten Docs 9.0.2 p.384].</p>
+      </div>
+      <div class="best-item">
+        <h4>Check application readiness</h4>
+        <p>Regularly verify the readiness of your applications; if they are scaled down, experiencing issues, or not functioning correctly, enabling the "Ignore Exceptions and Continue if Possible" option in the policy actions ensures they are carried out to the best of their ability [Src: Kasten Docs 9.0.2 p.1093].</p>
+      </div>
+      <div class="best-item">
+        <h4>Let the metrics do the watching</h4>
+        <p>Veeam Kasten provides metrics about its activities; the documented approach is to gather them with Prometheus to track backups, restores, and overall system health, visualize them in Grafana, and configure alerts when metrics exceed critical levels [Src: Kasten Docs 9.0.2 p.1093]. Creating alerts for any actions where <code>state=failed</code> is recommended, along with an alert for catalog volume used space above 50 percent, because that condition can affect upgrades [Src: Kasten Docs 9.0.2 p.1093].</p>
+      </div>
+      <div class="best-item">
+        <h4>Keep looking, and keep the monitoring current</h4>
+        <p>Regularly check the metrics and logs of your Veeam Kasten system, which helps you find and fix problems before they lead to downtime or data loss, and keep the monitoring configuration up to date as the deployment evolves so you monitor the right metrics and receive alerts for new issues [Src: Kasten Docs 9.0.2 p.1093].</p>
+      </div>
+    </div>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Did you know?</div>
+        <p>There is a guided walkthrough of the dashboard built into the product. An interactive tour is available when the dashboard is accessed for the first time, or afterwards via the Interface page of the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.301]. Worth 10 minutes on day one, and worth pointing an application team at when you hand them their namespace.</p>
+      </div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     KNOWLEDGE CHECK
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="check" class="check-section">
+  <div class="wrap">
+    <span class="eyebrow">Knowledge check · 06</span>
+    <h2>Check your understanding</h2>
+    <p class="lede">Five questions drawn from this module. Each one has a single best answer, and every option explains itself once you pick it.</p>
+
+    <div class="quiz">
+      <script type="application/json" class="quiz__data">
+      [
+        {
+          "q": "A policy snapshots an application hourly and does not export. The storage array holding the volumes suffers a catastrophic failure. What can you restore from?",
+          "opts": [
+            { "t": "The hourly snapshots, because Veeam Kasten holds them in its own catalog independently of the array", "correct": false, "why": "The catalog holds metadata, not the snapshot data. Snapshots live on the storage system alongside the primary data, which is exactly why the documentation calls them not always durable (p.349)." },
+            { "t": "Nothing from that policy — catastrophic storage failure destroys the snapshots along with the primary data", "correct": true, "why": "Correct. Snapshots are not always durable: catastrophic storage system failure destroys them along with your primary data, which is why durable backups are created by exporting (p.349). A snapshot-only policy has no copy that survives the array." },
+            { "t": "The most recent snapshot only, because Veeam Kasten keeps one copy off the array as a safety net", "correct": false, "why": "No such safety net exists. Durability comes from the export action, which transforms snapshots into backups in an infrastructure-independent format in a separate target location (p.351)." }
+          ]
+        },
+        {
+          "q": "You set a policy to hourly frequency, use a sub-frequency of every 15 minutes, and set retention to 24 hourly. How much history does the hourly tier actually give you?",
+          "opts": [
+            { "t": "24 hours, because retention counts are measured in hours rather than in restore points", "correct": false, "why": "Retention counts are counts of restore points, not durations. That is why the sub-frequency changes the window the count covers (p.362)." },
+            { "t": "Six hours, because the 24 retained restore points are taken 15 minutes apart", "correct": true, "why": "Correct. The documentation gives this exact example: retaining 24 hourly snapshots at 15-minute intervals would only retain six hours of snapshots (p.362). Sub-frequencies interact with retention, so raising the frequency shortens the window a fixed count covers." },
+            { "t": "96 hours, because each sub-frequency run adds its own retention slot", "correct": false, "why": "Sub-frequency runs consume the same retention count rather than multiplying it. All actions in a period are retained according to the retention count for that frequency (p.366)." }
+          ]
+        },
+        {
+          "q": "An application is restored into a namespace that already contains a ConfigMap of the same name, and overwriteExisting is not used. What happens to that ConfigMap?",
+          "opts": [
+            { "t": "It is replaced with the version in the restore point, because restores always return the namespace to the captured state", "correct": false, "why": "Only some resource types behave that way. Workloads are always restored, but for other existing resources the restore leaves them alone unless the flag is used (p.396)." },
+            { "t": "It is deleted, because the restore recreates the whole application stack from scratch", "correct": false, "why": "The restore recreates the application stack, but resources that already exist are not deleted wholesale — their treatment depends on the resource type and the flag (p.396)." },
+            { "t": "It is left at its current state, because existing resources of that kind are not restored without the flag", "correct": true, "why": "Correct. For resources other than workloads, ServiceAccounts and non-namespaced resources, existing objects are not restored and instead maintain their current state unless overwriteExisting is used; with the flag, Immutable Secrets and ConfigMaps are restored to the restore point version by re-creating the resources (p.396, p.397)." }
+          ]
+        },
+        {
+          "q": "A developer needs three deleted files back from one large volume, and the application must keep running throughout. Which path fits best?",
+          "opts": [
+            { "t": "A file recovery session against an exported restore point, which gives network access to the files without restoring the volume data", "correct": true, "why": "Correct. The FileRecoverySession custom resource requests network access to files from exported restore points without requiring a full restore of volume data (p.419). A volume-clones restore is the reasonable second choice, since it restores individual volumes into the existing namespace without disrupting its workloads (p.408)." },
+            { "t": "A data-only restore of the affected volume, which merges the missing files back into the live claim", "correct": false, "why": "A data-only restore does not merge. It follows a delete-and-restore-from-backup approach for the persistent volume claims to maintain data integrity (p.408), which is disruptive for three files." },
+            { "t": "A full application restore into the same namespace, then copy the three files out", "correct": false, "why": "That recreates the entire application stack into the selected namespace (p.396) — an outage taken for three files, when a finer path is documented (p.419)." }
+          ]
+        },
+        {
+          "q": "A colleague needs to answer \"did last night's runs succeed?\" for every namespace, and must not be able to change any configuration. Which assignment fits?",
+          "opts": [
+            { "t": "A RoleBinding to k10-basic in every namespace, since that is the namespace-scoped role", "correct": false, "why": "Too much. Within assigned namespaces, k10-basic allows manually backing up and restoring applications and creating and modifying policies (p.272) — the colleague would be able to change configuration." },
+            { "t": "A ClusterRoleBinding to k10-config-view, which grants read-only access to configuration resources cluster-wide", "correct": true, "why": "Correct. k10-config-view provides read-only access to all configuration resources for operators without full administrator privileges (p.275), with get and list verbs only (p.276), and it is bound cluster-wide with a ClusterRoleBinding (p.276, p.284)." },
+            { "t": "A ClusterRoleBinding to k10-admin, then a request not to change anything", "correct": false, "why": "k10-admin gives uninterrupted access to all Veeam Kasten operations across every API (p.264). Scope is the control here, not good intentions." }
+          ]
+        }
+      ]
+      </script>
+    </div>
+    <div class="quiz-score">
+      <div class="quiz-score__pct">0%</div>
+      <div class="quiz-score__label">Complete the knowledge check to see your score.</div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ◆ REVIEW -->
+<section id="review" class="review">
+  <div class="review__inner">
+    <span class="eyebrow eyebrow--bright">Recap · 07</span>
+    <h2>What you covered</h2>
+    <p class="lede">Policies produce restore points; restore points come from somewhere and land somewhere; roles decide who may do either. That is the whole of day-to-day Veeam Kasten administration.</p>
+    <div class="review-grid">
+      <div class="review-item"><div class="review-item__num">01</div><div class="review-item__text">Build a policy that snapshots on a schedule, exports to a location profile, and retires restore points on a grandfather-father-son retention schedule — and read it back as a Kubernetes object when the form is not telling you enough.</div></div>
+      <div class="review-item"><div class="review-item__num">02</div><div class="review-item__text">Choose between a local snapshot, an exported restore point, and an imported restore point for a given recovery situation, and defend the choice against the storage failure that motivates it.</div></div>
+      <div class="review-item"><div class="review-item__num">03</div><div class="review-item__text">Run a restore in place, into a different namespace, and at volume or file granularity, and predict what happens to resources that already exist in the target namespace.</div></div>
+      <div class="review-item"><div class="review-item__num">04</div><div class="review-item__text">Explain how an export policy on one cluster and an import policy on another combine into an application-mobility path, and which single export setting decides whether that path works.</div></div>
+      <div class="review-item"><div class="review-item__num">05</div><div class="review-item__text">Assign who can protect and restore what using the built-in roles, and work a daily and weekly routine off the dashboard that includes testing a restore before you need one.</div></div>
+    </div>
+    <p class="lede">That completes the course. The next step is not another module — it is your own cluster: build one policy with an export, restore the application into a second namespace, and time yourself. Then do it again from an exported restore point with the snapshot deleted.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ◆ FOOTER NAV -->
+<nav class="lesson-nav">
+  <a href="Lesson04_Maintaining_Veeam_Kasten_Over_Time.html" class="lesson-nav__card">
+    <div class="lesson-nav__dir">← Back</div>
+    <div class="lesson-nav__title">Module 04 · Maintaining Veeam Kasten Over Time</div>
+  </a>
+  <a href="index.html" class="lesson-nav__card">
+    <div class="lesson-nav__dir">Next →</div>
+    <div class="lesson-nav__title">Course overview · you have finished all five modules</div>
+  </a>
+</nav>
+
+<footer>
+  Veeam Kasten for Kubernetes Fundamentals · Module 5 of 5 · built against Veeam Kasten 9.0.2
+</footer>
+
+<!-- ◆ LIGHTBOX ROOT -->
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+  <button class="lightbox__close" type="button" aria-label="Close enlarged view">&times;</button>
+  <img src="" alt="">
+</div>
+
+<script src="components.js"></script>
+
+</body>
+</html>

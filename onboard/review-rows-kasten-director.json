@@ -1,0 +1,101 @@
+[
+  {
+    "id": "KDO-v2-001",
+    "sev": "critical",
+    "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html · Access control section, \"The four roles you will reach for\" table, k10-basic row",
+    "orig": "Operational access in specific namespaces. Within assigned namespaces the holder may manually back up and restore applications, create and modify policies, view application, action and restore point details, and cancel actions [Src: Kasten Docs 9.0.2 p.272].",
+    "prop": "Operational access in specific namespaces. Within assigned namespaces the holder may manually back up and restore applications, create and modify policies, view application, action and restore point details, and cancel actions [Src: Kasten Docs 9.0.2 p.272]. [VERIFY: does this role also permit deleting a restore point or a policy, or is deletion reserved to k10-admin? State it explicitly — \"who can delete these backups\" is the first question most CISOs ask, and this table is where a director would look for the answer.]",
+    "why": "The RBAC table names every other capability for k10-basic (backup, restore, create/modify policies, view, cancel) but is silent on delete. A director cannot answer the classic 'who can delete backups' question from this material for the one role most of the team will actually hold. Per the hard rules, a missing accountability answer must be flagged as a question, not filled in from assumption — this is exactly that case.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-002",
+    "sev": "critical",
+    "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html · The routine section, activity-table paragraph",
+    "orig": "The same information appears in tabular form under the graph, beginning with a summary of total actions, average action duration, the number of data artifacts and their size, followed by recent actions including the policy that generated each one, the number of child actions, the number of applications included in the run, and start and completion times [Src: Kasten Docs 9.0.2 p.311].",
+    "prop": "The same information appears in tabular form under the graph, beginning with a summary of total actions, average action duration, the number of data artifacts and their size, followed by recent actions including the policy that generated each one, the number of child actions, the number of applications included in the run, and start and completion times [Src: Kasten Docs 9.0.2 p.311]. [VERIFY: does this activity view, or any audit log, record which authenticated user triggered a manual backup, restore, or deletion? Name the screen here — a director will be asked this before almost anything else, and the course currently answers 'what happened' without ever answering 'who did it.']",
+    "why": "Every layer of monitoring described in Modules 04 and 05 (dashboard states, Prometheus action metrics, the activity table) reports on actions, policies, and outcomes but never on the identity of the user who triggered a manual action. Audit trail is named explicitly in this persona's scope as a director-owned concern; the course teaches 'what happened' monitoring thoroughly and is silent on 'who did it' accountability, which is the harder and more important half for an audit conversation.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-003",
+    "sev": "critical",
+    "loc": "Lesson03_Deploying_and_Configuring_Veeam_Kasten.html · Section 4, \"The four authentication modes you choose at install\" table, Direct Access row",
+    "orig": "When using Direct Access, there is no RBAC set on Veeam Kasten, and any user who has access to the dashboard can perform all Veeam Kasten operations, which is not advisable if granular access is needed [Src: Kasten Docs 9.0.2 p.220].",
+    "prop": "When using Direct Access, there is no authentication configured and no RBAC set on Veeam Kasten, so any user who has access to the dashboard can perform all Veeam Kasten operations — including deleting a restore point — with no authenticated identity to record against the action. Treat Direct Access as lab-only; it should never be the exposure choice on a cluster protecting anything you would have to account for [Src: Kasten Docs 9.0.2 p.220].",
+    "why": "The table already establishes that Direct Access has 'No authentication configuration' and 'no RBAC set,' but frames the consequence as merely 'not advisable if granular access is needed.' For a production-accountability audience that understates the finding: with no authentication, there is no identity to log against any action at all, which is a disqualifying fact for anything beyond a lab, not a granularity preference. This sharpens language the module already supports rather than adding a new claim.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-004",
+    "sev": "significant",
+    "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html · Upgrades section, \"Keeping pace with Kubernetes\" pro tip",
+    "orig": "so if the platform team moves the cluster first, your options narrow to whichever Veeam Kasten release supports the new version, while upgrading Veeam Kasten first keeps the choice. This is the coordination cost a Veeam Data Platform administrator does not carry when the backup server owns its own Windows host.",
+    "prop": "so if the platform team moves the cluster first, your options narrow to whichever Veeam Kasten release supports the new version, while upgrading Veeam Kasten first keeps the choice. This is the coordination cost a Veeam Data Platform administrator does not carry when the backup server owns its own Windows host. Put a name on it: agree with the platform team, in writing, who has to sign off before a cluster upgrade proceeds if it would drop the running Veeam Kasten release out of the supported matrix — otherwise the backup platform loses support status by nobody's decision.",
+    "why": "The module correctly identifies a real coordination cost between the backup team and the platform team that owns the cluster, but stops at naming the risk without naming who is accountable for resolving it. A director finishing this section could not say who owns the escalation when the two calendars conflict, which is exactly the ownership-blur this persona is scoped to catch.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-005",
+    "sev": "significant",
+    "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html · Monitoring section, \"Layer three: your existing monitoring stack\"",
+    "orig": "Grafana then visualizes what Prometheus collected, and alerts fire when metrics cross the levels you care about [Src: Kasten Docs 9.0.2 p.1093].",
+    "prop": "Grafana then visualizes what Prometheus collected, and alerts fire when metrics cross the levels you care about [Src: Kasten Docs 9.0.2 p.1093]. In most organizations that central Prometheus/Grafana stack belongs to a platform or observability team rather than the backup team — name who owns wiring the two alerts this module recommends (failed actions, catalog space over 50%) before you assume they already exist.",
+    "why": "The module gives excellent proof-of-health guidance (the two alerts to create first) but frames wiring them up as something 'you' do, without acknowledging that in a typical enterprise the monitoring stack these alerts ride on is owned by a separate team. A director reading this section could not say whose backlog those two alerts land on.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-006",
+    "sev": "significant",
+    "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html · Housekeeping section, \"Remember\" note",
+    "orig": "The KDR passphrase is retrievable by someone other than you, from a passphrase provider rather than a personal note [Src: Kasten Docs 9.0.2 p.572].",
+    "prop": "The KDR passphrase is retrievable by someone other than you, from a passphrase provider rather than a personal note [Src: Kasten Docs 9.0.2 p.572]. Decide who that second person or team is — security, a fellow backup admin, the secrets-management team — and write it into the runbook; 'someone other than you' is a decision your team has to make explicitly, not a default the product supplies.",
+    "why": "This is the single most important resilience control in the course (the catalog cannot be recovered without it) and the module correctly flags that a second party must be able to retrieve it, but never names who that should be. Left as-is, a team could satisfy the letter of the guidance ('someone other than you') without ever having a real answer to who that is, which defeats the point.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-007",
+    "sev": "significant",
+    "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html · Access control section, closing paragraph",
+    "orig": "Read that guidance as a job description change. Under it, application teams create and manage their own backup policies, set schedules, and determine retention settings [Src: Kasten Docs 9.0.2 p.1092], and your role moves from operating every job to designing the guardrails those teams work inside. The routine in the next section is what that role looks like day to day.",
+    "prop": "Read that guidance as a job description change. Under it, application teams create and manage their own backup policies, set schedules, and determine retention settings [Src: Kasten Docs 9.0.2 p.1092], and your role moves from operating every job to designing the guardrails those teams work inside. Decide, before you delegate, whether your team still owns reporting the aggregate compliance number to leadership once application teams own their own policies — this module does not say, and it is the first thing to settle before self-service rolls out. The routine in the next section is what that role looks like day to day.",
+    "why": "The course correctly frames multi-tenancy/self-service as a real operating-model shift for the backup team, but never addresses who is accountable for rolling up compliance status once policy ownership decentralizes to application teams — which is precisely the kind of ownership question a director must settle before staffing a rollout, not discover afterward.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-008",
+    "sev": "significant",
+    "loc": "Lesson03_Deploying_and_Configuring_Veeam_Kasten.html · Section 6, \"Your first location profile\"",
+    "orig": "If the bucket has object locking enabled, set the Enable Immutable Backups toggle [Src: Kasten Docs 9.0.2 p.315] — this is the setting that protects exported restore points from tampering: in a locked bucket, restore point data cannot be deleted or modified within the set protection period, even with administrator privileges, so a clean copy survives an attacker who has obtained privileged object store credentials [Src: Kasten Docs 9.0.2 p.341].",
+    "prop": "If the bucket has object locking enabled, set the Enable Immutable Backups toggle [Src: Kasten Docs 9.0.2 p.315] — this is the setting that protects exported restore points from tampering: in a locked bucket, restore point data cannot be deleted or modified within the set protection period, even with administrator privileges, so a clean copy survives an attacker who has obtained privileged object store credentials [Src: Kasten Docs 9.0.2 p.341]. Treat this toggle as the default for every production export location profile, not only the one behind Kasten Disaster Recovery — a profile without it is the first thing a CISO will flag.",
+    "why": "Module 04 gives immutability the strong, explicit 'the guide states this strongly' treatment for Kasten Disaster Recovery profiles. The same control, for ordinary application export profiles, is buried as a single conditional bullet inside a dense paragraph in Module 03 with no equivalent emphasis — a governance-critical setting is present in the content but not surfaced with the weight a director would expect given how hard the course leans on it elsewhere.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-009",
+    "sev": "minor",
+    "loc": "Lesson02_Kubernetes_Foundations_for_Backup_Admins.html · Namespaces section, dashboard screenshot caption",
+    "orig": "then reports each one as unmanaged when no protection policy covers it, non-compliant when a policy applies but its actions are failing or have not run yet, and compliant when a policy applies and its service-level agreements (SLAs) are being respected [Src: Kasten Docs 9.0.2 p.301].",
+    "prop": "then reports each one as unmanaged when no protection policy covers it, non-compliant when a policy applies but its actions are failing or have not run yet, and compliant when a policy applies and its service-level agreements (SLAs) are being respected — meaning the policy's own configured schedule and retention, not a separately negotiated or externally audited service-level agreement [Src: Kasten Docs 9.0.2 p.301].",
+    "why": "The term 'SLA' is used verbatim from the product without ever being defined for this audience. A director could easily repeat 'SLAs are being respected' to their own leadership as if it referred to an externally audited commitment, when the course elsewhere makes clear it just means the policy ran on its configured schedule. A one-clause definition closes that gap.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-010",
+    "sev": "minor",
+    "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html · Section 05, \"For a customer conversation\" sales aside",
+    "orig": "The value here is not a feature list, it is an operating model. A customer adopting Kubernetes does not have to stand up a parallel backup estate with its own storage, its own retention argument, and its own audit story — the Kubernetes applications can export into the repository their virtual estate already uses, and the constraints above are the honest fine print you should raise yourself rather than have discovered later.",
+    "prop": "The value here is not a feature list, it is an operating model. A customer adopting Kubernetes does not have to stand up a parallel backup estate with its own storage or its own retention argument — the Kubernetes applications can export into the repository their virtual estate already uses, appearing there as an ordinary backup job with the Kasten catalog identifier appended to its name [Src: Kasten Docs 9.0.2 p.129], which is the same job-level reporting your team already relies on rather than a new audit capability. The constraints above are the honest fine print you should raise yourself rather than have discovered later.",
+    "why": "\"Its own audit story\" is accountability-flavored language that the module never actually backs up with a mechanism — it reads as reassurance rather than a grounded claim. The course does establish a concrete, citable fact one paragraph away (the Kasten catalog identifier appended to the VBR job name); swapping the vague phrase for that fact keeps the same point without overselling an audit capability the content doesn't actually describe.",
+    "rev": "Kasten Director"
+  },
+  {
+    "id": "KDO-v2-011",
+    "sev": "minor",
+    "loc": "Lesson03_Deploying_and_Configuring_Veeam_Kasten.html · Section 4, \"Two details are worth carrying forward\" paragraph",
+    "orig": "token-based authentication is always enabled as a secondary authentication type to let Veeam Kasten Multi-Cluster Manager components and Veeam Backup & Replication services work with Veeam Kasten [Src: Kasten Docs 9.0.2 p.220].",
+    "prop": "token-based authentication is always enabled as a secondary authentication type to let Veeam Kasten Multi-Cluster Manager components and Veeam Backup & Replication services work with Veeam Kasten [Src: Kasten Docs 9.0.2 p.220]. Veeam Kasten Multi-Cluster Manager is named here only as an authentication detail — it is the fleet-wide console where a director would look for a compliance rollup across every cluster, not the single-cluster dashboard this course covers, and it deserves a pointer of its own rather than a footnote.",
+    "why": "This course, by design, covers a single cluster, so a full treatment of Multi-Cluster Manager is out of scope. But it is the natural answer to 'how do I prove program health across my whole fleet to my VP,' and currently a learner would have to already know the product exists to recognize this passing mention as a signpost to it.",
+    "rev": "Kasten Director"
+  }
+]

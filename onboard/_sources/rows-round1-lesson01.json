@@ -1,0 +1,65 @@
+[
+ {
+  "id": "ED-v1-005",
+  "sev": "significant",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Section 04 \u00b7 Enterprise compare card, \"How do you get it?\"",
+  "orig": "Customers choosing to upgrade obtain a license key from Kasten, or install from cloud marketplaces <span>[Src: Kasten Docs 9.0.2 p.3]</span>.",
+  "prop": "Customers choosing to upgrade obtain a license key, or install from cloud marketplaces <span>[Src: Kasten Docs 9.0.2 p.3]</span>.",
+  "why": "Legacy-brand drift. glossary.md bans \"Kasten by Veeam\" and \"Kasten K10\" as retired phrasing; bare \"Kasten\" used as the vendor name is the same problem in shorter form \u2014 the vendor is Veeam and the product is Veeam Kasten for Kubernetes. Dropping the vendor rather than substituting \"Veeam\" keeps the sentence inside what p.3 supports (prefer omission over assertion). The same page has a second instance two rows down \u2014 \"The documentation points at the Kasten product page for a comparison of the editions rather than listing one\" (l.483) \u2192 \"The documentation points at the product page for a comparison of the editions rather than listing one\" \u2014 apply both. These are the only two bare-vendor \"Kasten\" uses in the six files; everything else is correctly \"Veeam Kasten\" or a verbatim string.",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-006",
+  "sev": "significant",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Section 04 \u00b7 first compare card heading",
+  "orig": "Starter \u2014 also called Veeam Kasten Free",
+  "prop": "Veeam Kasten Free \u2014 the Starter edition",
+  "why": "Cross-lesson terminology. Lesson01 leads with \"Starter\" and treats \"Veeam Kasten Free\" as an alias; Lesson03 Section 1 leads with the opposite \u2014 \"Veeam Kasten is available in two main editions, Veeam Kasten Free and Enterprise\" and \"Veeam Kasten Free is the default Starter edition\". A learner meeting the editions in Module 01 and again in Module 03 sees the primary name swap. Put the product-branded name first in both places and keep \"Starter\" as the descriptor, which also matches how the edition is licensed and sold. Lesson01's body text and the following \"Heads up\" note reference \"the Starter edition\" three times (l.462, l.479, l.493) \u2014 those read correctly once the heading establishes the pairing, so no further edits are needed. Rubric 5, internally consistent terminology.",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-009",
+  "sev": "significant",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Knowledge check \u00b7 question 4 (quiz JSON)",
+  "orig": "You select a Veeam Repository as the Export Location Profile on a new policy. What happens to how volume snapshots are exported?",
+  "prop": "{ \"q\": \"Your team wants to prove Veeam Kasten works on a small test cluster before buying anything, then move the same configuration into production. What does the edition difference mean for that plan?\", \"opts\": [ { \"t\": \"The proof of concept has to be rebuilt for production, because the Enterprise edition uses different container images and a different install process.\", \"correct\": false, \"why\": \"The opposite: both editions use the same container images and follow an identical install process, so the install you rehearse is the install you run [Src: Kasten Docs 9.0.2 p.3].\" }, { \"t\": \"The test cluster can run the free Starter edition, which is functionally the same as Enterprise \u2014 but it is limited on support and scale, so production needs the licensed edition.\", \"correct\": true, \"why\": \"Correct on both halves. Starter is the default edition, provided at no charge and intended for evaluation or small non-production clusters, and is functionally the same as Enterprise but limited from a support and scale perspective [Src: Kasten Docs 9.0.2 p.2]. Same images, same install process [Src: Kasten Docs 9.0.2 p.3] \u2014 what changes is what you are entitled to when a restore matters.\" }, { \"t\": \"Nothing changes at all: the editions are identical, so the Starter edition is a supported production deployment.\", \"correct\": false, \"why\": \"\\u2018Functionally the same\\u2019 is not \\u2018the same\\u2019. The limits are on support and scale, and those are exactly what you need on a bad day [Src: Kasten Docs 9.0.2 p.2].\" } ] }",
+  "why": "Rubric 2, objective-to-assessment alignment. Module 01 states five objectives; objective 4 (\"Describe what Veeam Kasten puts inside a cluster, and how its two editions differ\") is the only one with no question against it, while objectives 5 gets two (Q4 and Q5 are both Veeam Backup & Replication export items). Worse, at course level Q4 is a near-duplicate of Lesson03's knowledge-check Q5 \u2014 same stem premise (selecting a Veeam Repository as the Export Location Profile), same correct answer (block mode export is enabled automatically), same source pages. Retargeting this one item onto the editions closes the objective gap and removes the duplicate in a single change; Q5 already covers the Veeam Backup & Replication integration for objective 5, and the block-mode rule stays taught in Section 05's constraints table. Apply by replacing the whole question object whose stem is the orig text with the object in prop (the stem is quoted as orig only to pin the location unambiguously).",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-013",
+  "sev": "significant",
+  "loc": "Lesson02_Kubernetes_Foundations_for_Backup_Admins.html \u00b7 hero (addition \u2014 after the hero__meta block, matching Lesson01/Lesson03)",
+  "orig": "",
+  "prop": "<div class=\"prereqs\"><span class=\"prereqs__label\">Before you start:</span> Module 01 \u2014 the Veeam Data Platform to Veeam Kasten concept map, and the snapshot-versus-export distinction this module builds on. No Kubernetes knowledge is assumed: every term used here is either defined on the spot or named as coming later.</div>",
+  "why": "Course-level pattern break. Lesson01 and Lesson03 both open with a prereqs panel \u2014 Lesson03's is explicit that Modules 01 and 02 supply \"the Kubernetes terms used here without re-definition\" \u2014 and index.html tells the learner \"Module 02 builds on the concept map from Module 01\". Module 02 is the one module that states no entry condition, yet it is the hinge the whole course leans on: Module 03 is unrunnable without it. Its hero blurb points forward (\"the mental model you will install against\") but never backward. Adding the panel makes the chain visible at the point of entry rather than only on the landing page. Modules 04 and 05 state the chain in their hero blurbs (\"Modules 01 to 03 got you\u2026\", \"The four modules before this one built the platform\"), so they need no panel \u2014 this is the only real gap. Rubric 2 and Rubric 5.",
+  "rev": "Editor"
+ },
+ {
+  "id": "KS-v1-003",
+  "sev": "significant",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Orientation \u00b7 01",
+  "orig": "the deployment and release information available from Helm v3, and all of the persistent storage resources associated with those workloads, meaning the PersistentVolumeClaims and PersistentVolumes [Src: Kasten Docs 9.0.2 p.346].",
+  "prop": "the deployment and release information available from Helm v3 \u2014 Helm is Kubernetes' package manager, covered fully in Module 02, so file the term away rather than chasing it now \u2014 and all of the persistent storage resources associated with those workloads, meaning the PersistentVolumeClaims and PersistentVolumes [Src: Kasten Docs 9.0.2 p.346].",
+  "why": "This is the very first substantive paragraph of the very first lesson, aimed at an audience with zero Kubernetes exposure, and it drops 'Helm v3' as a bare proper noun with no gloss and no signal that it will be explained later. In a live read-aloud this is exactly where a backup admin interrupts with 'wait, what's Helm?' and the presenter has nothing to say except 'hang on, Module 02.' The course already handles this well elsewhere (the hero prereqs box promises every term is 'defined on the spot or deferred to Module 02') \u2014 this is the one spot in the opening minutes where that promise isn't kept inline. A four-word parenthetical closes the gap without touching the cited fact.",
+  "rev": "Senior Kasten SE"
+ },
+ {
+  "id": "ED-v1-016",
+  "sev": "minor",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 chapter rail \u00b7 Section 05 dot label",
+  "orig": "VBR repositories",
+  "prop": "Veeam repositories",
+  "why": "\"VBR\" appears nowhere else in the six files \u2014 every prose mention is the full \"Veeam Backup & Replication\", so the abbreviation is never expanded for the learner before the rail tooltip uses it. glossary.md requires \"Veeam Backup & Replication (VBR)\" on first use before \"VBR\" is acceptable; the full name will not fit a rail label, so the neutral short form is the fix. The dot's aria-label is already correct (\"Jump to the Veeam Backup and Replication repository section\"), so only the visible label changes. Same applies to the section comment on l.505 if the LXD wants it tidy.",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-023",
+  "sev": "minor",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Section 02 \u00b7 concept map, \"Snapshot vs backup\" panel",
+  "orig": "You know which one you would want at 3am.",
+  "prop": "You know which one you would want at 3 a.m.",
+  "why": "Veeam Spelling and Hyphenation Guide: time-of-day abbreviations take periods and a space after the numeral (3 a.m.). Small, but it sits in the concept map \u2014 the component the module tells the learner to come back to \u2014 and \"3am\" reads as a typo rather than a style choice.",
+  "rev": "Editor"
+ }
+]

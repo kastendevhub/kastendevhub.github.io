@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 03 · Deploying and Configuring Veeam Kasten · Veeam Kasten for Kubernetes Fundamentals</title>
+<link rel="stylesheet" href="course.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* ─── Module-03-only additions ────────────────────────────────────────────
+     Layout for the deployment-readiness checklist in Section 2. Everything is
+     scoped under .rdy so nothing leaks into other modules; colours and radii
+     come from the shared brand tokens, never hard-coded values. */
+  .rdy__list { list-style: none; margin: 4px 0 0; padding: 0; }
+  .rdy__item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; background: var(--paper-2); }
+  .rdy__item input { margin: 3px 0 0; width: 17px; height: 17px; flex: 0 0 auto; accent-color: var(--veeam-green); cursor: pointer; }
+  .rdy__item input:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+  .rdy__item label { font-size: 14.5px; color: var(--ink-2); line-height: 1.55; cursor: pointer; }
+  .rdy__item label strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 3px; }
+  .rdy__gate { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin-top: 5px; }
+  .rdy__miss { margin: 10px 0 0; padding-left: 20px; font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+  .rdy__miss li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ════════ BREADCRUMB ════════ -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="index.html">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Course overview
+  </a>
+  <span class="breadcrumb__current">Module 03 of 05 · Deploying and Configuring Veeam Kasten</span>
+</nav>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progress"></div></div>
+
+<!-- ════════ STICKY SECTION RAIL (chapter-rail) ════════ -->
+<nav class="rail" aria-label="Section navigation">
+  <button class="rail__dot is-active" data-target="hero"        data-label="Module overview"      aria-label="Jump to module overview"></button>
+  <button class="rail__dot"           data-target="groundwork"  data-label="Prerequisites"        aria-label="Jump to prerequisites and environment checks"></button>
+  <button class="rail__dot"           data-target="preflight"   data-label="Pre-flight checks"    aria-label="Jump to pre-flight checks and the readiness checklist"></button>
+  <button class="rail__dot"           data-target="install"     data-label="The Helm install"     aria-label="Jump to the Helm install"></button>
+  <button class="rail__dot"           data-target="dashboard"   data-label="Dashboard and auth"   aria-label="Jump to dashboard access and authentication"></button>
+  <button class="rail__dot"           data-target="storage"     data-label="Storage integration"  aria-label="Jump to storage integration"></button>
+  <button class="rail__dot"           data-target="location"    data-label="Location profile"     aria-label="Jump to your first location profile"></button>
+  <button class="rail__dot"           data-target="check"       data-label="Knowledge check"      aria-label="Jump to the knowledge check"></button>
+  <button class="rail__dot"           data-target="review"      data-label="Recap"                aria-label="Jump to the recap"></button>
+</nav>
+
+<main>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__corner"></div>
+  <div class="hero__inner hero__inner--top">
+    <div>
+      <div class="hero__module-tag">Module 03</div>
+      <h1 class="hero__title--long">Deploying and Configuring<br/><em>Veeam Kasten</em></h1>
+      <p class="hero__blurb">
+        Modules 01 and 02 built the map: what Veeam Kasten for Kubernetes protects, and the Kubernetes vocabulary — namespaces, PVCs, StorageClasses, CSI, Helm — that the product is written in. This module is the runbook. You check the environment, run the pre-flight tool, install with Helm, reach the dashboard, wire up storage, and create the first location profile so exported data has somewhere to land.
+      </p>
+      <p class="hero__blurb">
+        Every command on this page is quoted from the Veeam Kasten 9.0.2 documentation and cited to its page. Where a Veeam Data Platform habit carries over, the text says so; where it does not, it says that too.
+      </p>
+      <p class="hero__blurb">
+        The estimate below is reading time plus the knowledge check. Executing the runbook against a live cluster is a separate booking, and two steps dominate the clock: the deeper CSI check creates a sample application with a persistent volume, writes data, snapshots it, provisions a new volume from that snapshot and validates the data [Src: Kasten Docs 9.0.2 p.102], and after the install command it may take a couple of minutes for all pods to come up [Src: Kasten Docs 9.0.2 p.100]. Time the pre-flight pass in your own environment and size the change window from that, not from the figure on this page.
+      </p>
+      <div class="hero__meta">
+        <div><strong>6 sections</strong><br/>plus a knowledge check</div>
+        <div><strong>~40 minutes</strong><br/>reading time</div>
+        <div><strong>Veeam Kasten 9.0.2</strong><br/>Helm-based install</div>
+      </div>
+      <div class="prereqs">
+        <span class="prereqs__label">Assumed before you start:</span>
+        <ul class="prereqs__list">
+          <li><strong>Modules 01 and 02</strong> — the concept bridge and the Kubernetes terms used here without re-definition.</li>
+          <li><strong>Cluster access</strong> — a working <code>kubectl</code> context with rights to create a namespace and cluster-scoped objects.</li>
+          <li><strong>A shell</strong> — this module is command-line first, the way your first Veeam Backup &amp; Replication install was a setup wizard before there was a console to click through. Veeam Kasten's dashboard is part of what you are deploying here, so there is no GUI to reach until the platform exists. The dashboard comes after the install, not before it.</li>
+          <li><strong>Image-pull reachability</strong> — the cluster nodes need a path to the container registry that holds the Veeam Kasten images, or to your own mirror of it. Section 1 covers what that means.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="objectives">
+      <div class="objectives__title">By the end of this module you'll be able to:</div>
+      <ol>
+        <li><strong>Identify</strong> the platform, Helm, namespace, and storage prerequisites Veeam Kasten expects before an install begins.</li>
+        <li><strong>Run</strong> the pre-flight checks with the primer tool and interpret what its output tells you about the cluster.</li>
+        <li><strong>Execute</strong> a Helm-based install into the <code>kasten-io</code> namespace and verify that it succeeded.</li>
+        <li><strong>Choose</strong> a dashboard access path and an authentication mode appropriate to how the dashboard will be exposed.</li>
+        <li><strong>Configure</strong> CSI storage integration by annotating a VolumeSnapshotClass, and create a first location profile.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 1 · PREREQUISITES ════════ -->
+<section id="groundwork">
+  <div class="wrap">
+    <span class="eyebrow">Prerequisites · 01</span>
+    <h2>What has to be true before you install</h2>
+    <p class="lede">
+      By the end of this section you'll be able to state the four conditions Veeam Kasten checks for — platform, Helm, namespace, and storage — and know which command or setting satisfies each one. Nothing here touches the cluster yet; this is the reading you do before the install window opens.
+    </p>
+
+    <div class="prose">
+      <p>You already run this checklist in Veeam Data Platform, in different words. Before an install there you confirm a supported platform, an identity the software can use, and a repository with room on it. The three questions are the same here. The answers arrive in Kubernetes vocabulary, and one of them — storage — carries more weight than it does on VMware, because on Kubernetes the snapshot capability belongs to the storage driver rather than to the backup product.</p>
+      <p>Veeam Kasten is available in two main editions, Veeam Kasten Free and Enterprise, and both editions use the same container images and follow an identical install process [Src: Kasten Docs 9.0.2 p.3]. Veeam Kasten Free is the default Starter edition, provided at no charge and intended for evaluation or for use in smaller or non-production clusters; it is functionally the same as the Enterprise edition but limited from a support and scale perspective [Src: Kasten Docs 9.0.2 p.3]. Nothing in this module changes with the edition you hold.</p>
+    </div>
+
+    <h3>1. Platform</h3>
+    <p class="prose">The supported operating system is Linux, and the architecture you pick decides which capabilities are available to you [Src: Kasten Docs 9.0.2 p.4]. For an administrator coming from Veeam Data Platform, the third row is the one to read twice: exporting to a Veeam repository and vSphere block mode exports are the two features that tie Veeam Kasten back to the estate you already run.</p>
+
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">Linux x86 (amd64)</th>
+            <th scope="col">Linux Arm (arm64/v8)</th>
+            <th scope="col">Linux Power (ppc64le)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">FIPS support</th>
+            <td><span class="matrix__yes" aria-label="Supported">✓</span></td>
+            <td><span class="matrix__no" aria-label="Not supported">✗</span></td>
+            <td><span class="matrix__no" aria-label="Not supported">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Veeam repository exports</th>
+            <td><span class="matrix__yes" aria-label="Supported">✓</span></td>
+            <td><span class="matrix__no" aria-label="Not supported">✗</span></td>
+            <td><span class="matrix__no" aria-label="Not supported">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">vSphere block mode exports</th>
+            <td><span class="matrix__yes" aria-label="Supported">✓</span></td>
+            <td><span class="matrix__no" aria-label="Not supported">✗</span></td>
+            <td>Not applicable</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Supported platforms and the capabilities each architecture carries [Src: Kasten Docs 9.0.2 p.4].</p>
+
+    <h3>2. Helm</h3>
+    <p class="prose">The first prerequisite step is to verify the Helm 3 package manager and configure access to the Veeam Kasten Helm charts repository [Src: Kasten Docs 9.0.2 p.4]. The Helm version should be compatible with the version of the Kubernetes cluster where Veeam Kasten is expected to be deployed, and Helm is assumed to be compatible with n-3 versions of Kubernetes it was compiled against [Src: Kasten Docs 9.0.2 p.4].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the Helm repository command to the clipboard">Copy</button>
+      </div>
+      <pre><code>helm repo add kasten https://charts.kasten.io/</code></pre>
+    </div>
+    <p class="caption">What you should see: Helm confirms the repository was added [Src: Kasten Docs 9.0.2 p.4]. This is the chart repository only — one of three places an internet-connected install reaches out to.</p>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Check this before the install window</div>
+        <p>Adding the chart repository is not the whole of the network story. For environments that are connected to the internet, one needs access to three repositories to install Veeam Kasten: the Helm repository that contains the Veeam Kasten chart, the container registry that contains the Veeam Kasten container images, and upstream repositories to install Veeam Kasten dependencies, for example Prometheus [Src: Kasten Docs 9.0.2 p.149]. All Veeam Kasten images for a default install are hosted at <code>gcr.io/kasten-images</code> [Src: Kasten Docs 9.0.2 p.8].</p>
+        <p>So confirm image-pull reachability from the cluster nodes — to that registry, or to the internal mirror your environment uses — before you open the install window, not during it. Where an air-gapped installation is required, it is possible to use your own private container registry to install Veeam Kasten [Src: Kasten Docs 9.0.2 p.149]; the air-gapped pre-flight command in Section 2 shows the same substitution for the pre-check image. A blocked registry path does not fail the chart-repository step above, and it does not fail the install command either — it surfaces later as pods that never reach Running.</p>
+      </div>
+    </div>
+
+    <p class="prose">The integrity of the Veeam Kasten Helm chart published on the Helm chart repository can be verified using the public key published [Src: Kasten Docs 9.0.2 p.4]. When installing Veeam Kasten using the <code>helm install</code> command, pass the <code>--verify</code> flag along with the <code>--keyring</code> to verify the Helm chart during installation [Src: Kasten Docs 9.0.2 p.4].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the signature-verified install command to the clipboard">Copy</button>
+      </div>
+      <pre><code>helm install k10 kasten/k10 --namespace=kasten-io --verify --keyring=/path/to/downloaded/RPM-KASTEN</code></pre>
+    </div>
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Did you know?</div>
+        <p>Helm chart provenance is supported only in Veeam Kasten chart versions 6.5.14 and later [Src: Kasten Docs 9.0.2 p.5]. If the verify flags fail on an older chart, the chart version is the thing to check first.</p>
+      </div>
+    </div>
+
+    <h3>3. Namespace</h3>
+    <p class="prose">Create the installation namespace for Veeam Kasten — by default, <code>kasten-io</code> [Src: Kasten Docs 9.0.2 p.6]. When Veeam Kasten is installed, Helm will automatically generate a new Service Account to grant Veeam Kasten the required access to Kubernetes resources; a pre-existing Service Account can be used instead by following the documented instructions [Src: Kasten Docs 9.0.2 p.6].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the namespace creation command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl create namespace kasten-io</code></pre>
+    </div>
+    <p class="prose">Treat <code>kasten-io</code> the way you treat the machine a Veeam Backup &amp; Replication server runs on: it is the product's own home, not somewhere protected workloads live. The namespace name is a default rather than a hard requirement, and the documentation uses <code>kasten-io</code> throughout [Src: Kasten Docs 9.0.2 p.67]. Staying on the default keeps every command you copy from the documentation working unchanged.</p>
+
+    <h3>4. Storage</h3>
+    <p class="prose">Veeam Kasten assumes that SSDs or similar fast storage media support the default storage class; if the default storage class doesn't meet the performance requirements, add the following option to the Veeam Kasten Helm installation commands [Src: Kasten Docs 9.0.2 p.7].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">helm flag</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the persistence storage class flag to the clipboard">Copy</button>
+      </div>
+      <pre><code>--set global.persistence.storageClass=&lt;storage-class-name&gt;</code></pre>
+    </div>
+
+    <p class="prose">That flag governs where Veeam Kasten keeps its own state. The second storage question is about the workloads you intend to protect, and it is the one that decides how good the resulting protection can be. Veeam Kasten highly recommends using a storage system with a CSI supported driver that includes VolumeSnapshot support, and using a CSI driver with VolumeSnapshot support is a requirement to build a good data protection solution using Veeam Kasten [Src: Kasten Docs 9.0.2 p.1090]. Though Veeam Kasten supports Generic Storage Backups for storage systems with no CSI drivers, this approach is not recommended [Src: Kasten Docs 9.0.2 p.1090].</p>
+
+    <div class="prose">
+      <h4>The three CSI requirements</h4>
+      <ul>
+        <li>Kubernetes v1.14.0 or higher [Src: Kasten Docs 9.0.2 p.102].</li>
+        <li>The VolumeSnapshotDataSource feature has been enabled in the Kubernetes cluster [Src: Kasten Docs 9.0.2 p.102].</li>
+        <li>A CSI driver that has Volume Snapshot support [Src: Kasten Docs 9.0.2 p.102].</li>
+      </ul>
+      <p>Read the first two against the release you are actually running. The Storage Integration page states the baseline as Kubernetes v1.14.0 with the VolumeSnapshotDataSource feature enabled [Src: Kasten Docs 9.0.2 p.102], while the support matrix for this build runs from Kubernetes 1.31 to 1.34 on any certified distribution, with 1.30 and 1.29 supported <em>only</em> when the cluster is deployed as OpenShift 4.17 or 4.16 [Src: Kasten Docs 9.0.2 p.862] — every one of those releases is far past that baseline, so treat those two lines as inherited history rather than work on your list. Check your own version against that matrix before anything else in this section: a vanilla Kubernetes 1.30 cluster is not a supported target, however clean its pre-flight run comes back. The third requirement is the one that still has to be proved on your cluster, and Section 2 is how you prove it.</p>
+    </div>
+
+    <div class="note note--caution">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>The pre-flight check does not include verification of the cluster being in FIPS mode, and that is a requirement for Veeam Kasten to be installed in FIPS mode [Src: Kasten Docs 9.0.2 p.6]. A clean pre-flight run is not evidence of a FIPS-ready cluster — that one you confirm yourself.</p>
+      </div>
+    </div>
+
+    <div class="note note--key">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Remember</div>
+        <p>Platform, Helm, namespace, storage. Three of the four are quick yes-or-no answers. The storage question — does the driver take snapshots — is the one worth spending your preparation time on, because no install flag can add a capability the storage driver does not have.</p>
+      </div>
+    </div>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 2 · PRE-FLIGHT CHECKS ════════ -->
+<section id="preflight">
+  <div class="wrap">
+    <span class="eyebrow">Pre-flight checks · 02</span>
+    <h2>Let the primer tool answer the storage question for you</h2>
+    <p class="lede">
+      By the end of this section you'll be able to run the pre-flight checks against a cluster, read the result line by line, and decide from that output whether the cluster is ready for an install. The interactive checklist at the end turns that decision into something you can hold on to.
+    </p>
+
+    <div class="prose">
+      <p>Validate that all prerequisites for installing Veeam Kasten are met by running the pre-flight checks [Src: Kasten Docs 9.0.2 p.1090]. By installing the primer tool, you can perform pre-flight checks provided that your default <code>kubectl</code> context is pointed to the cluster you intend to install Veeam Kasten on [Src: Kasten Docs 9.0.2 p.7]. Point the context at the wrong cluster and the tool will faithfully report on the wrong cluster, so confirm the context first.</p>
+    </div>
+
+    <div class="prose">
+      <h4>What the tool does</h4>
+      <p>The primer runs in a cluster pod and performs three operations: it validates if the Kubernetes settings meet the Veeam Kasten requirements, catalogs the available StorageClasses, and — if a CSI provisioner exists — performs basic validation of the cluster's CSI capabilities and any relevant objects that may be required [Src: Kasten Docs 9.0.2 p.7]. Running the pre-flight checks using the primer tool will create and subsequently clean up a ServiceAccount and ClusterRoleBinding to perform sanity checks on your Kubernetes cluster [Src: Kasten Docs 9.0.2 p.7]. The primer tool assumes that the Helm 3 package manager is installed and access to the Veeam Kasten Helm Charts repository is configured [Src: Kasten Docs 9.0.2 p.7].</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · pre-flight checks</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the pre-flight checks command to the clipboard">Copy</button>
+      </div>
+      <pre><code>curl https://docs.kasten.io/downloads/9.0.2/tools/k10_primer.sh | bash</code></pre>
+    </div>
+    <p class="caption">The documented command to deploy the pre-check tool [Src: Kasten Docs 9.0.2 p.7].</p>
+
+    <p class="prose">To run the pre-flight checks in an air-gapped environment, use the following command instead, substituting your own registry for the example one [Src: Kasten Docs 9.0.2 p.7].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · air-gapped</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the air-gapped pre-flight command to the clipboard">Copy</button>
+      </div>
+      <pre><code>curl https://docs.kasten.io/downloads/9.0.2/tools/k10_primer.sh | bash /dev/stdin -i repo.example.com/k10tools:9.0.2</code></pre>
+    </div>
+
+    <h3>What a good result looks like</h3>
+    <p class="prose">The documentation shows an example of the primer output when executed on a Kubernetes cluster deployed in Digital Ocean [Src: Kasten Docs 9.0.2 p.871, p.872]. Read it as four verdicts about the cluster followed by one verdict per storage provisioner. The excerpt below is the opening set of checks [Src: Kasten Docs 9.0.2 p.871, p.872]. It is an old sample — the cluster is Kubernetes v1.17.13 and the CSI check reports the <code>v1alpha1</code> group [Src: Kasten Docs 9.0.2 p.871, p.872] — so expect your own run to name a current version and the <code>v1</code> group; the shape of the output, and what each verdict is telling you, is what to take from it.</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">output · cluster checks</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the example cluster-check output to the clipboard">Copy</button>
+      </div>
+      <pre><code>Kubernetes Version Check:
+   Valid kubernetes version (v1.17.13) - OK
+RBAC Check:
+   Kubernetes RBAC is enabled - OK
+Aggregated Layer Check:
+   The Kubernetes Aggregated Layer is enabled - OK
+CSI Capabilities Check:
+   Using CSI GroupVersion snapshot.storage.k8s.io/v1alpha1 - OK</code></pre>
+    </div>
+
+    <p class="prose">Then, per provisioner, the tool reports the StorageClasses it found and what it thinks of the VolumeSnapshotClasses attached to them. This is the part that answers the storage question from Section 1 [Src: Kasten Docs 9.0.2 p.872].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">output · provisioner checks</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the example provisioner-check output to the clipboard">Copy</button>
+      </div>
+      <pre><code>Volume Snapshot Classes:
+      csi-rbdplugin-snapclass
+         Has k10.kasten.io/is-snapshot-class annotation set to true - OK
+         Has deletionPolicy 'Retain' - OK</code></pre>
+    </div>
+
+    <p class="prose">Two lines, two different things. The annotation line says Veeam Kasten will recognise this VolumeSnapshotClass and use it. The deletion-policy line says what happens to the underlying snapshot when the Kubernetes object is removed. Section 5 comes back to both. Where a provisioner has no deletion policy set, the same output reports it plainly as <code>Missing deletionPolicy, using default</code> [Src: Kasten Docs 9.0.2 p.872].</p>
+
+    <p class="prose"><strong>Read that last line as information, not as a finding to clear.</strong> It carries no <code>- OK</code> because it is reporting a state rather than passing a test, and the state it reports is the acceptable one: the guide describes the default deletion policy as the default and recommended one [Src: Kasten Docs 9.0.2 p.102], and the release notes record that a <code>Retain</code> deletionPolicy for VolumeSnapshotClasses is no longer required or recommended [Src: Kasten Docs 9.0.2 p.1153]. You can install against it. The line directly above it — the annotation line — is the one that gates whether snapshots work at all, and that is the line to stop on if it is missing [Src: Kasten Docs 9.0.2 p.103].</p>
+
+    <h3>The deeper CSI check</h3>
+    <p class="prose">The documentation strongly recommends that the same tool be used to perform a more comprehensive CSI validation [Src: Kasten Docs 9.0.2 p.7]. That check is a real end-to-end rehearsal: it creates a sample application with a persistent volume and writes some data to it, takes a snapshot of the persistent volume, creates a new volume from the persistent volume snapshot, and validates the data in the new persistent volume [Src: Kasten Docs 9.0.2 p.102]. Run the first command to derive the list of provisioners along with their StorageClasses and VolumeSnapshotClasses, then run the second with a valid StorageClass to deploy the pre-check tool [Src: Kasten Docs 9.0.2 p.102].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · list the provisioners</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the provisioner listing command to the clipboard">Copy</button>
+      </div>
+      <pre><code>curl -s https://docs.kasten.io/downloads/9.0.2/tools/k10_primer.sh | bash</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · CSI validation</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the CSI validation command to the clipboard">Copy</button>
+      </div>
+      <pre><code>curl -s https://docs.kasten.io/downloads/9.0.2/tools/k10_primer.sh | bash /dev/stdin csi -s ${STORAGE_CLASS}</code></pre>
+    </div>
+
+    <div class="note note--tip">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+      <div class="note__body">
+        <div class="note__label">Pro tip</div>
+        <p>Run the deeper CSI check before your install window, not during it. It writes data, snapshots it, restores it, and reads it back — the same round trip your first restore test would perform, minus the pressure. A Veeam Data Platform admin will recognise the instinct: prove the storage path works before you schedule anything against it.</p>
+      </div>
+    </div>
+
+    <!-- ─── BESPOKE INTERACTIVE: deployment-readiness checklist ─── -->
+    <div class="task__interactive-label"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — tick what you can confirm, then check your readiness</div>
+
+    <div class="widget mt-16" data-readiness>
+      <div class="widget__tag"><svg aria-hidden="true" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · readiness check, nothing scored</div>
+      <h3>Deployment-readiness checklist</h3>
+      <p class="widget__lede">Tick only what you have confirmed on the cluster you intend to install on. Six items are blocking; three are follow-ups you can carry into the install. Nothing is sent anywhere and nothing is graded.</p>
+
+      <ul class="rdy__list">
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy1" data-gate="block">
+          <label for="rdy1"><strong>Helm 3 is installed and the chart repository is added</strong>Verified with <code>helm repo add kasten https://charts.kasten.io/</code>, and the Helm binary is compatible with the cluster's Kubernetes version [Src: Kasten Docs 9.0.2 p.4].<span class="rdy__gate">Blocking</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy9" data-gate="block">
+          <label for="rdy9"><strong>The cluster nodes can pull the Veeam Kasten container images</strong>An internet-connected install reaches three repositories — the Helm chart repository, the container registry holding the Veeam Kasten container images, and upstream repositories for dependencies such as Prometheus [Src: Kasten Docs 9.0.2 p.149] — and images for a default install are hosted at <code>gcr.io/kasten-images</code> [Src: Kasten Docs 9.0.2 p.8]. Either that path is open from the nodes, or your own private container registry is loaded and named in the install [Src: Kasten Docs 9.0.2 p.149].<span class="rdy__gate">Blocking</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy2" data-gate="block">
+          <label for="rdy2"><strong>The cluster's Kubernetes version is in the supported matrix, and the CSI baseline is met</strong>The documented CSI baseline is Kubernetes v1.14.0 with the VolumeSnapshotDataSource feature enabled [Src: Kasten Docs 9.0.2 p.102]; every release this build supports is far past it, and the primer's version check confirms that line for you. The matrix itself is the part to read: 1.31 through 1.34 on any certified distribution, with 1.30 and 1.29 supported <em>only</em> as OpenShift 4.17 and 4.16 [Src: Kasten Docs 9.0.2 p.862].<span class="rdy__gate">Blocking</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy3" data-gate="block">
+          <label for="rdy3"><strong>A CSI driver with volume snapshot support is installed</strong>Confirmed against the CSI driver list rather than assumed from the storage vendor's name [Src: Kasten Docs 9.0.2 p.102].<span class="rdy__gate">Blocking</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy4" data-gate="block">
+          <label for="rdy4"><strong>Exactly one VolumeSnapshotClass per provisioner carries the annotation</strong>If no VolumeSnapshotClass or more than one has the Veeam Kasten annotation, snapshot operations will fail [Src: Kasten Docs 9.0.2 p.103].<span class="rdy__gate">Blocking</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy5" data-gate="block">
+          <label for="rdy5"><strong>The pre-flight checks and the CSI validation have both been run and read</strong>The primer output was reviewed line by line, not skimmed for the absence of red text [Src: Kasten Docs 9.0.2 p.7] — and the deeper check was run with <code>csi -s ${STORAGE_CLASS}</code>, so a sample application was created, a volume snapshotted, a new volume provisioned from that snapshot, and the data validated on this cluster [Src: Kasten Docs 9.0.2 p.102].<span class="rdy__gate">Blocking</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy6" data-gate="follow">
+          <label for="rdy6"><strong>You know which storage class Veeam Kasten's own state will use</strong>Either the default class is backed by fast media, or you have the class name ready for <code>--set global.persistence.storageClass=&lt;storage-class-name&gt;</code> [Src: Kasten Docs 9.0.2 p.7].<span class="rdy__gate">Follow-up</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy7" data-gate="follow">
+          <label for="rdy7"><strong>The installation namespace exists</strong>Created with <code>kubectl create namespace kasten-io</code>, or you have decided to let the install command create it [Src: Kasten Docs 9.0.2 p.6].<span class="rdy__gate">Follow-up</span></label>
+        </li>
+        <li class="rdy__item">
+          <input type="checkbox" id="rdy8" data-gate="follow">
+          <label for="rdy8"><strong>You have decided how the dashboard will be exposed, and how it will authenticate</strong>When exposing the Veeam Kasten dashboard externally, it is required that an authentication method is properly configured to secure access [Src: Kasten Docs 9.0.2 p.220].<span class="rdy__gate">Follow-up</span></label>
+        </li>
+      </ul>
+
+      <div class="widget__actions">
+        <button type="button" class="widget__reveal" data-rdy-check>Check my readiness</button>
+        <button type="button" class="widget__reset" data-rdy-reset>Reset</button>
+      </div>
+      <div class="simoutput" data-rdy-out aria-live="polite" aria-atomic="true">
+        <p class="simoutput__prompt">Tick the items you can confirm, then select <strong>Check my readiness</strong>.</p>
+      </div>
+      <p class="widget__model-note">A preparation aid, not a supported readiness tool — the primer output remains the authority on the cluster.</p>
+    </div>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 3 · THE HELM INSTALL ════════ -->
+<section id="install">
+  <div class="wrap">
+    <span class="eyebrow">The Helm install · 03</span>
+    <h2>One command, then two minutes of watching pods</h2>
+    <p class="lede">
+      By the end of this section you'll be able to run the Helm install for a certified Kubernetes distribution, recognise where environment-specific flags belong, and prove the install succeeded before you go looking for the dashboard.
+    </p>
+
+    <div class="task__interactive-label"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — click each stage of the install</div>
+    <div class="flow">
+      <div class="flow__title">The install, end to end</div>
+      <div class="flow__desc">Click a stage to see what you type and what you should see.</div>
+      <div class="flow__chain" role="tablist" aria-label="Install stages">
+        <div class="flow__node is-active" role="tab" tabindex="0" aria-selected="true" aria-controls="flowDetail" id="flowStep0">
+          <div class="flow__node-tag">STAGE 01</div>
+          <div class="flow__node-title">Add the chart repository</div>
+          <div class="flow__node-desc">Point Helm at the Veeam Kasten charts.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 01 — add the chart repository.</strong> Add the Veeam Kasten Helm charts repository with <code>helm repo add kasten https://charts.kasten.io/</code> [Src: Kasten Docs 9.0.2 p.4]. You should see Helm confirm the repository. Nothing has touched the cluster yet.</div>
+        </div>
+        <div class="flow__arrow" aria-hidden="true">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep1">
+          <div class="flow__node-tag">STAGE 02</div>
+          <div class="flow__node-title">Create the namespace</div>
+          <div class="flow__node-desc">Give the product its own home.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 02 — create the installation namespace.</strong> Run <code>kubectl create namespace kasten-io</code> [Src: Kasten Docs 9.0.2 p.6]. You should see the namespace created. When Veeam Kasten is installed, Helm will automatically generate a new Service Account to grant Veeam Kasten the required access to Kubernetes resources [Src: Kasten Docs 9.0.2 p.6].</div>
+        </div>
+        <div class="flow__arrow" aria-hidden="true">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep2">
+          <div class="flow__node-tag">STAGE 03</div>
+          <div class="flow__node-title">Install the chart</div>
+          <div class="flow__node-desc">One command, plus any flags your platform needs.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 03 — install.</strong> For a certified Kubernetes distribution installed on-premises or in another environment, the general instruction is <code>helm install k10 kasten/k10 --namespace=kasten-io</code> [Src: Kasten Docs 9.0.2 p.99]. Depending on your underlying infrastructure, you might also need to provide access credentials as specified elsewhere for public cloud providers [Src: Kasten Docs 9.0.2 p.99].</div>
+        </div>
+        <div class="flow__arrow" aria-hidden="true">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep3">
+          <div class="flow__node-tag">STAGE 04</div>
+          <div class="flow__node-title">Watch the pods</div>
+          <div class="flow__node-desc">Wait for every pod to reach Running.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 04 — validate.</strong> Run <code>kubectl get pods --namespace kasten-io --watch</code> to watch for the status of all Veeam Kasten pods [Src: Kasten Docs 9.0.2 p.100]. It may take a couple of minutes for all pods to come up but all pods should ultimately display the status of Running [Src: Kasten Docs 9.0.2 p.100].</div>
+        </div>
+        <div class="flow__arrow" aria-hidden="true">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep4">
+          <div class="flow__node-tag">STAGE 05</div>
+          <div class="flow__node-title">Reach the dashboard</div>
+          <div class="flow__node-desc">Forward a port, then plan the real path.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 05 — reach the dashboard.</strong> By default, the Veeam Kasten dashboard will not be exposed externally [Src: Kasten Docs 9.0.2 p.101]. A forwarded local port gets you in for the first look; Section 4 covers the exposure and authentication decisions that follow.</div>
+        </div>
+      </div>
+      <div class="flow__detail" id="flowDetail" role="tabpanel" aria-labelledby="flowStep0" aria-live="polite"></div>
+    </div>
+
+    <h3>The install command</h3>
+    <p class="prose">To use Veeam Kasten with a certified Kubernetes distribution installed on-premises or in another environment you can follow the general instructions [Src: Kasten Docs 9.0.2 p.99]. Which distributions those are is a matrix question rather than a name-check: the supported Kubernetes and OpenShift versions are published in the guide, and versions no longer actively supported by their vendor or community are not supported [Src: Kasten Docs 9.0.2 p.861, p.862].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · generic install</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the generic install command to the clipboard">Copy</button>
+      </div>
+      <pre><code>helm install k10 kasten/k10 --namespace=kasten-io</code></pre>
+    </div>
+
+    <p class="prose">Where the cluster runs in a public cloud, the same command carries credential flags. On Amazon EKS, or any other Kubernetes distribution running on EC2, two environment variables holding the access key id and secret access key are defined first, and the install command passes them through [Src: Kasten Docs 9.0.2 p.11].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · install with AWS long-term access keys</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the AWS install command to the clipboard">Copy</button>
+      </div>
+      <pre><code>helm install k10 kasten/k10 --namespace=kasten-io \
+      --set secrets.awsAccessKeyId="${AWS_ACCESS_KEY_ID}" \
+      --set secrets.awsSecretAccessKey="${AWS_SECRET_ACCESS_KEY}"</code></pre>
+    </div>
+    <p class="caption">The documented AWS install command. Before installing on Amazon EKS, it is important to determine the preferred authentication mechanism: either long-term access keys or IAM Roles for service accounts, because that choice affects the necessary steps and prerequisites for the installation process [Src: Kasten Docs 9.0.2 p.11].</p>
+
+    <h4>Where &ldquo;as specified elsewhere&rdquo; points, platform by platform</h4>
+    <p class="prose">AWS is the worked example above; the other platforms this audience runs have their own credential flags, each on its own install page in the guide. Find yours before the install window rather than at the prompt.</p>
+
+    <div class="prose">
+      <ul>
+        <li><strong>Azure.</strong> To install on Azure with Service Principal, you need to specify Client Secret credentials including your Azure tenant, service principal client ID and service principal client secret [Src: Kasten Docs 9.0.2 p.39]. Azure Stack takes the same three plus resource group, subscription ID and endpoint values [Src: Kasten Docs 9.0.2 p.39].</li>
+        <li><strong>Google Cloud.</strong> Installing Veeam Kasten on Google requires two kinds of Service Accounts: a Google Cloud Platform Service Account that grants access to underlying Google Cloud infrastructure resources such as storage, and a Kubernetes Service Account that grants access to Kubernetes resources and is auto-created during the Helm install [Src: Kasten Docs 9.0.2 p.79]. A newly created service account needs the <code>roles/compute.storageAdmin</code> role [Src: Kasten Docs 9.0.2 p.83].</li>
+        <li><strong>On-premises vSphere.</strong> To back up volumes provisioned by the vSphere CSI driver, credentials must be provided, either via Helm parameters or using a vSphere Infrastructure Profile [Src: Kasten Docs 9.0.2 p.91]. Section 5 covers the profile route; the Helm route is the flag trio below.</li>
+        <li><strong>Red Hat OpenShift.</strong> Depending on your OpenShift infrastructure provider you might need provider credentials as above, and you also add <code>--set scc.create=true</code> to create the SecurityContextConstraints for Veeam Kasten ServiceAccounts [Src: Kasten Docs 9.0.2 p.55].</li>
+      </ul>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · install on Azure with a service principal</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the Azure install command to the clipboard">Copy</button>
+      </div>
+      <pre><code>helm install k10 kasten/k10 --namespace=kasten-io \
+      --set secrets.azureTenantId=&lt;tenantID&gt; \
+      --set secrets.azureClientId=&lt;azureclient_id&gt; \
+      --set secrets.azureClientSecret=&lt;azureclientsecret&gt;</code></pre>
+    </div>
+    <p class="caption">The documented Azure install command for a service principal [Src: Kasten Docs 9.0.2 p.39].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">helm flags · vSphere credentials</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the vSphere credential flags to the clipboard">Copy</button>
+      </div>
+      <pre><code>--set secrets.vsphereUsername=&lt;vsphere username&gt; \
+  --set secrets.vspherePassword=&lt;vsphere password&gt; \
+  --set secrets.vsphereEndpoint=&lt;vsphere ip or hostname&gt;</code></pre>
+    </div>
+    <p class="caption">Setting up vSphere credentials requires configuring all of these flags during the execution of <code>helm install</code> or <code>helm upgrade</code>; alternatively an existing secret can be used with <code>--set secrets.vsphereClientSecretName=&lt;secret name&gt;</code> [Src: Kasten Docs 9.0.2 p.91].</p>
+
+    <h3>Verifying the install</h3>
+    <p class="prose">To validate that Veeam Kasten has been installed properly, the following command can be run in Veeam Kasten's namespace — the install default is <code>kasten-io</code> — to watch for the status of all Veeam Kasten pods [Src: Kasten Docs 9.0.2 p.100].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · validate</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the pod validation command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl get pods --namespace kasten-io --watch</code></pre>
+    </div>
+    <p class="caption">The <code>--watch</code> flag streams status changes and holds the terminal open rather than returning you to the prompt — that is the command working, not the command hanging. Read until every pod shows Running, then press Ctrl+C to stop it. It may take a couple of minutes for all pods to come up [Src: Kasten Docs 9.0.2 p.100].</p>
+
+    <p class="prose">What you should see, once the pods settle, is a table in which every row reads Running [Src: Kasten Docs 9.0.2 p.101].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">output · pods</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the example pod listing to the clipboard">Copy</button>
+      </div>
+      <pre><code>NAMESPACE  NAME                                READY  STATUS          RESTARTS  AGE
+kasten-io  aggregatedapis-svc-b45d98bb5-w54pr  1/1    Running         0         1m26s
+kasten-io  auth-svc-8549fc9c59-9c9fb           1/1    Running         0         1m26s
+kasten-io  catalog-svc-f64666fdf-5t5tv         2/2    Running         0         1m26s</code></pre>
+    </div>
+    <p class="caption">An excerpt of the documented example output; a real cluster lists more services than these three [Src: Kasten Docs 9.0.2 p.101]. In the unlikely scenario that pods are stuck in any other state, the documentation directs you to the support documentation to debug further [Src: Kasten Docs 9.0.2 p.101].</p>
+
+    <h4>If pods do not reach Running</h4>
+    <p class="prose">&ldquo;Go to the support documentation&rdquo; is thin comfort at 21:40 in a change window, so here is what the guide gives you to do first. Collect the evidence before you change anything: if you run into problems with Veeam Kasten, the guide asks you to run the debug script on your cluster as a first step to get information to support, assuming your default <code>kubectl</code> context points at the cluster and Veeam Kasten is installed in the <code>kasten-io</code> namespace [Src: Kasten Docs 9.0.2 p.862].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · collect support logs</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the support log collection command to the clipboard">Copy</button>
+      </div>
+      <pre><code>curl -s https://docs.kasten.io/downloads/9.0.2/tools/k10_debug.sh | bash;</code></pre>
+    </div>
+    <p class="caption">By default the debug script will generate a compressed archive file <code>k10_debug_logs.tar.gz</code> which will have separate log files for Veeam Kasten services [Src: Kasten Docs 9.0.2 p.862]. Veeam Kasten builds from a recent release can also produce support logs from the System Information page under the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.862].</p>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Before you tear it down</div>
+        <p>If you do decide to remove the install and start again, remove it the documented way. It is important to uninstall Veeam Kasten with the Helm command to ensure that all non-namespaced resources are cleaned up, and deleting the namespace Veeam Kasten is installed in might cause issues with stale services [Src: Kasten Docs 9.0.2 p.865] — so <code>helm uninstall k10 --namespace=kasten-io</code>, not <code>kubectl delete namespace</code>. After uninstalling, custom resource definitions remain on the cluster and can be cleaned up separately; note that deleting CRDs may lead to data loss, because any resources defined by the CRDs will be deleted [Src: Kasten Docs 9.0.2 p.865].</p>
+        <p>The 9.0.2 guide publishes no retry procedure for a partially completed install, but it does publish what to do when you reinstall on a cluster that has had Veeam Kasten on it before, and it is not "just run the command again". When reinstalling Veeam Kasten on the same cluster, it is important to clean up the namespace in which Veeam Kasten was previously installed, with <code>kubectl delete namespace kasten-io</code> [Src: Kasten Docs 9.0.2 p.605]; the disaster-recovery workflow states the same step first — "Reinstall Veeam Kasten, deleting the Veeam Kasten namespace if reinstalling on the same cluster" [Src: Kasten Docs 9.0.2 p.503]. Read that alongside the paragraph above and the order falls out: <code>helm uninstall k10 --namespace=kasten-io</code> first, because that is what clears the non-namespaced resources [Src: Kasten Docs 9.0.2 p.865], then remove the namespace if it survives, then install again. [VERIFY: whether a straight <code>helm install</code> re-run without that cleanup is safe after a <em>failed</em> install specifically — the 9.0.2 guide addresses reinstallation but never the failed-install case, so the cleanup sequence above is the documented path and a bare retry is not; Kasten SME to confirm.] Until that is confirmed, do not loop retries: collect the debug bundle, do the documented cleanup, and install once more — or open a support case with the logs attached.</p>
+      </div>
+    </div>
+
+    <div class="field-tip">
+      <strong>Where the Veeam Data Platform parallel stops</strong>
+      A Veeam Backup &amp; Replication install ends with a console on a server you can log into and a database you back up as part of the server. Veeam Kasten's install ends with a set of pods and a catalog that lives on cluster storage. That difference is why the documentation recommends including Veeam Kasten deployment and configuration as part of a GitOps solution — GitOps here means treating the install command and its flags as version-controlled files that redeploy the same way every time, the way you might already keep a build script for standing up a new backup server: Veeam Kasten is designed to protect Kubernetes applications and cannot be used to deploy or restore the cluster's overall state [Src: Kasten Docs 9.0.2 p.1090]. By automating the deployment of Veeam Kasten, whether through Helm or Operator, as part of the same solution, you can rapidly recover both applications and data in the event of an entire cluster loss [Src: Kasten Docs 9.0.2 p.1090]. In practice: keep the install command and its flags in version control, the way you would keep a build document — except here it is the recovery procedure too.
+    </div>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>The release name in the install command is <code>k10</code>, and it becomes part of the dashboard URL. If you installed Veeam Kasten with a different release name than <code>k10</code>, the dashboard will be available at the <code>/&lt;release-name&gt;/</code> URL path instead [Src: Kasten Docs 9.0.2 p.215]. Renaming the release is a decision that follows you into every URL, bookmark, and ingress path afterwards.</p>
+      </div>
+    </div>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 4 · DASHBOARD ACCESS AND AUTHENTICATION ════════ -->
+<section id="dashboard">
+  <div class="wrap">
+    <span class="eyebrow">Dashboard and authentication · 04</span>
+    <h2>Reaching the dashboard, then locking it down</h2>
+    <p class="lede">
+      By the end of this section you'll be able to open the dashboard from your own machine, name the four ways it can be exposed to other people, and match each authentication mode to the situation it belongs in.
+    </p>
+
+    <div class="prose">
+      <p>By default, the Veeam Kasten dashboard will not be exposed externally [Src: Kasten Docs 9.0.2 p.212]. That is a deliberate difference from the Veeam Backup &amp; Replication console, which is reachable by anyone who can log into the backup server the moment setup finishes. Here, the first look at the dashboard is a tunnel you open yourself and close when you are done.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · first look</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the port-forward command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl --namespace kasten-io port-forward service/gateway 8080:80</code></pre>
+    </div>
+    <p class="caption">To establish a connection to the dashboard, use this <code>kubectl</code> command to forward a local port to the Veeam Kasten ingress port. The dashboard will then be available at <code>http://127.0.0.1:8080/k10/#/</code> [Src: Kasten Docs 9.0.2 p.212].</p>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0055__Installing_Veeam_Kasten_Installing_Veeam_Kasten_on_Kubernete__1280x645__019.png" loading="lazy" alt="The Veeam Kasten dashboard shown inside the Red Hat OpenShift administrator console. An Apps panel reports 67 total applications with 2 compliant, 65 unmanaged and 0 non-compliant; a Data Usage doughnut shows 170.3 GB of backups split into 170 GB of snapshots and 280.4 MB of object storage; a Recent Activity table lists ten completed Policy Run actions for the pacman-backup and wordpress-backup policies with start times and durations of one to three minutes.">
+      <figcaption class="screenshot__caption">
+        <strong>The dashboard on first arrival.</strong> Counts of applications by compliance state, how much data is held where, and a list of recent actions. This example is the dashboard reached from the Veeam Kasten entry in a Red Hat OpenShift administrator console; the same panels appear however you reach it.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.55. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <p class="prose">Read the compliance counts the way you read a Veeam Backup &amp; Replication job list: unmanaged means no policy has claimed the application yet, which is the normal state of a cluster on day one. Your work over the next two modules is moving applications out of that column.</p>
+
+    <h3>Four ways in</h3>
+    <p class="prose">Following a successful installation, there are several options for setting up access to the Veeam Kasten dashboard [Src: Kasten Docs 9.0.2 p.10]. Pick the tab that matches how the dashboard needs to be reached.</p>
+
+    <div class="tabs">
+      <div class="tabs__list" role="tablist" aria-label="Dashboard access options">
+        <button type="button" class="tabs__tab" role="tab" id="tab-1" aria-controls="tabpanel-1" aria-selected="true" tabindex="0">Port forward</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-2" aria-controls="tabpanel-2" aria-selected="false" tabindex="-1">Ingress</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-3" aria-controls="tabpanel-3" aria-selected="false" tabindex="-1">LoadBalancer</button>
+        <button type="button" class="tabs__tab" role="tab" id="tab-4" aria-controls="tabpanel-4" aria-selected="false" tabindex="-1">OpenShift Route</button>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="tabpanel-1" aria-labelledby="tab-1">
+        <p><strong>What it is for:</strong> your own session, from your own machine, for as long as the command runs.</p>
+        <p>By default, the Veeam Kasten dashboard will not be exposed externally; to establish a connection to it use <code>kubectl --namespace kasten-io port-forward service/gateway 8080:80</code>, after which the dashboard will be available at <code>http://127.0.0.1:8080/k10/#/</code> [Src: Kasten Docs 9.0.2 p.212].</p>
+        <p>If you installed Veeam Kasten with a different release name than <code>k10</code>, the URL should be modified to replace the last occurrence of <code>k10</code> with the specified release name [Src: Kasten Docs 9.0.2 p.213].</p>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="tabpanel-2" aria-labelledby="tab-2" hidden>
+        <p><strong>What it is for:</strong> a cluster that already has an Ingress controller, and a dashboard other people need to reach.</p>
+        <p>If there is already an Ingress controller installed and the goal is to expose the Veeam Kasten dashboard through it, the option <code>--set ingress.create=true</code> must be specified with the <code>helm install</code> command [Src: Kasten Docs 9.0.2 p.215]. By default, the Ingress object is created with the name <code>{release-name}-ingress</code>, and a different name can be set with <code>--set ingress.name="&lt;custom-name&gt;"</code> [Src: Kasten Docs 9.0.2 p.215].</p>
+        <p>An Ingress class can be chosen for the Ingress object by adding that option to the Helm command [Src: Kasten Docs 9.0.2 p.215]:</p>
+        <p><code>--set ingress.create=true --set ingress.class=nginx</code></p>
+        <p>It is necessary to follow the specific Ingress controller guidelines to expose an external endpoint for the <code>k10-ingress</code> Kubernetes Ingress object that will be installed in the <code>kasten-io</code> namespace as part of the Helm installation [Src: Kasten Docs 9.0.2 p.215].</p>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="tabpanel-3" aria-labelledby="tab-3" hidden>
+        <p><strong>What it is for:</strong> exposing the dashboard through an external load balancer, with a DNS name in front of it.</p>
+        <p>To expose the Veeam Kasten dashboard via an external load balancer, you will need to configure an authentication method; the currently supported options are Basic Authentication, Token Authentication, or OpenID Connect Authentication [Src: Kasten Docs 9.0.2 p.213]. The options can be added to the install command for your environment, or applied as an upgrade [Src: Kasten Docs 9.0.2 p.214]:</p>
+        <p><code>helm upgrade k10 kasten/k10 --namespace=kasten-io \ --reuse-values \ --set externalGateway.create=true \ --set auth.tokenAuth.enabled=true</code></p>
+        <p>The dashboard will then be available at the <code>/k10/</code> URL path of the DNS or IP address set up using those options [Src: Kasten Docs 9.0.2 p.214]. If your environment does not support ExternalDNS, find the load balancer's public DNS or IP address first [Src: Kasten Docs 9.0.2 p.215]:</p>
+        <p><code>kubectl --namespace kasten-io get service gateway-ext \ -o jsonpath='{.status.loadBalancer.ingress[].hostname}'</code></p>
+      </div>
+      <div class="tabs__panel" role="tabpanel" id="tabpanel-4" aria-labelledby="tab-4" hidden>
+        <p><strong>What it is for:</strong> Red Hat OpenShift clusters, where Routes are the native way to publish a service.</p>
+        <p>The Veeam Kasten dashboard can also be accessed via an OpenShift Route [Src: Kasten Docs 9.0.2 p.60]. The Route is enabled from the install command with <code>--set route.enabled=true</code>, and TLS on that Route is a separate setting [Src: Kasten Docs 9.0.2 p.884].</p>
+        <p>On OpenShift the authentication decision has a native answer as well: the OpenShift OAuth server can be used to authenticate access to Veeam Kasten, and the OpenShift OAuth proxy can be used for authenticating access [Src: Kasten Docs 9.0.2 p.60]. By default, Veeam Kasten automatically configures the OAuth Client during installation, which includes extracting the Root CA certificates, creating the OAuth Client Service Account, and generating the corresponding secret [Src: Kasten Docs 9.0.2 p.237].</p>
+      </div>
+    </div>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Do not leave the dashboard behind port-forward; use an ingress with HTTPS [Src: Kasten Docs 9.0.2 p.1090]. A forwarded port is fine for the first ten minutes and wrong as a steady state — it ties dashboard access to one person's laptop and one running command.</p>
+      </div>
+    </div>
+
+    <h3>The four authentication modes you choose at install</h3>
+    <p class="prose">During installation, you have an option to choose an authentication mode: Direct Access, Basic Authentication, Token-based Authentication, or OpenID Connect [Src: Kasten Docs 9.0.2 p.208]. When exposing the Veeam Kasten dashboard externally, it is required that an authentication method is properly configured to secure access [Src: Kasten Docs 9.0.2 p.220]. Two more modes exist beyond that install-time list, and both matter in an enterprise: access can be authenticated against an Active Directory or LDAP server, enabled with <code>--set auth.ldap.enabled=true</code> and its supporting Helm values [Src: Kasten Docs 9.0.2 p.250], and on Red Hat OpenShift the OpenShift OAuth server can do the authenticating, enabled with <code>--set auth.openshift.enabled=true</code> [Src: Kasten Docs 9.0.2 p.237].</p>
+
+    <table class="data-table">
+      <thead><tr><th scope="col">Mode</th><th scope="col">How it is enabled</th><th scope="col">What to know</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Direct Access</td>
+          <td data-label="How it is enabled">No authentication configuration.</td>
+          <td data-label="What to know">No authentication method is configured, and when using Direct Access there is no RBAC set on Veeam Kasten: any user who has access to the dashboard can perform all Veeam Kasten operations, which is not advisable if granular access is needed [Src: Kasten Docs 9.0.2 p.220]. Read &ldquo;all operations&rdquo; literally — it includes the destructive ones, and with no authentication configured there is no authenticated identity behind any of them. Treat Direct Access as lab-only, not the exposure choice on a cluster whose restore points you would have to account for.</td>
+        </tr>
+        <tr>
+          <td>Basic Authentication</td>
+          <td data-label="How it is enabled"><code>--set auth.basicAuth.enabled=true</code> plus generated htpasswd credentials [Src: Kasten Docs 9.0.2 p.221].</td>
+          <td data-label="What to know">Protects the dashboard with a user name and password; when using Basic Authentication there is also no RBAC set on Veeam Kasten [Src: Kasten Docs 9.0.2 p.221].</td>
+        </tr>
+        <tr>
+          <td>Token Authentication</td>
+          <td data-label="How it is enabled"><code>--set auth.tokenAuth.enabled=true</code> [Src: Kasten Docs 9.0.2 p.222].</td>
+          <td data-label="What to know">Once the dashboard is configured you will be prompted to provide a bearer token that will be used when accessing the dashboard [Src: Kasten Docs 9.0.2 p.222].</td>
+        </tr>
+        <tr>
+          <td>OpenID Connect</td>
+          <td data-label="How it is enabled">Configured as an authentication mode at install time [Src: Kasten Docs 9.0.2 p.208].</td>
+          <td data-label="What to know">The option to reach for when dashboard identities should come from the identity provider your organisation already runs [Src: Kasten Docs 9.0.2 p.208].</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="prose">Two details are worth carrying forward. First: token-based authentication is always enabled as a secondary authentication type to let Veeam Kasten Multi-Cluster Manager components and Veeam Backup &amp; Replication services work with Veeam Kasten [Src: Kasten Docs 9.0.2 p.220]. Second: Basic Authentication requires you to generate htpasswd credentials by either using an online tool or via the htpasswd binary found on most systems, and then supply the resulting string with the <code>helm install</code> or upgrade command [Src: Kasten Docs 9.0.2 p.221]. The guide does not publish an htpasswd invocation to copy, so do not go hunting for one — what it does specify is the shape of the string you have to produce: htpasswd credentials in the format of <code>username:hashedpassword</code>, generated using either an online tool or the htpasswd binary found on most systems, after which you use those credentials to log in to the dashboard [Src: Kasten Docs 9.0.2 p.45]. The worked example below shows that string in place on the command line, which is the form to compare your own output against.</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">helm flags · basic authentication</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the basic authentication flags to the clipboard">Copy</button>
+      </div>
+      <pre><code>--set auth.basicAuth.enabled=true \
+--set auth.basicAuth.htpasswd='example:$apr1$qrAVXu.v$Q8YVc50vtiS8KPmiyrkld0'</code></pre>
+    </div>
+    <p class="caption">Alternatively you can use an existing secret that contains a file created with htpasswd, referenced with <code>--set auth.basicAuth.secretName=my-basic-auth-secret</code>; the secret must be in the Veeam Kasten namespace, and it must be created with the key named <code>auth</code> and the value as the password generated using htpasswd in the data field of the secret [Src: Kasten Docs 9.0.2 p.221].</p>
+
+    <p class="prose">For token authentication, the most common token type you can use is a service account bearer token, and <code>kubectl</code> will generate one for a service account that you know has the proper permissions [Src: Kasten Docs 9.0.2 p.222]. Generating a token with an expiration period is the recommended practice [Src: Kasten Docs 9.0.2 p.222].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · service account token</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the token creation command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl --namespace kasten-io create token my-kasten-sa --duration=24h</code></pre>
+    </div>
+    <p class="caption">The example assumes Veeam Kasten is installed in the <code>kasten-io</code> namespace and the ServiceAccount is named <code>my-kasten-sa</code> [Src: Kasten Docs 9.0.2 p.222].</p>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Where fleet-wide reporting lives</div>
+        <p>Veeam Kasten Multi-Cluster Manager appeared above only as the reason token authentication stays enabled, which undersells it if you are the person who has to show protection status across every cluster you own. It is a product surface of its own: the Multi-Cluster manager simplifies Veeam Kasten operations across multiple Kubernetes clusters, administrators define primary-secondary relationships between their Veeam Kasten instances, primary instances provide a single entry point and dashboard for managing secondary instances, and the secondaries' actions and metrics are summarized in the primary instance [Src: Kasten Docs 9.0.2 p.1012]. This course deploys and operates one cluster, so the single-cluster dashboard is what you will see in Modules 04 and 05 — but the rollup you would take to a leadership review is the primary instance's dashboard, not this one.</p>
+      </div>
+    </div>
+
+    <div class="sales-aside mt-24">
+      <span class="sales-aside__label">For a customer conversation</span>
+      <p>A backup console that is closed by default and has to be deliberately published is a security posture, not an inconvenience. The point to make is that the exposure decision and the authentication decision are taken together at install time, and that the platform's own identity system — an Ingress controller, a load balancer, an OpenShift OAuth server, or an OpenID Connect provider — is what does the authenticating.</p>
+    </div>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 5 · STORAGE INTEGRATION ════════ -->
+<section id="storage">
+  <div class="wrap">
+    <span class="eyebrow">Storage integration · 05</span>
+    <h2>One annotation decides whether snapshots work</h2>
+    <p class="lede">
+      By the end of this section you'll be able to annotate a VolumeSnapshotClass so Veeam Kasten uses it, prove that exactly one per provisioner carries that annotation, and explain why a CSI snapshot on its own is not a backup.
+    </p>
+
+    <div class="prose">
+      <p>Veeam Kasten supports direct integration with public cloud storage vendors as well as CSI integration, and while most integrations are transparent, some need configuration [Src: Kasten Docs 9.0.2 p.102]. The storage providers that are either automatically discovered and configured within Veeam Kasten or can be configured for direct integration include Amazon Elastic Block Store, Azure Managed Disks, Google Persistent Disk, Ceph, Cinder-based providers on OpenStack, vSphere Cloud Native Storage, Portworx, and Veeam Backup [Src: Kasten Docs 9.0.2 p.102].</p>
+      <p>Apart from direct storage provider integration, Veeam Kasten also supports invoking volume snapshot operations via the Container Storage Interface [Src: Kasten Docs 9.0.2 p.102]. This is the path most on-premises clusters take, and it needs one specific thing from you.</p>
+    </div>
+
+    <h3>The annotation</h3>
+    <p class="prose">For each CSI driver, ensure that a VolumeSnapshotClass has been added with the Veeam Kasten annotation <code>k10.kasten.io/is-snapshot-class: "true"</code> [Src: Kasten Docs 9.0.2 p.102]. If an existing VolumeSnapshotClass does not match the required configuration, the documentation shows how to modify it, and if it cannot be modified, a new one can be created with the required annotation [Src: Kasten Docs 9.0.2 p.103]. The example below is a correctly configured class captured from a live cluster — the guide's own Azure Disk VolumeSnapshotClass [Src: Kasten Docs 9.0.2 p.105].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · inspect a VolumeSnapshotClass</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the VolumeSnapshotClass example to the clipboard">Copy</button>
+      </div>
+      <pre><code>$ kubectl get volumesnapshotclass csi-azuredisk-vsc -o yaml
+apiVersion: snapshot.storage.k8s.io/v1
+deletionPolicy: Delete
+driver: disk.csi.azure.com
+kind: VolumeSnapshotClass
+metadata:
+  annotations:
+    k10.kasten.io/is-snapshot-class: "true"
+    snapshot.storage.kubernetes.io/is-default-class: "true"
+  creationTimestamp: "2024-10-28T14:48:50Z"
+  generation: 1
+  name: csi-azuredisk-vsc
+  resourceVersion: "2502"
+  uid: 9ebec324-0f09-42fa-aace-39440b3184b6
+parameters:
+  incremental: "true" # available values: "true", "false" ("true" by default for Azure Public Cloud, and "false" by default for Azure Stack Cloud)
+  networkAccessPolicy: "AllowAll"
+  publicNetworkAccess: "Enabled"</code></pre>
+    </div>
+    <p class="caption">The annotation is what matters; the API group has moved on. The guide also illustrates this object with its Alpha and Beta snapshot API examples [Src: Kasten Docs 9.0.2 p.102, p.103], but on every Kubernetes release in this build's support matrix — 1.31 to 1.34, and 1.30 or 1.29 only as OpenShift [Src: Kasten Docs 9.0.2 p.862] — the group is <code>snapshot.storage.k8s.io/v1</code>, as shown here. The driver, name, timestamps, deletion policy and parameters belong to the sample Azure cluster — yours will differ.</p>
+
+    <p class="prose">Whenever Veeam Kasten detects volumes that were provisioned via a CSI driver, it will look for a VolumeSnapshotClass with the Veeam Kasten annotation for the identified CSI driver and use it to create snapshots [Src: Kasten Docs 9.0.2 p.103]. An existing VolumeSnapshotClass can be annotated in place [Src: Kasten Docs 9.0.2 p.103].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · annotate</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the annotate command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl annotate volumesnapshotclass ${VSC_NAME} \
+       k10.kasten.io/is-snapshot-class=true</code></pre>
+    </div>
+
+    <div class="note note--caution">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Verify that only one VolumeSnapshotClass per storage provisioner has the Veeam Kasten annotation — currently, if no VolumeSnapshotClass or more than one has the Veeam Kasten annotation, snapshot operations will fail [Src: Kasten Docs 9.0.2 p.103]. Two annotated classes is the failure mode that looks like nothing at install time and shows up later as failed snapshots.</p>
+      </div>
+    </div>
+
+    <p class="prose">The check is one command. List the VolumeSnapshotClasses that carry the annotation and count the answers per provisioner [Src: Kasten Docs 9.0.2 p.103].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · verify</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the annotation verification command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl get volumesnapshotclass -o json | \
+       jq '.items[] | select (.metadata.annotations["k10.kasten.io/is-snapshot-class"]=="true") | .metadata.name'</code></pre>
+    </div>
+
+    <p class="prose">As an alternative to annotating the VolumeSnapshotClass, a StorageClass can be annotated instead, and all volumes created with that StorageClass will be snapshotted by the specified VolumeSnapshotClass [Src: Kasten Docs 9.0.2 p.103].</p>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell · StorageClass alternative</span>
+        <button type="button" class="code-block__copy" aria-label="Copy the StorageClass annotation command to the clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl annotate storageclass ${SC_NAME} \
+      k10.kasten.io/volume-snapshot-class=${VSC_NAME}</code></pre>
+    </div>
+
+    <div class="prose">
+      <h4>Two more storage details that bite later</h4>
+      <ul>
+        <li><strong>Cross-cluster names must match.</strong> If application migration across clusters is needed, ensure that the VolumeSnapshotClass names match between both clusters; as the VolumeSnapshotClass is also used for restoring volumes, an identical name is required [Src: Kasten Docs 9.0.2 p.103].</li>
+        <li><strong>The snapshotter has a floor.</strong> Ensure that the csi-snapshotter container for all CSI drivers you might have installed has a minimum version of v1.2.2 [Src: Kasten Docs 9.0.2 p.103] — the documentation states this as a hard minimum, so treat it as a check to make before your first policy runs, not a diagnosis to reach for after one fails.</li>
+      </ul>
+    </div>
+
+    <h3>Why a snapshot is not a backup here either</h3>
+    <div class="compare">
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+        </div>
+        <h3>What the documentation says</h3>
+        <div>
+          <div class="compare__qa-row">
+            <div class="compare__q">Are CSI snapshots durable?</div>
+            <div class="compare__a">CSI snapshots are not durable [Src: Kasten Docs 9.0.2 p.102].</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">What happens when the volume goes?</div>
+            <div class="compare__a">With the default and recommended deletionPolicy, deleting a volume or the namespace containing it leads to a cascading delete of the VolumeSnapshotContent object and therefore the underlying storage snapshot [Src: Kasten Docs 9.0.2 p.102].</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">Is a different deletion policy enough?</div>
+            <div class="compare__a">Setting deletionPolicy to Delete isn't sufficient either, as some storage systems will force snapshot deletion if the associated volume is deleted [Src: Kasten Docs 9.0.2 p.102].</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">So what is required?</div>
+            <div class="compare__a">Enabling backups together with volume snapshots is therefore required for a durable backup [Src: Kasten Docs 9.0.2 p.102].</div>
+          </div>
+        </div>
+      </div>
+      <div class="compare__card card-dark">
+        <h3 class="card-dark__title">The habit that carries over</h3>
+        <p class="card-dark__lede">You already refuse to count a storage snapshot as a backup. The reasoning is the same on Kubernetes, and the mechanism is one layer further away from you.</p>
+        <div class="card-dark__list">
+          <div class="card-dark__row">
+            <span class="card-dark__idx">01</span>
+            <div><strong>The snapshot lives with the volume.</strong><br/><span>Lose the volume or the namespace and the snapshot goes with it. Section 6 is where you give the data somewhere else to live.</span></div>
+          </div>
+          <div class="card-dark__row">
+            <span class="card-dark__idx">02</span>
+            <div><strong>Veeam Kasten protects the restore path.</strong><br/><span>Veeam Kasten creates a clone of the original VolumeSnapshotClass with the DeletionPolicy set to 'Retain', so that when restoring a CSI VolumeSnapshot an independent replica is created using this cloned class to avoid accidental deletions of the underlying VolumeSnapshotContent [Src: Kasten Docs 9.0.2 p.102].</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Infrastructure profiles: key steps</h3>
+    <p class="prose">Some storage integrations need credentials of their own, held in an infrastructure profile. To enable Veeam Kasten to take snapshots and restore volumes from AWS, an Infrastructure Profile must be created from the Infrastructure page of the Profiles menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.103]. On VMware, if a vSphere Infrastructure Profile is configured, Veeam Kasten will create First Class Disk snapshots of volumes via vCenter [Src: Kasten Docs 9.0.2 p.118].</p>
+    <p class="prose"><strong>This walkthrough is abbreviated.</strong> The Create Infrastructure Profile wizard has three steps — Name and Provider, Configuration, and Summary — and the two screens below are the two the documentation illustrates [Src: Kasten Docs 9.0.2 p.102]. Treat them as a shape to recognise rather than a complete click path. As with a Location Profile, an Infrastructure Profile is a Kubernetes custom resource under the hood: the guide's API examples create an AWS Infrastructure Profile declaratively as a Profile custom resource applied with <code>kubectl apply</code> [Src: Kasten Docs 9.0.2 p.623, p.624] — so in a GitOps-managed rollout this step does not have to stay a dashboard click-path.</p>
+
+    <div class="prose">
+      <h4>The vSphere profile, in full</h4>
+      <p>For the one integration this audience already owns, an abbreviated shape is not enough — so here is the whole of it. A vSphere Infrastructure Profile must be created from the Infrastructure page of the Profiles menu in the navigation sidebar to identify the vCenter server; the vCenter Server field is required and must be a valid IP address or hostname that points to the vSphere infrastructure, and the vSphere User and vSphere Password fields are also required [Src: Kasten Docs 9.0.2 p.123]. Note the precedence: if vSphere credentials are provided during the installation of Veeam Kasten, those parameters will be ignored in favor of the credentials contained in the Infrastructure profile [Src: Kasten Docs 9.0.2 p.123]. So the profile wins over the install flags from Section 3 — which is the answer to &ldquo;do I have to redo the install if the account changes?&rdquo;</p>
+      <p>On the vCenter side, it is recommended that a dedicated user account be created for Veeam Kasten, and to authorize the account a role is created with the following privileges for vSphere 7.0.x and 8.0.x [Src: Kasten Docs 9.0.2 p.124]:</p>
+      <ul>
+        <li><strong>Datastore</strong> — Allocate space, Browse datastore, Low level file operations [Src: Kasten Docs 9.0.2 p.124].</li>
+        <li><strong>Global</strong> — Disable methods, Enable methods, Licenses [Src: Kasten Docs 9.0.2 p.124].</li>
+        <li><strong>Virtual Machine Snapshot Management</strong> — Create snapshot, Remove snapshot, Revert to snapshot [Src: Kasten Docs 9.0.2 p.124].</li>
+        <li><strong>Cryptographic operations</strong> (vSphere 8.0) — Decrypt [Src: Kasten Docs 9.0.2 p.124].</li>
+        <li>vSphere with Tanzu clusters require one more privilege to resolve paravirtualized volume handles: CNS &rarr; Searchable [Src: Kasten Docs 9.0.2 p.124].</li>
+      </ul>
+      <p>Assign that role to the dedicated Veeam Kasten user account on the root vCenter object and on the datacenter objects, propagating down each subtree to reach datastore and virtual machine objects [Src: Kasten Docs 9.0.2 p.124]. This is the request you send your vSphere team, and it is close enough to a Veeam Backup &amp; Replication service-account request that you can reuse the conversation.</p>
+    </div>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0102__Installing_Veeam_Kasten_Storage_Integration_Storage_Integrat__2872x1680__031.png" loading="lazy" alt="The Create Infrastructure Profile page in Veeam Kasten, on step one of three. A Steps list on the left shows Name and Provider highlighted, followed by Configuration and Summary. The form has an Infra Profile Name field containing my-aws-infra-profile, described as the display name for this infrastructure profile, and a Storage Provider dropdown set to Amazon S3. Cancel and Next buttons sit at the bottom right.">
+      <figcaption class="screenshot__caption">
+        <strong>Step 1 — Name and Provider.</strong> A display name and a storage provider. The provider you pick here decides which fields the next step asks for.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.102. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0102__Installing_Veeam_Kasten_Storage_Integration_Storage_Integrat__2010x1430__032.png" loading="lazy" alt="Step two of the Create Infrastructure Profile wizard, headed Configure AWS Infrastructure Profile. The Steps list shows Name and Provider completed and Configuration active. The form has empty AWS Access Key and AWS Secret fields, a toggle labelled Execute Operations Using an AWS IAM Role with the hint that it switches to an IAM role for executing cloud-related operations, and a checkbox labelled Opt-out of EBS Direct for Changed Block Tracking noting that using EBS Changed Block Tracking is more efficient but may incur additional costs. Back and Next buttons sit at the bottom right.">
+      <figcaption class="screenshot__caption">
+        <strong>Step 2 — Configuration, for an AWS profile.</strong> Keys, or a toggle that says use an IAM role instead. The credential choice made at install time is the same choice presented here.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.102. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0102__Installing_Veeam_Kasten_Storage_Integration_Storage_Integrat__2022x1326__042.png" loading="lazy" alt="The same Create Infrastructure Profile wizard on the Configuration step, this time headed Configure vSphere Infrastructure Profile. The form has three empty fields: vCenter Server, described as the IP address or hostname of the vCenter server that manages your vSphere infrastructure, vSphere User, and vSphere Password with a show-password eye icon. Back and Next buttons sit at the bottom right.">
+      <figcaption class="screenshot__caption">
+        <strong>The same step, for a vSphere profile.</strong> vCenter server, user, password — the credentials you already hold. This is the screen where a Veeam Data Platform administrator's existing vSphere access becomes useful on Kubernetes.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.102. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 6 · FIRST LOCATION PROFILE ════════ -->
+<section id="location">
+  <div class="wrap">
+    <span class="eyebrow">Your first location profile · 06</span>
+    <h2>The repository-shaped object, and where to point it</h2>
+    <p class="lede">
+      By the end of this section you'll be able to explain why a location profile is needed at all, name the destination types available, and create a first profile — including a Veeam repository profile, if the estate you already run is where this data should go.
+    </p>
+
+    <div class="prose">
+      <p>Veeam Kasten can invoke protection operations such as snapshots within a cluster without requiring additional credentials in many environments [Src: Kasten Docs 9.0.2 p.315]. That is not sufficient for essential operations such as performing real backups, enabling cross-cluster and cross-cloud application migration, and enabling disaster recovery of the Veeam Kasten system itself [Src: Kasten Docs 9.0.2 p.315]. To enable those actions that span the lifetime of any one cluster, Veeam Kasten needs to be configured with access to external object storage or external NFS/SMB file storage, and this is accomplished via the creation of Location Profiles [Src: Kasten Docs 9.0.2 p.315].</p>
+      <p>Module 01 named this object as the repository-equivalent, and the framing holds with one correction worth keeping. A backup repository in Veeam Backup &amp; Replication is a place plus the settings that govern it. A location profile is closer to a place plus the credentials to reach it — the retention and scheduling that a repository partly carries live in the policy instead, which Module 05 covers.</p>
+    </div>
+
+    <p class="prose">Location Profile creation can be accessed from the Location page of the Profiles menu in the navigation sidebar, or via the CRD-based Profiles API [Src: Kasten Docs 9.0.2 p.315]. To create a location profile, click <strong>Create New Profile</strong> on the profiles page [Src: Kasten Docs 9.0.2 p.315].</p>
+
+    <p class="prose"><strong>Before you click that button, check the path.</strong> You already do this in Veeam Data Platform before adding a repository or a Cloud Connect target, and the same habit applies here — the guide's own disaster-recovery guidance states plainly that clusters must have network connectivity to at least one external storage location such as S3, Google Cloud or Azure, and that a corresponding location profile must be configured to allow access to it [Src: Kasten Docs 9.0.2 p.474]. Upon clicking Submit the dialog will validate the input data [Src: Kasten Docs 9.0.2 p.338], which means a firewalled endpoint, an unresolvable DNS name or a closed API port reaches you as a failed validation on the profile card rather than as an obvious network error. Confirming reachability from the cluster first turns a puzzling red badge into a five-minute check you have already done.</p>
+
+    <h3>What you can point it at</h3>
+    <table class="data-table">
+      <thead><tr><th scope="col">Destination</th><th scope="col">What you provide</th><th scope="col">Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Amazon S3 or S3 Compatible Storage</td>
+          <td data-label="What you provide">Access key and secret, region, bucket name [Src: Kasten Docs 9.0.2 p.315].</td>
+          <td data-label="Notes">The bucket must be in the region specified; an IAM role may be specified by selecting the <strong>Execute Operations Using an AWS IAM Role</strong> button [Src: Kasten Docs 9.0.2 p.315].</td>
+        </tr>
+        <tr>
+          <td>Azure Storage</td>
+          <td data-label="What you provide">An Azure Storage Account, a Cloud Environment and a Container [Src: Kasten Docs 9.0.2 p.318].</td>
+          <td data-label="Notes">The Container must be created beforehand [Src: Kasten Docs 9.0.2 p.318].</td>
+        </tr>
+        <tr>
+          <td>Google Cloud Storage</td>
+          <td data-label="What you provide">Credentials for the Google Cloud storage location [Src: Kasten Docs 9.0.2 p.315].</td>
+          <td data-label="Notes">One of the four supported object storage providers [Src: Kasten Docs 9.0.2 p.315].</td>
+        </tr>
+        <tr>
+          <td>Veeam Data Cloud Vault</td>
+          <td data-label="What you provide">A storage vault assigned to the registered cluster [Src: Kasten Docs 9.0.2 p.324].</td>
+          <td data-label="Notes">Select <strong>Create New Profile</strong> and choose the VDC Vault provider type; the dialog will validate the input data [Src: Kasten Docs 9.0.2 p.324].</td>
+        </tr>
+        <tr>
+          <td>Veeam Repository</td>
+          <td data-label="What you provide">The DNS name or IP address of the Veeam backup server, the API port, and a backup repository name [Src: Kasten Docs 9.0.2 p.336], plus access credentials in the Username and Password fields [Src: Kasten Docs 9.0.2 p.337].</td>
+          <td data-label="Notes">May be used as the destination for both application metadata and persistent volume snapshot data in compatible environments [Src: Kasten Docs 9.0.2 p.335].</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="prose">Veeam Kasten creates Kopia repositories in object store locations, using Kopia as a data mover, which implicitly provides support to deduplicate, encrypt and compress data at rest — the three things that keep your object storage bill down and your exported data unreadable at rest, with nothing for you to configure or remember; Veeam Kasten performs periodic maintenance on these repositories to recover released storage [Src: Kasten Docs 9.0.2 p.315]. That trio is not a new thing to learn: deduplication, compression and encryption at rest are what a Veeam Backup &amp; Replication backup file already gives you today, with Kopia doing the work here instead of the backup server. If an S3-compatible object storage system is used that is not hosted by one of the supported cloud providers, an S3 endpoint URL will need to be specified and optionally SSL verification might need to be disabled — and disabling SSL verification is only recommended for test setups [Src: Kasten Docs 9.0.2 p.316].</p>
+
+    <p class="prose"><strong>Immutability is a toggle, and it belongs on by default.</strong> If the bucket has object locking enabled, set the <strong>Enable Immutable Backups</strong> toggle [Src: Kasten Docs 9.0.2 p.315] — this is the setting that protects exported restore points from tampering: in a locked bucket, restore point data cannot be deleted or modified within the set protection period, even with administrator privileges, so a clean copy survives an attacker who has obtained privileged object store credentials [Src: Kasten Docs 9.0.2 p.341]. Module 04 gives this weight for the profile behind Veeam Kasten's own disaster recovery, and the control is the same one here: treat it as the standing choice for every production export location profile, not a special case. One documented exception, so you do not pay for nothing: the generic storage and shareable volume backup and restore workflows are not compatible with the protections immutable backups afford — such a profile still works, but the protection period is ignored and the profile is treated as non-immutable, and using an object-locking bucket for those workflows can amplify storage usage without any additional benefit [Src: Kasten Docs 9.0.2 p.341]. A profile without immutability is the first thing an auditor or a CISO will pick out of your configuration, and the answer &ldquo;the bucket was not locked&rdquo; is a procurement decision you want on the record before the review, not during it.</p>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Did you know?</div>
+        <p>If the bucket is using S3 Intelligent-Tiering, only the Standard-IA, One Zone-IA and Glacier Instant Retrieval storage classes are supported by Veeam Kasten [Src: Kasten Docs 9.0.2 p.315]. Worth checking against the lifecycle rules already on a bucket someone else created.</p>
+      </div>
+    </div>
+
+    <h3>Pointing it at a Veeam repository</h3>
+    <p class="prose">This is the profile that connects the two halves of your estate. To create a Veeam Repository location profile, select <strong>Create New Profile</strong> and specify Veeam Repository as the provider type [Src: Kasten Docs 9.0.2 p.335]. Provide the DNS name or the IP address of the Veeam backup server in the <strong>Veeam Backup Server</strong> field; the <strong>Veeam Backup Server API Port</strong> field is pre-configured with the installation default value and may be changed if necessary; specify the name of a backup repository on this server in the <strong>Backup Repository</strong> field [Src: Kasten Docs 9.0.2 p.336].</p>
+
+    <p class="prose">The field list does not end there, and this is the part to read before you touch a production backup server. Provide access credentials in the <strong>Username</strong> and <strong>Password</strong> fields [Src: Kasten Docs 9.0.2 p.337] — so yes, this profile authenticates, and the account is yours to prepare. Ensure Access Permissions are granted within Veeam Backup &amp; Replication for the specified account, or the related security group, and for the backup repository [Src: Kasten Docs 9.0.2 p.338]. Treat that as its own pre-implementation task on the Veeam Data Platform side of the estate: the account exists and is scoped to the one repository this profile names, before the Veeam Kasten administrator opens the dialog.</p>
+
+    <p class="prose">Two more things happen when you submit. Upon clicking Submit, the dialog will validate the input data, and communication with the server uses SSL and requires that the server's certificate be trusted by Veeam Kasten [Src: Kasten Docs 9.0.2 p.338] — so an untrusted or self-signed certificate on the backup server is a failure mode you can predict rather than discover. Alternatively, enabling the <strong>Skip certificate chain and hostname verification</strong> option disables certificate validation [Src: Kasten Docs 9.0.2 p.338], which is the same trade you already weigh when a Veeam Backup &amp; Replication component presents an untrusted certificate: available, and not the answer you want in production.</p>
+
+    <div class="prose">
+      <h4>Five things to know before you choose this route</h4>
+      <ul>
+        <li>Exporting to a Veeam Repository requires the use of the Block Mode Export mechanism for all volume snapshots created by the policy, and when a Veeam Repository is selected as the Export Location Profile, block mode export is enabled automatically [Src: Kasten Docs 9.0.2 p.128]. Check that your provisioner can do it before you build the profile: a Veeam Repository is a destination for both application metadata and persistent volume snapshot data on any cluster where the storage provisioner for persistent volumes supports block mode export [Src: Kasten Docs 9.0.2 p.127], and while both Filesystem and Block persistent volume modes are supported, only storage provisioners capable of performing block mode exports are compatible [Src: Kasten Docs 9.0.2 p.129]. This is the go/no-go gate on the whole route, and it is a property of the CSI driver rather than something a Helm flag can add.</li>
+        <li>Veeam Kasten does not support export to Veeam Backup &amp; Replication direct object storage repository types [Src: Kasten Docs 9.0.2 p.128].</li>
+        <li>Each Veeam Kasten instance may only export to a single, unique Veeam Backup &amp; Replication backup server; multiple location profiles may be created to export to separate repositories exposed by the same backup server, and multiple Veeam Kasten instances may be integrated with the same backup server [Src: Kasten Docs 9.0.2 p.129].</li>
+        <li>In order to properly restore volume data, the name of the Veeam Repository location profile on both the source and target cluster must be identical [Src: Kasten Docs 9.0.2 p.130].</li>
+        <li>Your CSI driver decides how expensive each export is. Veeam Kasten accelerates incremental backups to Veeam Backup &amp; Replication for Azure Disk CSI (<code>disk.csi.azure.com</code>), CephRBD CSI (<code>rbd.csi.ceph.com</code>) and VMware vSphere CSI (<code>csi.vsphere.vmware.com</code>); where that storage integration is unavailable, each export reads the entire source volume, and only the changes are sent to Veeam Backup &amp; Replication [Src: Kasten Docs 9.0.2 p.129].</li>
+      </ul>
+    </div>
+
+    <h3>What you should see when it works</h3>
+    <p class="prose">When a location profile is created, the config profile will be created, and a profile appears on the profiles page [Src: Kasten Docs 9.0.2 p.317]. The card carries the provider, the profile name, a validation status, and the actions available on it.</p>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0102__Installing_Veeam_Kasten_Storage_Integration_Storage_Integrat__948x1024__036.png" loading="lazy" alt="A created profile card in Veeam Kasten. The header reads AZURE above the profile name federated-azure-profile, with a green Success badge on the right. Below it, a Subscription ID beginning 899abe23-34ce and a blurred Resource Group, then Credential Type set to Federated Identity. A read-only command box shows kubectl get profile federated-azure-profile -n kasten-i, truncated, with a copy button. An information panel states that the profile is using Federated Identity, is read-only and cannot be edited or deleted. A footer offers Revalidate and YAML actions.">
+      <figcaption class="screenshot__caption">
+        <strong>A validated profile.</strong> The green Success badge is the confirmation you are looking for; the <strong>Revalidate</strong> action re-runs the check when credentials or endpoints change. This example is an Azure profile authenticated with federated identity, which is why it is marked read-only.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.102. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">You now have a working deployment</div>
+        <p>A checked cluster, a verified install, a reachable dashboard with an authentication decision behind it, annotated storage, and a destination for exported data. That is the whole of a first-day Veeam Kasten implementation — everything after this is policy, upkeep, and recovery.</p>
+      </div>
+    </div>
+
+    <div class="note note--key mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Remember</div>
+        <p>Snapshots keep data on the cluster's storage. A location profile is what lets data leave the cluster — which is also what makes cross-cluster restores, migration, and disaster recovery of Veeam Kasten itself possible [Src: Kasten Docs 9.0.2 p.315]. Create one before you build your first policy in Module 05, not after.</p>
+      </div>
+    </div>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ KNOWLEDGE CHECK ════════ -->
+<section id="check" class="check-section">
+  <div class="wrap">
+    <span class="eyebrow">Knowledge check · 07</span>
+    <h2>Check your understanding</h2>
+    <p class="lede">Five questions on the deployment runbook you have worked through. Every answer is somewhere above this line.</p>
+
+    <div class="quiz">
+      <script type="application/json" class="quiz__data">
+      [
+        {
+          "q": "You are preparing to install Veeam Kasten on a cluster you inherited. The storage team says their CSI driver 'supports snapshots'. What does running the pre-flight checks with the primer tool add to that assurance?",
+          "opts": [
+            { "t": "It validates the Kubernetes settings, catalogs the available StorageClasses, and performs basic validation of the cluster's CSI capabilities and relevant objects.", "correct": true, "why": "Correct. The primer runs in a cluster pod and does exactly those three things, which turns a vendor claim into an observed result on your cluster." },
+            { "t": "It installs the CSI driver's snapshot controller if the cluster is missing it.", "correct": false, "why": "The primer validates and catalogs; it does not install storage components. It creates and then cleans up only a ServiceAccount and a ClusterRoleBinding to perform its sanity checks." },
+            { "t": "It confirms the cluster is running in FIPS mode, which the install requires.", "correct": false, "why": "The opposite: the pre-flight check does not include verification of the cluster being in FIPS mode, so that condition has to be confirmed separately." }
+          ]
+        },
+        {
+          "q": "A colleague annotates a second VolumeSnapshotClass with k10.kasten.io/is-snapshot-class=true for the same storage provisioner, reasoning that a spare cannot hurt. What happens?",
+          "opts": [
+            { "t": "Veeam Kasten uses whichever class was annotated first and ignores the second.", "correct": false, "why": "There is no first-wins rule. The requirement is exactly one annotated class per provisioner." },
+            { "t": "Snapshot operations will fail, because more than one annotated VolumeSnapshotClass per provisioner is not supported.", "correct": true, "why": "Correct. If no VolumeSnapshotClass or more than one has the annotation, snapshot operations fail — which is why verifying the count is part of the readiness check rather than an afterthought." },
+            { "t": "Nothing changes until a restore is attempted, at which point the duplicate is resolved automatically.", "correct": false, "why": "The failure is on the snapshot side, not deferred to restore time. The duplicate is never resolved automatically." }
+          ]
+        },
+        {
+          "q": "The install is verified and you have opened the dashboard with a forwarded local port. Two other administrators now need access. What does that requirement change?",
+          "opts": [
+            { "t": "Nothing structural — share the port-forward command and each administrator runs it from their own machine.", "correct": false, "why": "Technically possible, but the documentation is explicit that the dashboard should not be left behind port-forward; an ingress with HTTPS is the recommended path." },
+            { "t": "You expose the dashboard through an Ingress, LoadBalancer, or OpenShift Route, and configure an authentication method as part of doing so.", "correct": true, "why": "Correct. Exposing the dashboard externally requires that an authentication method is properly configured, so the exposure decision and the authentication decision are taken together." },
+            { "t": "You enable Direct Access so the other administrators can reach the dashboard without extra configuration.", "correct": false, "why": "Direct Access configures no authentication and sets no RBAC — any user with dashboard access can perform all Veeam Kasten operations, destructive ones included, with no authenticated identity behind the action. It is a lab posture, not an access-sharing method." }
+          ]
+        },
+        {
+          "q": "Snapshots are working on the cluster and no location profile has been created yet. Which capability are you still missing?",
+          "opts": [
+            { "t": "Scheduling — snapshots cannot be run on a schedule until a location profile exists.", "correct": false, "why": "Scheduling belongs to policies. Snapshot operations within the cluster work without the additional credentials a location profile carries." },
+            { "t": "Any operation that has to outlive the cluster: real backups, cross-cluster and cross-cloud migration, and disaster recovery of Veeam Kasten itself.", "correct": true, "why": "Correct. In-cluster snapshots need no extra credentials, but backups, migration, and disaster recovery of the Veeam Kasten system all require access to external object storage or NFS/SMB file storage through a location profile." },
+            { "t": "Volume snapshot support — the location profile is what tells Veeam Kasten which VolumeSnapshotClass to use.", "correct": false, "why": "That job belongs to the VolumeSnapshotClass annotation, which is storage integration rather than location configuration." }
+          ]
+        },
+        {
+          "q": "You point a location profile at a repository on your existing Veeam Backup & Replication server and select it as the Export Location Profile for a policy. What does that selection do to the export mechanism?",
+          "opts": [
+            { "t": "Block mode export is enabled automatically, because exporting to a Veeam Repository requires block mode export for all volume snapshots the policy creates.", "correct": true, "why": "Correct. The requirement and the automatic behaviour go together, so there is no separate switch for you to remember to set." },
+            { "t": "Filesystem mode export is used, because a Veeam repository presents itself as a file share.", "correct": false, "why": "Exporting to a Veeam Repository requires the block mode export mechanism for every volume snapshot the policy creates." },
+            { "t": "The mechanism is unchanged; the destination type has no bearing on how snapshot data is exported.", "correct": false, "why": "The destination does decide it here — selecting a Veeam Repository as the Export Location Profile enables block mode export automatically." }
+          ]
+        }
+      ]
+      </script>
+    </div>
+    <div class="quiz-score">
+      <div class="quiz-score__pct">0%</div>
+      <div class="quiz-score__label">Complete the knowledge check to see your score.</div>
+    </div>
+
+    <div class="continue" data-continue>
+      <button class="continue__btn" type="button">Continue
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ RECAP ════════ -->
+<section id="review" class="review">
+  <div class="review__inner">
+    <span class="eyebrow eyebrow--bright">Recap · 08</span>
+    <h2>What you covered</h2>
+    <p class="lede">A cluster checked, a product installed, a dashboard reached and secured, storage wired up, and a destination for exported data. Module 04 takes the deployment you now have and keeps it healthy.</p>
+    <div class="review-grid">
+      <div class="review-item"><div class="review-item__num">01</div><div class="review-item__text">The platform, Helm, namespace, and storage prerequisites Veeam Kasten expects — and why the storage question carries the most weight.</div></div>
+      <div class="review-item"><div class="review-item__num">02</div><div class="review-item__text">Running the pre-flight checks with the primer tool, reading its output, and judging readiness from evidence rather than assurance.</div></div>
+      <div class="review-item"><div class="review-item__num">03</div><div class="review-item__text">The Helm install into the <code>kasten-io</code> namespace, and verifying it by watching every pod reach Running.</div></div>
+      <div class="review-item"><div class="review-item__num">04</div><div class="review-item__text">Four dashboard access paths and the authentication modes, matched to how the dashboard needs to be reached.</div></div>
+      <div class="review-item"><div class="review-item__num">05</div><div class="review-item__text">CSI storage integration through the VolumeSnapshotClass annotation, and a first location profile so exported data has a destination.</div></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ════════ FOOTER NAV ════════ -->
+<nav class="lesson-nav">
+  <a href="Lesson02_Kubernetes_Foundations_for_Backup_Admins.html" class="lesson-nav__card">
+    <div class="lesson-nav__dir">← Back</div>
+    <div class="lesson-nav__title">Module 02 · Kubernetes Foundations for Backup Admins</div>
+  </a>
+  <a href="Lesson04_Maintaining_Veeam_Kasten_Over_Time.html" class="lesson-nav__card">
+    <div class="lesson-nav__dir">Next →</div>
+    <div class="lesson-nav__title">Module 04 · Maintaining Veeam Kasten Over Time</div>
+  </a>
+</nav>
+
+<footer>
+  Veeam Kasten for Kubernetes Fundamentals · Module 03 of 05 · built against Veeam Kasten 9.0.2
+</footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+  <button class="lightbox__close" type="button" aria-label="Close enlarged view">&times;</button>
+  <img src="" alt="">
+</div>
+
+<script src="components.js"></script>
+
+<script>
+/* ── Module 03 only: deployment-readiness checklist ────────────────────────
+   Native checkboxes (keyboard-operable, visible focus from the stylesheet
+   above) plus a verdict written into the shared .simoutput block. Guarded and
+   scoped to [data-readiness]; absent on other pages, so it no-ops there. */
+(function () {
+  try {
+    var root = document.querySelector('[data-readiness]');
+    if (!root) return;
+    var boxes  = [].slice.call(root.querySelectorAll('input[type="checkbox"]'));
+    var out    = root.querySelector('[data-rdy-out]');
+    var check  = root.querySelector('[data-rdy-check]');
+    var reset  = root.querySelector('[data-rdy-reset]');
+    if (!boxes.length || !out || !check || !reset) return;
+
+    var PROMPT = '<p class="simoutput__prompt">Tick the items you can confirm, then select <strong>Check my readiness</strong>.</p>';
+
+    function labelFor(box) {
+      var lab = root.querySelector('label[for="' + box.id + '"] strong');
+      return lab ? lab.textContent : box.id;
+    }
+
+    function verdict() {
+      var missBlock = boxes.filter(function (b) { return b.dataset.gate === 'block' && !b.checked; });
+      var missFollow = boxes.filter(function (b) { return b.dataset.gate === 'follow' && !b.checked; });
+      var done = boxes.filter(function (b) { return b.checked; }).length;
+      var html = '';
+
+      if (missBlock.length) {
+        html += '<p class="simoutput__result is-wrong">✗ Not ready to install — ' + missBlock.length +
+                ' blocking item' + (missBlock.length === 1 ? '' : 's') + ' outstanding.</p>';
+        html += '<p class="simoutput__why">Each of these has to be true before the install command is worth running. The primer tool answers the Kubernetes, CSI and annotation items for you; the registry path is yours to confirm.</p>';
+      } else if (missFollow.length) {
+        html += '<p class="simoutput__result is-right">✓ Clear to install — with ' + missFollow.length +
+                ' follow-up' + (missFollow.length === 1 ? '' : 's') + ' to close.</p>';
+        html += '<p class="simoutput__why">Every blocking item is confirmed. The remaining items can be settled during the install window, but do not let them drift past it.</p>';
+      } else {
+        html += '<p class="simoutput__result is-right">✓ Ready to install — all ' + boxes.length + ' items confirmed.</p>';
+        html += '<p class="simoutput__why">Platform, Helm, image-pull reachability, namespace, storage, and the exposure decision are all accounted for. Section 3 is the install itself.</p>';
+      }
+
+      var outstanding = missBlock.concat(missFollow);
+      if (outstanding.length) {
+        html += '<ul class="rdy__miss">';
+        outstanding.forEach(function (b) {
+          var tag = b.dataset.gate === 'block' ? 'Blocking' : 'Follow-up';
+          html += '<li><strong>' + tag + ':</strong> ' + labelFor(b) + '</li>';
+        });
+        html += '</ul>';
+      }
+      html += '<div class="simoutput__row"><span>Confirmed</span><span>' + done + ' of ' + boxes.length + '</span></div>';
+      out.innerHTML = html;
+    }
+
+    check.addEventListener('click', verdict);
+    reset.addEventListener('click', function () {
+      boxes.forEach(function (b) { b.checked = false; });
+      out.innerHTML = PROMPT;
+      boxes[0].focus();
+    });
+  } catch (e) { console.error('[module03:readiness]', e); }
+})();
+</script>
+
+</body>
+</html>

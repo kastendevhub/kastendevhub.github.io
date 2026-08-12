@@ -1,0 +1,8 @@
+[
+  {
+    "_placeholder": "Overwrite with the Architect (Step 7)'s proposed changes (a JSON list). Then build the review page with Pipeline/bin/make-review-page.py.",
+    "id": "XX-vN-000", "sev": "minor", "loc": "<section + anchor>",
+    "orig": "<verbatim current text, or empty for an addition>",
+    "prop": "<verbatim proposed replacement>", "why": "<rationale (+ source page for technical rows)>"
+  }
+]

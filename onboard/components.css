@@ -1,0 +1,652 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   COURSE TEMPLATE — components.css  (interactive / widget layer)
+   ───────────────────────────────────────────────────────────────────────────
+   The reusable "kit of parts" styles for the interactive widgets. Load AFTER
+   course.css:
+     <link rel="stylesheet" href="course.css">
+     <link rel="stylesheet" href="components.css">
+
+   Every rule here resolves to the shared course.css design tokens
+   (--veeam-green, --veeam-green-dim, --veeam-green-soft, --warn, --warn-soft,
+   --danger, --danger-soft, --ink, --ink-2, --line, --line-2, --paper,
+   --paper-2, --muted, --shadow, --shadow-lg). No component forks a token with
+   a raw hex; translucent overlays use the brand RGB with an explicit alpha.
+
+   WHAT LIVES WHERE
+   ----------------
+   course.css already ships (de-scoped, global) these interactive components,
+   so they are NOT duplicated here — the gallery demonstrates them with the
+   course.css classes directly:
+     • FLIP CARDS      .flipcards / .flip
+     • FLOW CHAIN      .flow*
+     • WIZARD          .wizard*
+     • USE-CASE GRID   .best / .best-item
+     • COMPARE CARDS   .compare*
+     • SCENARIO SLIDER .widget / .widget__slider / __meter / __reveal /
+                       __reset / __fieldset / __actions / __model-note / __label
+     • VIEW TOGGLE (pill group base) .toggle-group / .toggle-group__opt
+     • QUIZ            .quiz* / .quiz-card* / .quiz-opt* / .quiz-score*
+     • REVIEW          .review* / .review-grid / .review-item*
+     • SIMOUTPUT base  .simoutput / __prompt / __verdict / __why / __warn / __jump
+
+   This file adds only what was still inline (scoped) in the lessons:
+     1. HOTSPOT (find-it quiz)          — from Lesson 02
+     2. SORTER  (unified)               — from Lesson 03 .sev-sorter + Lesson 04 .dashsort
+     3. TOGGLE-WIDGET + INV-TREE        — from Lesson 05
+     4. STEPPER (click-to-reveal)       — from Lesson 05 .bv5 / .w1-*  (renamed)
+     5. DECISION (weigh-the-choice)     — from Lesson 03 .remact*      (renamed)
+     6. SCENARIO WIDGET OUTPUT HELPERS  — row / result lines the slider check() emits
+     7. LIGHTBOX (screenshot enlarge)   — from Lesson 01
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   HOTSPOT — find-it quiz
+   WHEN: reinforce "where is X on this screen?" — clickable regions over a
+         screenshot, prompted one at a time, with attempt limits and scoring.
+   ───────────────────────────────────────────────────────────────────────── */
+.hotspot { margin: 28px 0 8px; }
+.hotspot__toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 0; flex-wrap: wrap; }
+.hotspot__toolbar h3 { margin: 0 0 4px; font-family: 'ES Build', Arial, sans-serif; font-size: 18px; }
+.hotspot__toolbar p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 520px; }
+.hotspot__modes { display: flex; gap: 8px; flex-shrink: 0; }
+.hotspot__mode-btn { font: inherit; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); cursor: pointer; color: var(--muted); transition: all .18s ease; }
+.hotspot__mode-btn:hover { border-color: var(--veeam-green-dim); color: var(--veeam-green-dim); }
+.hotspot__mode-btn:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.hotspot__stage { position: relative; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-lg); background: var(--paper-2); line-height: 0; margin-top: 14px; }
+.hotspot__img { display: block; width: 100%; height: auto; }
+.hotspot__pin { position: absolute; margin: 0; padding: 0; border: 2px solid transparent; border-radius: 6px; background: rgba(0,179,54,0); cursor: pointer; transition: border-color .15s ease, background .15s ease; min-height: 28px; min-width: 28px; box-sizing: border-box; }
+.hotspot__pin:hover, .hotspot__pin:focus-visible { border-color: var(--veeam-green-bright); background: rgba(0,179,54,.12); outline: none; }
+.hotspot__pin:focus-visible { box-shadow: 0 0 0 3px var(--veeam-green-soft); }
+.hotspot__pin.is-correct { border-color: var(--veeam-green); background: rgba(0,179,54,.24); }
+.hotspot__pin.is-wrong { border-color: var(--danger); background: rgba(212,56,56,.16); }
+.hotspot__pin-num { position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700; line-height: 22px; text-align: center; box-shadow: var(--shadow); pointer-events: none; }
+.hotspot.is-quiz .hotspot__pin-num { display: none; }
+.hotspot__panel { margin-top: 16px; padding: 18px 22px; background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--veeam-green); border-radius: 8px; min-height: 64px; }
+.hotspot__panel h4 { margin: 0 0 6px; font-family: 'ES Build', Arial, sans-serif; font-size: 16px; }
+.hotspot__panel p { margin: 0; font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+.hotspot__panel.is-prompt { background: var(--veeam-green-soft); }
+.hotspot__panel.is-correct { background: var(--veeam-green-soft); }
+.hotspot__panel.is-wrong { border-left-color: var(--danger); background: var(--danger-soft); }
+.hotspot__score { margin-top: 10px; font-size: 13px; color: var(--muted); font-family: ui-monospace, monospace; }
+@media (max-width: 640px) { .hotspot__toolbar { flex-direction: column; align-items: flex-start; } }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   SORTER — click a card, then file it under a bucket  (unified)
+   WHEN: sort a set of items into named buckets and explain each filing.
+         Unifies Lesson 03 .sev-sorter (select-card-then-bucket, verdict text)
+         with Lesson 04 .dashsort (progress line + reset) into ONE component.
+         Fully generic: any buckets, any cards, any "why" text — supplied as
+         data in the markup, not baked into the CSS.
+   ───────────────────────────────────────────────────────────────────────── */
+.sorter { margin: 32px 0; border: 1px solid var(--line); border-radius: 16px; padding: 28px; background: var(--paper); }
+.sorter__h { margin: 0 0 6px; font-size: 20px; color: var(--ink); }
+.sorter__cap { margin: 0 0 16px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+.sorter__progress { font-family: ui-monospace, 'SF Mono', monospace; font-size: 12.5px; font-weight: 600; color: var(--veeam-green-dim); margin: 0 0 16px; }
+.sorter__tray-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); margin: 0 0 10px; }
+.sorter__tray { display: flex; flex-wrap: wrap; gap: 10px; min-height: 52px; padding: 14px; border: 1px dashed var(--line); border-radius: 12px; background: var(--paper-2); margin-bottom: 6px; }
+.sorter__tray-empty { font-size: 13px; color: var(--ink-2); align-self: center; }
+.sorter__card { font: inherit; text-align: left; font-size: 13.5px; color: var(--ink); background: var(--paper); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; transition: border-color .18s, background .18s, box-shadow .18s; max-width: 100%; }
+.sorter__card:hover { border-color: var(--veeam-green-dim); }
+.sorter__card[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); box-shadow: var(--shadow); }
+.sorter__status { font-size: 13px; color: var(--ink-2); font-weight: 600; margin: 14px 0 2px; }
+.sorter__do { margin: 0 0 4px; font-size: 13.5px; color: var(--veeam-green-dim); font-weight: 600; }
+.sorter__buckets { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-top: 16px; }
+.sorter__bucket { border: 1px solid var(--line); border-top: 4px solid var(--veeam-green); border-radius: 12px; background: var(--paper-2); padding: 14px; display: flex; flex-direction: column; }
+.sorter__bucket-head { font: inherit; width: 100%; text-align: left; font-weight: 700; font-size: 14px; background: transparent; border: none; cursor: pointer; padding: 4px 4px 10px; color: var(--ink); }
+.sorter__bucket-head:hover { color: var(--veeam-green-dim); }
+.sorter__bucket-head:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.sorter__bucket-drop { font-size: 11.5px; color: var(--ink-2); margin: 0 0 8px; min-height: 16px; }
+.sorter__bucket-items { display: flex; flex-direction: column; gap: 8px; }
+.sorter__placed { font: inherit; text-align: left; font-size: 13px; border-radius: 9px; padding: 9px 12px; cursor: pointer; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); transition: border-color .18s; }
+.sorter__placed:hover { border-color: var(--ink); }
+.sorter__placed-verdict { display: block; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 3px; }
+.sorter__placed--fit .sorter__placed-verdict { color: var(--veeam-green-dim); }
+.sorter__placed--miss .sorter__placed-verdict { color: var(--warn); }
+.sorter__placed-why { display: block; font-size: 12px; color: var(--ink-2); margin-top: 4px; line-height: 1.5; }
+.sorter__placed-pull { display: inline-block; font-size: 11px; color: var(--ink-2); margin-top: 6px; text-decoration: underline; }
+.sorter__reset { font: inherit; font-size: 13px; font-weight: 600; padding: 9px 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer; margin-top: 20px; }
+.sorter__reset:hover { border-color: var(--veeam-green); color: var(--veeam-green-dim); }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   TOGGLE-WIDGET + INV-TREE — one dataset, several groupings
+   WHEN: show the SAME content re-presented under different lenses; pill
+         buttons swap which grouping panel is visible (aria-live announced).
+   ───────────────────────────────────────────────────────────────────────── */
+.toggle-widget { margin-top: 28px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 24px 26px; box-shadow: var(--shadow); }
+.toggle-widget h3 { font-family: 'ES Build', Arial, sans-serif; margin: 0 0 4px; font-size: 16px; }
+.toggle-widget__sub { font-size: 13.5px; color: var(--ink-2); margin: 0 0 16px; }
+.toggle-widget__controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+.toggle-widget__btn { background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 9px 18px; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: all .18s ease; }
+.toggle-widget__btn:hover { border-color: var(--veeam-green-dim); }
+.toggle-widget__btn.is-active { background: var(--veeam-green); border-color: var(--veeam-green); color: var(--ink); }
+.toggle-widget__btn:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+
+/* inv-tree: the grouped-object figure the toggle swaps between (also usable stand-alone). */
+.inv-tree { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.inv-tree__group { background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; transition: background .18s ease; }
+.inv-tree__group h4 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--veeam-green-dim); font-family: ui-monospace, 'SF Mono', monospace; }
+.inv-tree__group ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.inv-tree__item { font-size: 13.5px; color: var(--ink); background: var(--paper); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 8px; }
+.inv-tree__item.is-anchor { border-color: var(--veeam-green); box-shadow: 0 0 0 2px var(--veeam-green-soft); flex-wrap: wrap; }
+.inv-tree__badge { font-family: ui-monospace, 'SF Mono', monospace; font-size: 10px; color: var(--veeam-green-dim); background: var(--veeam-green-soft); border-radius: 4px; padding: 2px 6px; letter-spacing: .03em; flex-shrink: 0; }
+.inv-tree__tracked { font-family: ui-monospace, 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: var(--ink); background: var(--veeam-green); border-radius: 4px; padding: 2px 8px; letter-spacing: .02em; margin-left: auto; white-space: normal; }
+
+/* Small green "takeaway" strip often closing a toggle/interactive block. */
+.mini-takeaway { margin-top: 18px; padding: 12px 16px; background: var(--veeam-green-soft); border-left: 3px solid var(--veeam-green); border-radius: 6px; font-size: 13.5px; color: var(--veeam-green-dim); font-weight: 500; }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   STEPPER — click-to-reveal ordered steps (one open at a time)
+   WHEN: a recommended sequence of moves; learners expand each step to read
+         the detail. Accordion behaviour, connected by a vertical spine.
+   (Renamed from Lesson 05 .bv5 / .w1-*.)
+   ───────────────────────────────────────────────────────────────────────── */
+.stepper { --mono: ui-monospace, 'SF Mono', monospace; }
+.stepper__h { font-family: 'ES Build', Arial, sans-serif; margin: 0 0 4px; font-size: 18px; }
+.stepper__caption { margin: 0 0 18px; font-size: 14px; color: var(--ink-2); }
+.stepper__card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px; box-shadow: var(--shadow); }
+.stepper__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+.stepper__step { position: relative; padding-left: 56px; }
+.stepper__step::before { content: ""; position: absolute; left: 19px; top: 44px; bottom: -6px; width: 2px; background: var(--line); }
+.stepper__step:last-child::before { display: none; }
+.stepper__btn { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: transparent; border: 0; padding: 12px 0; cursor: pointer; font: inherit; color: var(--ink); }
+.stepper__btn:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; border-radius: 6px; }
+.stepper__num { position: absolute; left: 0; top: 10px; width: 40px; height: 40px; border-radius: 10px; background: var(--veeam-green-soft); color: var(--veeam-green-dim); font-family: var(--mono); font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); }
+.stepper__btn[aria-expanded="true"] .stepper__num,
+.stepper__step.is-open .stepper__num { background: var(--veeam-green); color: var(--ink); border-color: var(--veeam-green); }
+.stepper__title { font-size: 16px; font-weight: 700; flex: 1; }
+.stepper__chev { font-family: var(--mono); font-size: 15px; color: var(--ink-2); }
+.stepper__btn[aria-expanded="true"] .stepper__chev::after { content: "– hide"; }
+.stepper__btn[aria-expanded="false"] .stepper__chev::after { content: "+ show"; }
+.stepper__detail { overflow: hidden; max-height: 0; transition: max-height .25s ease; }
+.stepper__detail p { margin: 0 0 14px; padding: 2px 0 6px 0; font-size: 14.5px; color: var(--ink-2); }
+.stepper__detail.is-open { max-height: 320px; }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   DECISION — weigh a choice, get the reasoning
+   WHEN: "which way would you do X?" style self-check — pick an option per
+         item and reveal whether it's a good call plus the tradeoff.
+   (Renamed from Lesson 03 .remact*.)
+   ───────────────────────────────────────────────────────────────────────── */
+.decision { margin: 24px 0; border: 1px solid var(--line); border-radius: 16px; padding: 22px 26px 26px; background: var(--paper-2); }
+.decision__heading { margin: 0 0 6px; font-size: 17px; font-weight: 600; color: var(--ink); }
+.decision__intro { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0 0 18px; }
+.decision__list { display: flex; flex-direction: column; gap: 14px; }
+.decision__item { border: 1px solid var(--line); border-left: 3px solid var(--veeam-green); border-radius: 12px; padding: 16px 18px; background: var(--paper); }
+.decision__title { font-weight: 700; font-size: 15.5px; color: var(--ink); }
+.decision__trigger { font-size: 12px; color: var(--veeam-green-dim); font-family: ui-monospace, 'SF Mono', monospace; margin-top: 3px; }
+.decision__what { font-size: 13.5px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+.decision__choices { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.decision__btn { font: inherit; font-size: 13px; font-weight: 600; padding: 9px 16px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+.decision__btn:hover { border-color: var(--veeam-green-dim); }
+.decision__btn.is-sel { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.decision__btn:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.decision__fb { font-size: 13px; line-height: 1.55; margin-top: 12px; padding: 12px 14px; border-radius: 8px; display: none; color: var(--ink); }
+.decision__fb.is-shown { display: block; }
+.decision__fb.is-good { background: var(--veeam-green-soft); }
+.decision__fb.is-recon { background: var(--warn-soft); }
+.decision__fb strong { color: var(--ink); }
+.decision__note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 16px 0 0; font-style: italic; }
+/* Impact text carried in the markup, revealed by JS — never shown raw. */
+.decision__impact { display: none; }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   SCENARIO WIDGET — output helpers
+   WHEN: the .widget scenario slider (base classes in course.css) emits a
+         verdict + per-limit rows into its .simoutput on "Check". These two
+         classes are the only bits course.css's .simoutput block doesn't cover.
+   ───────────────────────────────────────────────────────────────────────── */
+.simoutput__result { font-family: 'ES Build', Arial, sans-serif; font-size: 15px; margin: 0 0 6px; }
+.simoutput__result.is-right { color: var(--veeam-green-dim); }
+.simoutput__result.is-wrong { color: var(--warn); }
+.simoutput__row { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
+.simoutput__row span:first-child { font-weight: 700; }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   LIGHTBOX — click a screenshot to enlarge
+   WHEN: any page with .screenshot figures; one .lightbox root per page wires
+         every .screenshot__img. Overlay + close button + Esc, focus-restored.
+   ───────────────────────────────────────────────────────────────────────── */
+.screenshot__img { cursor: zoom-in; }
+.lightbox { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: rgba(10,14,11,.88); padding: 24px; cursor: zoom-out; }
+.lightbox.is-open { display: flex; }
+.lightbox img { max-width: 96vw; max-height: 92vh; width: auto; height: auto; border-radius: 8px; box-shadow: 0 24px 70px rgba(0,0,0,.55); cursor: default; }
+.lightbox__close { position: absolute; top: 14px; right: 22px; width: 44px; height: 44px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); border-radius: 50%; color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+.lightbox__close:hover { background: rgba(255,255,255,.22); }
+.lightbox__close:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   Reduced-motion guards
+   course.css already zeroes all transitions/animations globally under
+   prefers-reduced-motion; these mirror that for the height/transform effects
+   introduced above, so the intent is explicit at the component level.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .stepper__detail { transition: none; }
+  .sorter__card, .decision__btn, .hotspot__pin, .toggle-widget__btn { transition: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ████ ADDED KIT — extends the original component set ████
+   ───────────────────────────────────────────────────────────────────────────
+   Everything below is additive and token-pure: it resolves only to course.css
+   variables plus the three added tokens (--info / --info-soft / --warn-text).
+   Sections:
+     A. NOTE FAMILY            .note / .note--fact|tip|caution|key
+     B. WAYS OF PRESENTING — TEXT     .prose, .checklist, .learn-goals
+     C. WAYS OF PRESENTING — LAYOUT   .split, .card-grid, .content-card,
+                                      .feature-row(s), .stat-row/.stat,
+                                      .rule/.spacer, .timeline
+     D. WAYS OF PRESENTING — MEDIA    .media-figure, .carousel*, .compare-slider*,
+                                      .thumb-grid
+     E. WAYS OF PRESENTING — OTHER    .tabs*, .pullquote, .video-embed, .btn*
+     F. CHOSEN COMPONENTS      .matrix* (comparison), .glossary* (popover)
+   JS for the interactive ones (carousel, compare-slider, tabs, glossary) lives
+   in components.js, each as its own guarded, fault-isolated IIFE.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── A. NOTE FAMILY (info-highlight notes) ──────────────────────────────────
+   WHEN: a short flagged aside inline in body copy. .note carries neutral
+   defaults; each modifier only re-points --accent / --accent-soft. Static. */
+.note {
+  --accent: var(--veeam-green-dim); --accent-soft: var(--veeam-green-soft);
+  display: flex; gap: 14px; align-items: flex-start; margin-top: 24px;
+}
+.note__icon {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px;
+  background: var(--accent-soft); display: flex; align-items: center; justify-content: center;
+}
+.note__icon svg { width: 18px; height: 18px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.note__body { min-width: 0; }
+.note__label {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700;
+  color: var(--accent); margin-bottom: 4px;
+}
+.note__body p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.6; }
+.note--fact    { --accent: var(--veeam-green-dim); --accent-soft: var(--veeam-green-soft); }
+.note--tip     { --accent: var(--info);            --accent-soft: var(--info-soft); }
+.note--caution { --accent: var(--warn-text);       --accent-soft: var(--warn-soft); }
+.note--key     { --accent: var(--ink-2);           --accent-soft: var(--paper-2); }
+
+
+/* ── B. WAYS OF PRESENTING · TEXT ───────────────────────────────────────────
+   .prose is a generic rich-text scope for paragraphs, lead/small/caption,
+   inline emphasis, code/kbd, links, and lists. */
+.prose p { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin: 0 0 14px; max-width: 720px; }
+.prose .text-lead { font-size: 19px; color: var(--ink); line-height: 1.55; }
+.prose .text-small, .prose small { font-size: 13px; color: var(--muted); }
+.prose .caption { display: block; font-size: 12.5px; color: var(--muted); font-style: italic; }
+.prose strong { font-weight: 700; color: var(--ink); }
+.prose em { font-style: italic; }
+.prose a { color: var(--info); text-decoration: underline; text-underline-offset: 2px; }
+.prose a:hover { color: var(--veeam-green-dim); }
+.prose code, .prose kbd { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+.prose code { font-size: .88em; background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 1px 6px; color: var(--ink); }
+.prose kbd { font-size: .82em; background: var(--ink); color: var(--paper); border-radius: 5px; padding: 2px 7px; border: 1px solid var(--ink); box-shadow: 0 1.5px 0 rgba(10,14,11,.35); }
+/* heading-hierarchy demo — h2/h3 come from course.css; h4 is defined here */
+.prose h4 { font-family: 'ES Build', Arial, sans-serif; font-size: 17px; font-weight: 600; margin: 18px 0 8px; letter-spacing: -.01em; color: var(--ink); }
+/* lists */
+.prose ul, .prose ol { margin: 0 0 14px; padding-left: 22px; }
+.prose li { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin: 0 0 6px; }
+.prose dl { margin: 0 0 14px; }
+.prose dt { font-weight: 700; color: var(--ink); font-size: 15px; margin-top: 10px; }
+.prose dd { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+/* static checklist (also reused by .learn-goals) */
+.checklist { list-style: none; margin: 0 0 14px; padding: 0; }
+.checklist li { position: relative; padding-left: 30px; margin: 0 0 10px; font-size: 15px; color: var(--ink-2); line-height: 1.6; }
+.checklist li:last-child { margin-bottom: 0; }
+.checklist li::before {
+  content: '✓'; position: absolute; left: 0; top: 1px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--veeam-green); color: var(--paper);
+  font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+
+/* Learning-objectives checklist card (Learning; static). */
+.lo-section { padding: 64px 32px 0; }
+.learn-goals { margin: 0; border: 1px solid var(--line); border-left: 4px solid var(--veeam-green); border-radius: 12px; background: var(--paper); padding: 24px 28px; box-shadow: var(--shadow); }
+.learn-goals__label { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--veeam-green-dim); font-weight: 700; margin-bottom: 6px; }
+.learn-goals__title { font-family: 'ES Build', Arial, sans-serif; font-size: 20px; font-weight: 600; margin: 0 0 16px; color: var(--ink); }
+
+
+/* ── C. WAYS OF PRESENTING · LAYOUT ─────────────────────────────────────────
+   dual-view split, card grids, feature rows, stat KPIs, dividers, timeline. */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; margin: 24px 0; }
+@media (max-width: 760px) { .split { grid-template-columns: 1fr; } }
+.split__media img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--line); }
+.split__text p { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin: 0 0 12px; }
+
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.card-grid--3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 760px) { .card-grid, .card-grid--3 { grid-template-columns: 1fr; } }
+.content-card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; }
+.content-card h4 { font-family: 'ES Build', Arial, sans-serif; font-size: 16px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.content-card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+.feature-rows { display: flex; flex-direction: column; margin: 24px 0; }
+.feature-row { display: grid; grid-template-columns: 48px 1fr; gap: 18px; align-items: start; padding: 18px 0; border-bottom: 1px solid var(--line-2); }
+.feature-row:last-child { border-bottom: none; }
+.feature-row__icon { width: 48px; height: 48px; border-radius: 12px; background: var(--veeam-green-soft); display: flex; align-items: center; justify-content: center; }
+.feature-row__icon svg { width: 22px; height: 22px; stroke: var(--veeam-green-dim); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.feature-row__body h4 { margin: 0 0 4px; font-family: 'ES Build', Arial, sans-serif; font-size: 16px; font-weight: 600; color: var(--ink); }
+.feature-row__body p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+@media (max-width: 640px) { .stat-row { grid-template-columns: 1fr; } }
+.stat { background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--veeam-green); border-radius: 12px; padding: 24px; text-align: center; }
+.stat__num { font-family: 'ES Build', Arial, sans-serif; font-size: 44px; font-weight: 600; color: var(--veeam-green-dim); line-height: 1; }
+.stat__label { font-size: 13.5px; color: var(--muted); margin-top: 8px; }
+
+.rule { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
+.spacer { height: 32px; }
+.spacer--lg { height: 64px; }
+
+/* Timeline / phase tracker (Present; static). Horizontal, wraps to vertical. */
+.timeline { display: flex; margin: 24px 0; list-style: none; padding: 0; }
+.timeline__phase { flex: 1 1 0; position: relative; padding: 0 16px; text-align: center; }
+.timeline__dot { position: relative; z-index: 1; width: 40px; height: 40px; border-radius: 50%; background: var(--veeam-green-soft); color: var(--veeam-green-dim); border: 2px solid var(--veeam-green); font-family: ui-monospace, 'SF Mono', monospace; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+.timeline__phase:not(:last-child)::before { content: ''; position: absolute; top: 20px; left: 50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.timeline__title { font-weight: 700; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+.timeline__desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+@media (max-width: 760px) {
+  .timeline { flex-direction: column; }
+  .timeline__phase { display: grid; grid-template-columns: 40px 1fr; gap: 6px 14px; text-align: left; padding: 0 0 26px; }
+  .timeline__dot { margin: 0; grid-row: 1 / span 2; }
+  .timeline__phase:not(:last-child)::before { top: 40px; left: 19px; width: 2px; height: 100%; }
+  .timeline__title { align-self: center; }
+}
+
+
+/* ── D. WAYS OF PRESENTING · MEDIA ──────────────────────────────────────────
+   generic figure, image carousel, before/after comparison slider, thumb grid. */
+.media-figure { margin: 24px 0; }
+.media-figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--line); }
+.media-figure figcaption { margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.media-figure figcaption strong { color: var(--ink); }
+
+/* Carousel (JS: components.js › carousel). One slide visible; prev/next + dots. */
+.carousel { margin: 24px 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--paper-2); }
+.carousel__viewport { position: relative; overflow: hidden; }
+.carousel__track { display: flex; transition: transform .4s ease; }
+.carousel__slide { flex: 0 0 100%; min-width: 0; margin: 0; }
+.carousel__slide img { width: 100%; height: auto; display: block; }
+.carousel__slide figcaption { padding: 12px 18px; font-size: 13px; color: var(--muted); background: var(--paper); border-top: 1px solid var(--line-2); }
+.carousel__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(10,14,11,.6); color: var(--paper); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1; }
+.carousel__nav:hover { background: rgba(10,14,11,.82); }
+.carousel__nav:focus-visible { outline: 2px solid var(--veeam-green-bright); outline-offset: 2px; }
+.carousel__nav--prev { left: 12px; }
+.carousel__nav--next { right: 12px; }
+.carousel__dots { display: flex; gap: 8px; justify-content: center; padding: 14px; background: var(--paper); }
+.carousel__dot { width: 9px; height: 9px; border-radius: 50%; border: none; background: var(--line); cursor: pointer; padding: 0; }
+.carousel__dot.is-active { background: var(--veeam-green); }
+.carousel__dot:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .carousel__track { transition: none; } }
+
+/* Before/after comparison slider (JS: components.js › compare-slider). */
+.compare-slider { margin: 24px 0; }
+.compare-slider__frame { position: relative; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); touch-action: none; user-select: none; }
+.compare-slider__base { display: block; width: 100%; height: auto; }
+.compare-slider__overlay { position: absolute; top: 0; left: 0; height: 100%; width: 50%; overflow: hidden; }
+.compare-slider__overlay img { position: absolute; top: 0; left: 0; height: 100%; width: auto; max-width: none; display: block; }
+.compare-slider__handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: var(--veeam-green); transform: translateX(-50%); z-index: 2; pointer-events: none; }
+.compare-slider__handle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; border-radius: 50%; background: var(--veeam-green); border: 3px solid var(--paper); box-shadow: var(--shadow); }
+.compare-slider__tag { position: absolute; top: 10px; z-index: 1; padding: 3px 10px; border-radius: 999px; font-family: ui-monospace, 'SF Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+.compare-slider__tag--before { left: 10px; background: var(--ink); color: var(--paper); }
+.compare-slider__tag--after { right: 10px; background: var(--veeam-green); color: var(--ink); }
+.compare-slider__range { width: 100%; margin-top: 14px; }
+
+/* Thumbnail grid — thumbs carry .screenshot__img so the existing lightbox wires them. */
+.thumb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0; }
+@media (max-width: 560px) { .thumb-grid { grid-template-columns: repeat(2, 1fr); } }
+.thumb-grid img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+
+
+/* ── E. WAYS OF PRESENTING · OTHER ──────────────────────────────────────────
+   tabbed panels, pull quote, responsive video embed, button family. */
+.tabs { margin: 24px 0; }
+.tabs__list { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.tabs__tab { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); background: transparent; border: none; border-bottom: 2px solid transparent; padding: 12px 18px; cursor: pointer; margin-bottom: -1px; }
+.tabs__tab:hover { color: var(--veeam-green-dim); }
+.tabs__tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--veeam-green); }
+.tabs__tab:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: -2px; border-radius: 4px; }
+.tabs__panel { padding: 22px 4px; }
+.tabs__panel[hidden] { display: none; }
+.tabs__panel p { margin: 0 0 12px; font-size: 14.5px; color: var(--ink-2); line-height: 1.65; }
+.tabs__panel > :last-child { margin-bottom: 0; }
+
+.pullquote { margin: 28px 0; padding: 8px 0 8px 28px; border-left: 4px solid var(--veeam-green); }
+.pullquote blockquote { margin: 0; font-family: 'ES Build', Arial, sans-serif; font-size: 22px; line-height: 1.4; color: var(--ink); font-weight: 600; letter-spacing: -.01em; }
+.pullquote figcaption { margin-top: 12px; }
+.pullquote cite { font-size: 13.5px; font-style: normal; color: var(--muted); }
+.pullquote cite::before { content: '— '; }
+
+.video-embed { position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 24px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--paper-2); }
+.video-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* Button family. course.css already ships .next-btn (the review-section CTA);
+   this is the reusable inline set — extend, don't duplicate. */
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 24px 0; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-family: 'ES Build Neutral', Arial, sans-serif; font-weight: 600; font-size: 14px; padding: 11px 20px; border-radius: 10px; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: all .2s ease; }
+.btn:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.btn--primary { background: var(--veeam-green); color: var(--ink); border-color: var(--veeam-green); }
+.btn--primary:hover { background: var(--veeam-green-bright); border-color: var(--veeam-green-bright); }
+.btn--secondary { background: var(--paper); color: var(--ink); border-color: var(--line); }
+.btn--secondary:hover { border-color: var(--veeam-green-dim); color: var(--veeam-green-dim); }
+.btn--text { background: transparent; color: var(--info); padding-left: 4px; padding-right: 4px; }
+.btn--text:hover { color: var(--veeam-green-dim); text-decoration: underline; }
+
+
+/* ── F. CHOSEN COMPONENTS ───────────────────────────────────────────────────
+   Feature/edition comparison matrix (Present; static) + key-terms glossary
+   popover (JS: components.js › glossary). */
+.matrix-wrap { overflow-x: auto; margin: 24px 0; }
+.matrix { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+.matrix thead th { font-family: ui-monospace, 'SF Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: center; }
+.matrix thead th:first-child { text-align: left; }
+.matrix tbody th[scope="row"] { text-align: left; font-weight: 600; color: var(--ink); padding: 12px 14px; border-bottom: 1px solid var(--line-2); }
+.matrix tbody td { text-align: center; color: var(--ink-2); padding: 12px 14px; border-bottom: 1px solid var(--line-2); }
+.matrix tbody tr:last-child th, .matrix tbody tr:last-child td { border-bottom: none; }
+.matrix__yes { color: var(--veeam-green-dim); font-weight: 700; }
+.matrix__no { color: var(--muted); }
+
+.glossary { position: relative; }
+.glossary-term { border-bottom: 1px dotted var(--info); color: var(--info); cursor: help; font-weight: 600; }
+.glossary-term:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; border-radius: 3px; }
+.glossary-pop { position: absolute; top: 100%; left: 0; margin-top: 6px; z-index: 80; max-width: 280px; background: var(--ink); color: var(--paper); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.55; box-shadow: var(--shadow-lg); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .15s ease, transform .15s ease; }
+.glossary-pop.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+.glossary-pop strong { display: block; margin-bottom: 4px; color: var(--veeam-green-bright); }
+@media (prefers-reduced-motion: reduce) { .glossary-pop { transition: none; } }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ████ RISE BUCKET ADDITIONS — new blocks for the Rise block-library buckets ████
+   ───────────────────────────────────────────────────────────────────────────
+   Additive and token-pure: resolves only to course.css variables plus the three
+   added tokens (--info / --info-soft / --warn-text). The only raw colours are
+   intentional alpha overlays built from the brand RGB (--ink 10,14,11 as a
+   readable scrim; --paper 251,252,249 as a light overlay on the dark code bar).
+   Grouped by bucket:
+     Text        .text-columns              (content paragraphs reuse .prose)
+     Quote       .quote-figure
+     Image       .text-on-image             (image & text reuse .split)
+     Multimedia  .attachment, .audio-block
+     Interactive .labeled-graphic, .branch
+     Know. check .fitb, .matching
+     Chart       .bar-chart
+     Code        .code-block
+   JS for the interactive ones (labeled-graphic, branch, fitb, matching,
+   code-copy) lives in components.js, each its own guarded, fault-isolated IIFE.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── TEXT · Columns (2-col text) ────────────────────────────────────────────
+   Two side-by-side text columns; collapse to one ≤760px. Static. */
+.text-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: 24px 0; }
+@media (max-width: 760px) { .text-columns { grid-template-columns: 1fr; gap: 20px; } }
+.text-columns h4 { font-family: 'ES Build', Arial, sans-serif; font-size: 16px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.text-columns p { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin: 0 0 14px; }
+.text-columns__col > :last-child { margin-bottom: 0; }
+
+
+/* ── QUOTE · Quote with image ───────────────────────────────────────────────
+   Blockquote + small portrait/logo + attribution. Static. */
+.quote-figure { display: grid; grid-template-columns: 72px 1fr; gap: 20px; align-items: center; margin: 28px 0; padding: 24px 28px; background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--veeam-green); border-radius: 14px; }
+.quote-figure__img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); background: var(--paper-2); }
+.quote-figure blockquote { margin: 0; font-family: 'ES Build', Arial, sans-serif; font-size: 19px; line-height: 1.45; color: var(--ink); font-weight: 600; letter-spacing: -.01em; }
+.quote-figure figcaption { margin-top: 10px; }
+.quote-figure cite { font-size: 13.5px; font-style: normal; color: var(--muted); }
+.quote-figure cite::before { content: '— '; }
+@media (max-width: 560px) { .quote-figure { grid-template-columns: 1fr; } .quote-figure__img { width: 56px; height: 56px; } }
+
+
+/* ── IMAGE · Text on image ──────────────────────────────────────────────────
+   Full-bleed image with an overlaid text panel over a readable gradient scrim.
+   The rgba(10,14,11,…) values are the --ink brand RGB used as an intentional
+   alpha overlay for contrast. Static. */
+.text-on-image { position: relative; margin: 24px 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+.text-on-image img { display: block; width: 100%; height: auto; }
+.text-on-image__panel { position: absolute; inset: auto 0 0 0; margin: 0; padding: 40px 28px 24px; background: linear-gradient(to top, rgba(10,14,11,.85), rgba(10,14,11,.45) 55%, rgba(10,14,11,0)); color: var(--paper); }
+.text-on-image__title { font-family: 'ES Build', Arial, sans-serif; font-size: 22px; font-weight: 600; margin: 0 0 6px; color: var(--paper); }
+.text-on-image__panel p { margin: 0; font-size: 14.5px; line-height: 1.55; color: rgba(251,252,249,.9); max-width: 640px; }
+
+
+/* ── MULTIMEDIA · Attachment / download card ────────────────────────────────
+   Link card: file-type icon + name + type/size + download affordance. Static. */
+.attachment { display: flex; align-items: center; gap: 16px; margin: 24px 0; padding: 16px 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: inherit; transition: border-color .18s ease, box-shadow .18s ease; max-width: 520px; }
+.attachment:hover { border-color: var(--veeam-green-dim); box-shadow: var(--shadow); }
+.attachment:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.attachment__icon { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 10px; background: var(--veeam-green-soft); display: flex; align-items: center; justify-content: center; }
+.attachment__icon svg { width: 22px; height: 22px; stroke: var(--veeam-green-dim); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.attachment__body { min-width: 0; flex: 1; }
+.attachment__name { display: block; font-weight: 600; font-size: 15px; color: var(--ink); }
+.attachment__meta { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.attachment__dl { flex: 0 0 auto; color: var(--veeam-green-dim); display: flex; }
+.attachment__dl svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* ── MULTIMEDIA · Audio player ──────────────────────────────────────────────
+   Native <audio controls> in a styled wrapper + caption. No JS. */
+.audio-block { margin: 24px 0; padding: 18px 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; max-width: 560px; }
+.audio-block audio { width: 100%; display: block; }
+.audio-block figcaption { margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.audio-block figcaption strong { color: var(--ink); }
+
+
+/* ── INTERACTIVE · Labeled graphic ──────────────────────────────────────────
+   Static annotated image: numbered markers positioned by inline top/left %,
+   plus an always-visible legend. JS highlights the matching legend row (and
+   works with JS off — the legend is always readable). */
+.labeled-graphic { margin: 24px 0; }
+.labeled-graphic__stage { position: relative; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--paper-2); line-height: 0; box-shadow: var(--shadow); }
+.labeled-graphic__img { display: block; width: 100%; height: auto; }
+.labeled-graphic__marker { position: absolute; transform: translate(-50%, -50%); width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--paper); background: var(--veeam-green); color: var(--ink); font-family: ui-monospace, 'SF Mono', monospace; font-weight: 700; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow); padding: 0; }
+.labeled-graphic__marker:hover, .labeled-graphic__marker:focus-visible { background: var(--veeam-green-bright); outline: none; }
+.labeled-graphic__marker:focus-visible { box-shadow: 0 0 0 3px var(--veeam-green-soft); }
+.labeled-graphic__marker.is-active { background: var(--ink); color: var(--veeam-green-bright); }
+.labeled-graphic__legend { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.labeled-graphic__legend li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+.labeled-graphic__legend-num { width: 24px; height: 24px; border-radius: 50%; background: var(--veeam-green-soft); color: var(--veeam-green-dim); font-family: ui-monospace, 'SF Mono', monospace; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.labeled-graphic__legend strong { color: var(--ink); }
+.labeled-graphic__legend li.is-active { color: var(--ink); }
+.labeled-graphic__legend li.is-active .labeled-graphic__legend-num { background: var(--veeam-green); color: var(--ink); }
+
+
+/* ── INTERACTIVE · Scenario (branching choice → outcome) ────────────────────
+   A prompt + 2–3 choice buttons; picking one reveals its outcome, "Try again"
+   resets. Outcomes live in the markup. */
+.branch { margin: 24px 0; border: 1px solid var(--line); border-radius: 16px; padding: 24px 26px; background: var(--paper); }
+.branch h3 { font-family: 'ES Build', Arial, sans-serif; margin: 0 0 8px; font-size: 18px; }
+.branch__prompt { font-size: 15px; color: var(--ink-2); line-height: 1.6; margin: 0 0 16px; }
+.branch__prompt strong { color: var(--ink); }
+.branch__choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.branch__btn { font: inherit; font-size: 14px; font-weight: 600; padding: 11px 18px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); cursor: pointer; transition: border-color .15s ease, background .15s ease, color .15s ease; }
+.branch__btn:hover { border-color: var(--veeam-green-dim); }
+.branch__btn.is-sel { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.branch__btn:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.branch__outcome { display: none; margin-top: 16px; padding: 16px 18px; border-radius: 10px; font-size: 14px; line-height: 1.6; color: var(--ink); border-left: 3px solid var(--veeam-green); background: var(--veeam-green-soft); }
+.branch__outcome.is-shown { display: block; }
+.branch__outcome.is-poor { border-left-color: var(--warn); background: var(--warn-soft); }
+.branch__outcome strong { color: var(--ink); }
+.branch__reset { font: inherit; font-size: 13px; font-weight: 600; padding: 9px 16px; margin-top: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer; display: none; }
+.branch__reset.is-shown { display: inline-block; }
+.branch__reset:hover { border-color: var(--veeam-green-dim); color: var(--veeam-green-dim); }
+@media (prefers-reduced-motion: reduce) { .branch__btn { transition: none; } }
+
+
+/* ── KNOWLEDGE CHECK · Fill-in-the-blank ────────────────────────────────────
+   Sentence with a text input; check compares (case/space-insensitive) to the
+   accepted answers, then shows correct/incorrect + the answer. */
+.fitb { margin: 24px 0; border: 1px solid var(--line); border-radius: 16px; padding: 24px 26px; background: var(--paper); }
+.fitb__sentence { font-size: 16px; color: var(--ink); line-height: 1.9; margin: 0 0 16px; }
+.fitb__input { font: inherit; font-size: 15px; padding: 6px 12px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--paper-2); color: var(--ink); min-width: 160px; }
+.fitb__input:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 1px; border-color: var(--veeam-green-dim); }
+.fitb__input.is-correct { border-color: var(--veeam-green); background: var(--veeam-green-soft); }
+.fitb__input.is-wrong { border-color: var(--danger); background: var(--danger-soft); }
+.fitb__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.fitb__check { font: inherit; font-size: 13px; font-weight: 600; padding: 9px 18px; border: 1px solid var(--veeam-green); border-radius: 8px; background: var(--veeam-green); color: var(--paper); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.fitb__check:hover { background: var(--veeam-green-bright); border-color: var(--veeam-green-bright); }
+.fitb__check:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.fitb__feedback { margin: 14px 0 0; font-size: 14px; line-height: 1.55; display: none; }
+.fitb__feedback.is-shown { display: block; }
+.fitb__feedback.is-correct { color: var(--veeam-green-dim); }
+.fitb__feedback.is-wrong { color: var(--danger); }
+.fitb__feedback strong { font-weight: 700; }
+
+
+/* ── KNOWLEDGE CHECK · Matching (term ↔ definition) ─────────────────────────
+   Click a term then its definition to pair them; correct pairs lock green,
+   wrong pairs flash; progress line + reset. */
+.matching { margin: 24px 0; border: 1px solid var(--line); border-radius: 16px; padding: 24px 26px; background: var(--paper); }
+.matching h3 { font-family: 'ES Build', Arial, sans-serif; margin: 0 0 8px; font-size: 18px; }
+.matching__progress { font-family: ui-monospace, 'SF Mono', monospace; font-size: 12.5px; font-weight: 600; color: var(--veeam-green-dim); margin: 0 0 16px; }
+.matching__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .matching__grid { grid-template-columns: 1fr; } }
+.matching__col-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); margin: 0 0 10px; }
+.matching__list { display: flex; flex-direction: column; gap: 8px; }
+.matching__item { font: inherit; text-align: left; font-size: 14px; color: var(--ink); background: var(--paper-2); border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.matching__item:hover:not(:disabled) { border-color: var(--veeam-green-dim); }
+.matching__item:focus-visible { outline: 2px solid var(--veeam-green); outline-offset: 2px; }
+.matching__item.is-sel { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.matching__item.is-matched { border-color: var(--veeam-green); background: var(--veeam-green-soft); color: var(--veeam-green-dim); cursor: default; }
+.matching__item.is-wrong { animation: matchShake .3s ease; border-color: var(--danger); background: var(--danger-soft); }
+@keyframes matchShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.matching__reset { font: inherit; font-size: 13px; font-weight: 600; padding: 9px 16px; margin-top: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); cursor: pointer; }
+.matching__reset:hover { border-color: var(--veeam-green-dim); color: var(--veeam-green-dim); }
+@media (prefers-reduced-motion: reduce) { .matching__item, .matching__item.is-wrong { animation: none; transition: none; } }
+
+
+/* ── CHART · Static bar chart ───────────────────────────────────────────────
+   Horizontal CSS bars sized by a --val custom property (0–100). The visual
+   rows are aria-hidden; a visually-hidden <table> carries the same data to
+   assistive technology. No JS. */
+.bar-chart { margin: 24px 0; border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px; background: var(--paper); }
+.bar-chart__title { font-family: 'ES Build', Arial, sans-serif; font-size: 16px; font-weight: 600; margin: 0 0 18px; color: var(--ink); }
+.bar-chart__row { display: grid; grid-template-columns: 140px 1fr; gap: 14px; align-items: center; margin-bottom: 12px; }
+.bar-chart__row:last-of-type { margin-bottom: 0; }
+.bar-chart__label { font-size: 13.5px; color: var(--ink-2); text-align: right; }
+.bar-chart__track { background: var(--paper-2); border-radius: 6px; overflow: hidden; height: 26px; }
+.bar-chart__bar { height: 100%; width: calc(var(--val, 0) * 1%); background: var(--veeam-green); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: var(--ink); font-size: 12.5px; font-weight: 700; font-family: ui-monospace, 'SF Mono', monospace; min-width: 22px; box-sizing: border-box; }
+@media (max-width: 560px) { .bar-chart__row { grid-template-columns: 1fr; gap: 4px; } .bar-chart__label { text-align: left; } }
+
+
+/* ── CODE · Code snippet ────────────────────────────────────────────────────
+   Monospaced <pre><code> on an ink background + a Copy button. The
+   rgba(251,252,249,…) values are the --paper brand RGB used as intentional
+   light alpha overlays on the dark bar. JS: components.js › code-copy. */
+.code-block { margin: 24px 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--ink); }
+.code-block__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; background: rgba(251,252,249,.06); border-bottom: 1px solid rgba(251,252,249,.1); }
+.code-block__lang { font-family: ui-monospace, 'SF Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(251,252,249,.6); font-weight: 700; }
+.code-block__copy { font: inherit; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(251,252,249,.2); background: transparent; color: var(--veeam-green-bright); cursor: pointer; transition: background .15s ease; }
+.code-block__copy:hover { background: rgba(251,252,249,.1); }
+.code-block__copy:focus-visible { outline: 2px solid var(--veeam-green-bright); outline-offset: 2px; }
+.code-block pre { margin: 0; padding: 18px 20px; overflow-x: auto; }
+.code-block code { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; line-height: 1.7; color: var(--paper); white-space: pre; }

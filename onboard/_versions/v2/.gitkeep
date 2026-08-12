@@ -1,0 +1,12 @@
+# _versions/v2/
+
+Frozen snapshot of every file in this module at the moment version v2 was
+declared complete. The LXD copies working files here BEFORE starting the
+next revision, so diff-vN-to-vN+1.md can be regenerated even if intermediate
+state was lost.
+
+Snapshot timing (8-step workflow):
+  v1 — after Step 1 (LXD produces v1)
+  v2 — after Step 3 (LXD fixes Red Team findings)
+  v3 — after Step 6 (LXD applies the human's Editor decisions)
+  v4 — after Step 8 (LXD applies the human's final-panel decisions, if any)

@@ -1,0 +1,20 @@
+[
+ {
+  "id": "KBA-v2-001",
+  "sev": "significant",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Section 01 \"Why this is a different problem\" \u2014 first compare card, \"Where does it live?\" row",
+  "orig": "Inside a namespace on a cluster, alongside other applications. Namespace selection is how most policies choose what to protect [Src: Kasten Docs 9.0.2 p.347].",
+  "prop": "Inside a namespace \u2014 a named boundary on the cluster that groups an application's pieces together, roughly the way a folder groups related VMs in your inventory (Module 02 covers it properly) \u2014 on a cluster, alongside other applications. Namespace selection is how most policies choose what to protect [Src: Kasten Docs 9.0.2 p.347].",
+  "why": "\"Namespace\" is used repeatedly through Module 01 (this row, the note--key box, the concept-map's kasten-io references, the Module 05 Veeam-repository table) but is never actually defined until Module 02, Section 04. Module 01 explicitly defers other unfamiliar terms out loud \u2014 \"Helm is Kubernetes' package manager, covered fully in Module 02, so file the term away rather than chasing it now\" \u2014 but gives namespace no equivalent courtesy; it's simply used as if already owned. I could infer an approximately-right meaning from context (and the end-of-module quiz effectively confirms it via a wrong-answer distractor), but that's exactly the kind of term-before-definition gap this review exists to catch \u2014 a lossy inference I only trusted once Module 02 caught up. A one-line inline gloss, reusing the folder analogy the course itself uses one module later, closes the gap without adding new content.",
+  "rev": "Kasten Backup Admin"
+ },
+ {
+  "id": "KDO-v2-010",
+  "sev": "minor",
+  "loc": "Lesson01_From_VDP_Admin_to_Kasten_Admin.html \u00b7 Section 05, \"For a customer conversation\" sales aside",
+  "orig": "The value here is not a feature list, it is an operating model. A customer adopting Kubernetes does not have to stand up a parallel backup estate with its own storage, its own retention argument, and its own audit story \u2014 the Kubernetes applications can export into the repository their virtual estate already uses, and the constraints above are the honest fine print you should raise yourself rather than have discovered later.",
+  "prop": "The value here is not a feature list, it is an operating model. A customer adopting Kubernetes does not have to stand up a parallel backup estate with its own storage or its own retention argument \u2014 the Kubernetes applications can export into the repository their virtual estate already uses, appearing there as an ordinary backup job with the Kasten catalog identifier appended to its name [Src: Kasten Docs 9.0.2 p.129], which is the same job-level reporting your team already relies on rather than a new audit capability. The constraints above are the honest fine print you should raise yourself rather than have discovered later.",
+  "why": "\"Its own audit story\" is accountability-flavored language that the module never actually backs up with a mechanism \u2014 it reads as reassurance rather than a grounded claim. The course does establish a concrete, citable fact one paragraph away (the Kasten catalog identifier appended to the VBR job name); swapping the vague phrase for that fact keeps the same point without overselling an audit capability the content doesn't actually describe.",
+  "rev": "Kasten Director"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "id": "ED-v1-007",
+  "sev": "significant",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Section 03 \"Layer one: the dashboard\" \u2192 Compliant card",
+  "orig": "A policy applies and its service-level agreements are being respected [Src: Kasten Docs 9.0.2 p.301].",
+  "prop": "A policy applies and its service-level objectives are being respected [Src: Kasten Docs 9.0.2 p.301].",
+  "why": "The same four-state compliance model is taught in three lessons from the same source page, in three different wordings: Lesson02 l.386 \"compliant when a policy applies and its service levels are being met\"; Lesson04 l.302 \"service-level agreements are being respected\"; Lesson05 l.219 \"policies apply and their service-level objectives are being respected\". SLA and SLO are not interchangeable terms to a technical audience, and this is the state a learner reads every morning. Standardising on \"service-level objectives\" (the form in the fullest treatment, Module 05) also aligns with the surrounding RPO/RTO vocabulary. Also apply to Lesson02 l.386: \"compliant when a policy applies and its service levels are being met\" \u2192 \"compliant when a policy applies and its service-level objectives are being respected\". LXD: confirm the exact wording on p.301 and use that single form in all three places.",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-008",
+  "sev": "significant",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Section 03 \"Layer one: the dashboard\" \u2192 Removed card",
+  "orig": "Objects that have been removed [Src: Kasten Docs 9.0.2 p.301].",
+  "prop": "Objects that no longer exist on the cluster; filter to this state to find a removed application and restore it [Src: Kasten Docs 9.0.2 p.301, p.397].",
+  "why": "Circular definition \u2014 \"Removed means objects that have been removed\" teaches nothing, and it sits in a four-card set where the other three states are properly explained. This audience has no Kubernetes background, so the question the card leaves unanswered is the one that matters: does a removed application still have restore points? It does, and Module 05 says so (l.360: removed applications are hidden by default, you filter and select Removed to find them, then use the normal restore workflow, p.397). Pointing forward to that closes the loop rather than repeating the label. The same circularity appears in Lesson05 l.219 (\"and Removed, meaning objects that are removed\") \u2014 fix both to the same wording. Rubric 3 (clarity) and Rubric 2 (comprehension floor).",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-010",
+  "sev": "significant",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Knowledge check \u00b7 quiz JSON (addition \u2014 append as a sixth question)",
+  "orig": "",
+  "prop": "{ \"q\": \"Restores have started failing for one application and you cannot see why from the dashboard. In what order do you gather what support will ask for?\", \"opts\": [ { \"t\": \"Open the case first so the clock starts, then collect logs if support asks for them\", \"correct\": false, \"why\": \"Collecting the bundle first is what turns a case into a diagnosis instead of a request for logs. Support runs through Veeam Kasten Community Support or a case opened at the Veeam customer portal [Src: Kasten Docs 9.0.2 p.861].\" }, { \"t\": \"Confirm on the dashboard which actions are failing, download the support logs from System Information, run the debug script for the fuller bundle, check the platform with k10tools, then open the case with the bundle attached\", \"correct\": true, \"why\": \"Correct \u2014 that is the order this module works in, cheapest evidence first. The dashboard names the failing actions and applications [Src: Kasten Docs 9.0.2 p.301]; support logs are available to admin users from the System Information page with no terminal [Src: Kasten Docs 9.0.2 p.862]; the debug script produces k10_debug_logs.tar.gz with per-service logs and can include Prometheus metrics [Src: Kasten Docs 9.0.2 p.862, p.863]; k10tools validates the cluster and debugs the Veeam Kasten micro services [Src: Kasten Docs 9.0.2 p.864].\" }, { \"t\": \"Run the debug script on every namespace in the cluster, then send the whole archive without reading it\", \"correct\": false, \"why\": \"The debug script assumes your default context points at the cluster and that Veeam Kasten is installed in the kasten-io namespace, with option flags for a different namespace or output file [Src: Kasten Docs 9.0.2 p.862] \u2014 it is scoped to the platform, not swept across the cluster. And the dashboard step exists so you know what you are looking for before you collect.\" } ] }",
+  "why": "Rubric 2. Module 04 declares six objectives but assesses five, and the coverage is lopsided: Q1 and Q2 both test objective 1 (the four-version window, then the 50% catalog figure), while objective 2 (Kubernetes/OpenShift version pacing) and objective 4 (\"Collect the right diagnostics before you open a support case\") get nothing. Objective 4 is the one a learner will actually need under pressure and it has a clean five-step sequence in Section 03 to assess, so a sixth item is the honest fix \u2014 deleting an existing question would cost either the four-version rule or the 50% threshold, and the module itself calls 50% \"the one number to take away\". Append this object as the last entry in the quiz JSON array. Paired with ED-v1-011, which fixes the two places that promise five questions.",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-011",
+  "sev": "minor",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Knowledge check \u00b7 lede",
+  "orig": "Five questions on the maintenance duties covered in this module. Each one has a single best answer, and every option explains itself.",
+  "prop": "Six questions on the maintenance duties covered in this module. Each one has a single best answer, and every option explains itself.",
+  "why": "Consequential edit for ED-v1-010; a count in the lede that disagrees with the quiz is the kind of small break learners notice and reviewers get blamed for. Two further places state the count for this module and need the same change: the hero meta chip \"5 sections / plus knowledge check\" is unaffected, but index.html's Module 04 card chip reads \"5-question check\" (l.185\u2013186) and index.html's \"How to take it\" paragraph reads \"Each module closes with a five-question knowledge check\" (l.64) \u2014 the second is a course-wide statement, so either soften it to \"a short knowledge check\" or state \"five or six questions\". If the human declines ED-v1-010, decline this row too.",
+  "rev": "Editor"
+ },
+ {
+  "id": "ED-v1-021",
+  "sev": "minor",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Section 01 \"Day two: you now own the protector\"",
+  "orig": "noting releases every 2 weeks [Src: Kasten Docs 9.0.2 p.1093]",
+  "prop": "noting releases every two weeks [Src: Kasten Docs 9.0.2 p.1093]",
+  "why": "Veeam Editorial Style Guide: spell out whole numbers below 10 in body copy; use numerals for measurements, versions and percentages. The rest of the course follows this (\"a couple of minutes\", \"the first ten minutes\", \"three requirements\"), so \"2 weeks\" is the outlier. Related in the same module: \"Worth 10 minutes on day one\" (Lesson05 l.698) is correct as numerals; do not change it.",
+  "rev": "Editor"
+ },
+ {
+  "id": "KA-v1-009",
+  "sev": "minor",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Protecting the catalog \u00b7 04 \u2014 the Veeam Data Platform parallel",
+  "orig": "      <p>The Veeam Data Platform parallel is configuration backup, and it holds up well: both protect the metadata that makes restore points findable, both are scheduled, and both are worthless if you cannot decrypt them. Where it breaks is the dependency list. A KDR recovery needs three things you must arrange in advance \u2014 a location profile that the target cluster can also reach, the passphrase used when KDR was configured, and the source instance's cluster identifier [Src: Kasten Docs 9.0.2 p.571].</p>",
+  "prop": "      <p>The Veeam Data Platform parallel is configuration backup, and it holds up well: both protect the metadata that makes restore points findable, both are scheduled, and both are worthless if you cannot decrypt them. Where it breaks is the dependency list. The guide is blunt about what to retain after enabling KDR, without which restore point catalog recovery will not be possible: the source Cluster ID, the KDR passphrase or the external secret manager details, and the KDR location profile details and credential [Src: Kasten Docs 9.0.2 p.585].</p>",
+  "why": "Right facts, wrong page. Kasten Docs 9.0.2 p.571 covers enabling KDR and the immutable-profile recommendation; the three-item retention warning \u2014 'The source Cluster ID / The KDR passphrase (or external secret manager details) / The KDR location profile details and credential \u2026 Without this information, restore point catalog recovery will not be possible' \u2014 is on p.585. This is the one row in the module a reader will follow the citation on, because it is the list they have to hand to whoever holds the secrets store, and the guide's own wording is stronger than the paraphrase.",
+  "rev": "Kasten Architect"
+ },
+ {
+  "id": "KA-v1-010",
+  "sev": "minor",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Upgrades \u00b7 02 \u2014 the two rules that decide your upgrade plan",
+  "orig": "      <p>You do not have to work the arithmetic out by hand. You can verify available catalog free space and see your recommended upgrade path from the System Information page under the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.198]. The <code>k10tools</code> binary offers the same answer from a terminal: its <code>k10tools primer upgrade</code> sub-command finds the recommended upgrade path for your version and checks there is adequate space, for Helm deployments [Src: Kasten Docs 9.0.2 p.872].</p>",
+  "prop": "      <p>You do not have to work the arithmetic out by hand. You can verify available catalog free space and see your recommended upgrade path from the System Information page under the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.198]. The <code>k10tools</code> binary offers the same answer from a terminal: its <code>k10tools primer upgrade</code> sub-command finds the recommended upgrade path for your version and checks there is adequate space, for Helm deployments \u2014 and it requires internet access to <code>gcr.io</code>, so on a restricted or air-gapped cluster the System Information page is the route that still works [Src: Kasten Docs 9.0.2 p.872].</p>",
+  "why": "One clause from the same page, and it is the one that decides which of the two routes a regulated estate can use. Kasten Docs 9.0.2 p.872 states of the upgrade primer: 'This tool requires Internet access to http://gcr.io'. Air-gapped and egress-restricted clusters are common in the estates this course is aimed at \u2014 the module already teaches the air-gapped primer variant in Module 03 \u2014 so an admin who reaches for the terminal answer on such a cluster gets a failure with no hint that the dashboard route is unaffected.",
+  "rev": "Kasten Architect"
+ },
+ {
+  "id": "KA-v1-012",
+  "sev": "minor",
+  "loc": "Lesson04_Maintaining_Veeam_Kasten_Over_Time.html \u00b7 Upgrades \u00b7 02 \u2014 Pro tip (keeping pace with Kubernetes)",
+  "orig": "        <p>Put the cluster's Kubernetes upgrade on the same calendar as the Veeam Kasten upgrade, and sequence them deliberately. If the platform team moves the cluster first, your options narrow to whichever Veeam Kasten release supports the new version; if you upgrade Veeam Kasten first, you keep the choice. This is the coordination cost a Veeam Data Platform administrator does not carry when the backup server owns its own Windows host.</p>",
+  "prop": "        <p>Put the cluster's Kubernetes upgrade on the same calendar as the Veeam Kasten upgrade, and sequence them deliberately. Veeam Kasten supports a published list of Kubernetes and OpenShift versions and does not support distribution versions that are no longer actively supported by their vendor or community [Src: Kasten Docs 9.0.2 p.861, p.862], and a single release can add one version and remove another [Src: Kasten Docs 9.0.2 p.1098, p.1099] \u2014 so if the platform team moves the cluster first, your options narrow to whichever Veeam Kasten release supports the new version, while upgrading Veeam Kasten first keeps the choice. This is the coordination cost a Veeam Data Platform administrator does not carry when the backup server owns its own Windows host.</p>",
+  "why": "One of the 17 uncited extractions, and the only one carrying operational advice rather than a heading, objective, label or recap. The advice is right and the module has already cited the facts underneath it (Kasten Docs 9.0.2 p.861, p.862 for the support statement; p.1098, p.1099 for 8.5.9 adding Kubernetes 1.34 and removing 1.30), so grounding it in place costs nothing and makes the sequencing argument checkable by the platform team the admin has to persuade.",
+  "rev": "Kasten Architect"
+ }
+]

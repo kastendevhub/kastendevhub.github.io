@@ -1,0 +1,1060 @@
+{
+  "schema_version": "1.0",
+  "module": "Kasten_SelfPaced_VDP_to_Kasten",
+  "version": "v1",
+  "draft_file": "Work\\Kasten_SelfPaced_VDP_to_Kasten\\Lesson04_Maintaining_Veeam_Kasten_Over_Time.html",
+  "extractor": "bin/extract-claims.py v1.0",
+  "generated_at": "2026-08-06T12:51:37-04:00",
+  "totals": {
+    "cited": 78,
+    "verify": 0,
+    "uncited": 12,
+    "total": 90
+  },
+  "claims": [
+    {
+      "claim_id": "C-v1-001",
+      "text": "Veeam Kasten 9.0.2              day-two operations",
+      "location": {
+        "line": 58
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-002",
+      "text": "Explain how Kubernetes and distribution version support sets the pace of your upgrade calendar",
+      "location": {
+        "line": 65
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-003",
+      "text": "Collect the right diagnostics before you open a support case",
+      "location": {
+        "line": 67
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-004",
+      "text": "Two differences change the calendar more than anything else in this module. First, cadence: Veeam Kasten ships far more frequently than a Veeam Data Platform release cycle \u2014 the product documentation's own maintenance guidance is to always upgrade and not stay on an outdated version for comfort, noting releases every 2 weeks [Src: Kasten Docs 9.0.2 p.1093]. Second, the floor moves: Veeam Kasten supports a defined list of Kubernetes and OpenShift versions and does not support distribution versions that are no longer actively supported by their vendor or community [Src: Kasten Docs 9.0.2 p.861],",
+      "location": {
+        "line": 86
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-005",
+      "text": "The catalog is the product.                    Restore points are only useful while something knows they exist. Veeam Kasten Disaster Recovery exists to protect that catalog, and catalog storage space is also what gates your upgrades [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 100
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-006",
+      "text": "Upgrade the Helm release in the Veeam Kasten namespace, reusing your current values [Src: Kasten Docs 9.0.2 p.199]",
+      "location": {
+        "line": 111
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.199",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 199,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-007",
+      "text": "Two constraints have no console equivalent: upgrades are supported across a maximum of four versions, and at least 50% free space is required in catalog storage [Src: Kasten Docs 9.0.2 p.198]",
+      "location": {
+        "line": 112
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.198",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 198,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-008",
+      "text": "Read the dashboard's compliance states, then the action metrics behind them [Src: Kasten Docs 9.0.2 p.301, p.748]",
+      "location": {
+        "line": 116
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301, p.748",
+      "source_doc": "Kasten Docs 9.0.2 p.301",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-009",
+      "text": "Alerting is something you wire up: Veeam Kasten exposes a Prometheus endpoint for a central system to extract data from [Src: Kasten Docs 9.0.2 p.746]",
+      "location": {
+        "line": 117
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.746",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 746,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-010",
+      "text": "Enable the Veeam Kasten Disaster Recovery (KDR) policy, which backs up Veeam Kasten's own resources and catalog to a location profile [Src: Kasten Docs 9.0.2 p.565, p.571]",
+      "location": {
+        "line": 121
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.565, p.571",
+      "source_doc": "Kasten Docs 9.0.2 p.565",
+      "source_page": 565,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-011",
+      "text": "Recovery depends on a passphrase you stored and a location profile configured on the target cluster [Src: Kasten Docs 9.0.2 p.571, p.572]",
+      "location": {
+        "line": 122
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571, p.572",
+      "source_doc": "Kasten Docs 9.0.2 p.571",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-012",
+      "text": "Let the garbage collector clean up resources that are orphaned or past their expiration period [Src: Kasten Docs 9.0.2 p.839]",
+      "location": {
+        "line": 126
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.839",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 839,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-013",
+      "text": "Retiring a restore point does not always free space right away, and deduplication can make the reclamation minimal [Src: Kasten Docs 9.0.2 p.365]",
+      "location": {
+        "line": 127
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.365",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 365,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-014",
+      "text": "Three of the four day-two duties in that table \u2014 upgrades, dashboard health, and catalog protection \u2014 all touch catalog storage. If you take one number away from this module, take 50%: the free space Veeam Kasten needs in catalog storage for upgrades [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 136
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-015",
+      "text": "This section gives you the upgrade rules, the command that performs the upgrade, and a planner you can use to decide whether your instance is one hop or several hops from current. It also covers the version support you do not control: the Kubernetes and OpenShift releases underneath you.",
+      "location": {
+        "line": 154
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-016",
+      "text": "Veeam Kasten upgrades are supported across a maximum of four versions (for example, 2.0.10 to 2.0.14). If your instance is further behind, a step upgrade process is recommended, using the       --version        flag with       helm upgrade        to control the version jumps \u2014 and at least 50% free space is required in catalog storage [Src: Kasten Docs 9.0.2 p.198].",
+      "location": {
+        "line": 159
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.198",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 198,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-017",
+      "text": "You do not have to work the arithmetic out by hand. You can verify available catalog free space and see your recommended upgrade path from the System Information page under the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.198]. The       k10tools        binary offers the same answer from a terminal: its       k10tools primer upgrade        sub-command finds the recommended upgrade path for your version and checks there is adequate space, for Helm deployments [Src: Kasten Docs 9.0.2 p.872].",
+      "location": {
+        "line": 160
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.198",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 198,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-018",
+      "text": "A release may perform a catalog schema upgrade, and the schema upgrade requires at least 50% of free space in the       catalog-pv-claim        persistent volume \u2014 the claim's size may need to be increased first. Available catalog storage space is visible in the dashboard under Settings &gt; System Information &gt; Upgrade Status [Src: Kasten Docs 9.0.2 p.1097].",
+      "location": {
+        "line": 173
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1097",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1097,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-019",
+      "text": "An upgrade is a Helm upgrade of the release you installed, run against the namespace you installed into \u2014 the documented example assumes the       kasten-io        namespace and the release name       k10        [Src: Kasten Docs 9.0.2 p.199]. The documented sequence refreshes the chart repository, captures your current values, and upgrades using them, so your configuration survives the upgrade [Src: Kasten Docs 9.0.2 p.200].",
+      "location": {
+        "line": 178
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.199",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 199,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-020",
+      "text": "For a step upgrade, the same sequence carries a pinned version \u2014 this is the form the upgrade primer prints as its recommended upgrade path, with the target release on the end [Src: Kasten Docs 9.0.2 p.872].",
+      "location": {
+        "line": 192
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.872",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 872,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-021",
+      "text": "Read the Upgrade Notes for every release you pass through, not only the one you land on \u2014 that is where the breaking details live. Recent examples: an       app_namespace        label was added to per-application metrics, so Prometheus queries that pin the exact label set may need updating [Src: Kasten Docs 9.0.2 p.1097]; metrics sourced through Red Hat ACM Observability moved from       cluster_id        to       cluster_uid       , so dashboards and alert rules filtering on the old label need changing [Src: Kasten Docs 9.0.2 p.1099]; and policy, profile, and action names became limited to 63",
+      "location": {
+        "line": 209
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1097",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1097,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-022",
+      "text": "Answer both questions the way your cluster looks today, then plan the upgrade. The planner applies only the two documented rules: the four-version support window and the catalog free-space requirement [Src: Kasten Docs 9.0.2 p.198].",
+      "location": {
+        "line": 220
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.198",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 198,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-023",
+      "text": "The other half of staying current is the platform underneath. Veeam Kasten publishes the certified Kubernetes distributions and respective OpenShift versions it supports, and does not support distribution versions that are no longer actively supported by their vendor or community [Src: Kasten Docs 9.0.2 p.861]. A single Veeam Kasten release can move both ends of that list: release 8.5.9 added support for Kubernetes 1.34 [Src: Kasten Docs 9.0.2 p.1098] and, in the same release, removed support for Kubernetes 1.30 while OpenShift 4.17 clusters continued to be supported [Src: Kasten Docs 9.0.2 p.",
+      "location": {
+        "line": 253
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.861",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 861,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-024",
+      "text": "1.34                                        4.21                            Supported [Src: Kasten Docs 9.0.2 p.862]",
+      "location": {
+        "line": 259
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-025",
+      "text": "1.33                                        4.20                            Supported [Src: Kasten Docs 9.0.2 p.862]",
+      "location": {
+        "line": 260
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-026",
+      "text": "1.32                                        4.19                            Supported [Src: Kasten Docs 9.0.2 p.862]",
+      "location": {
+        "line": 261
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-027",
+      "text": "1.31                                        4.18                            Supported [Src: Kasten Docs 9.0.2 p.862]",
+      "location": {
+        "line": 262
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-028",
+      "text": "1.30                                        4.17                            Kubernetes version     only      supported when deployed as an OpenShift cluster [Src: Kasten Docs 9.0.2 p.862]",
+      "location": {
+        "line": 263
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-029",
+      "text": "1.29                                        4.16                            Kubernetes version     only      supported when deployed as an OpenShift cluster [Src: Kasten Docs 9.0.2 p.862]",
+      "location": {
+        "line": 264
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-030",
+      "text": "Put the cluster's Kubernetes upgrade on the same calendar as the Veeam Kasten upgrade, and sequence them deliberately. If the platform team moves the cluster first, your options narrow to whichever Veeam Kasten release supports the new version; if you upgrade Veeam Kasten first, you keep the choice. This is the coordination cost a Veeam Data Platform administrator does not carry when the backup server owns its own Windows host.",
+      "location": {
+        "line": 273
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-031",
+      "text": "This section takes you from the morning glance to the support case: the three layers of monitoring available to you, the alerts worth creating first, and the order to gather diagnostics in when something looks wrong.",
+      "location": {
+        "line": 291
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-032",
+      "text": "The top of the Veeam Kasten dashboard shows the applications on the cluster, the policies that exist, and a summary of the cluster's backup data footprint [Src: Kasten Docs 9.0.2 p.301]. Filtered to applications with stateful services, each is placed in one of four states \u2014 the closest thing here to your morning read of job sessions [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 296
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-033",
+      "text": "Unmanaged        No protection policy covers this object [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 300
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-034",
+      "text": "Non-compliant        A policy applies, but its actions are failing or have not been invoked yet \u2014 for example, right after policy creation [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 301
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-035",
+      "text": "Compliant        A policy applies and its service-level agreements are being respected [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 302
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-036",
+      "text": "Removed        Objects that have been removed [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 303
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-037",
+      "text": "Veeam Kasten enables centralized monitoring of its activity by integrating with Prometheus, exposing a Prometheus endpoint that a central system can extract data from [Src: Kasten Docs 9.0.2 p.746]. The built-in instance is configured by default with persistent storage of 8Gi and a retention period of 30d, changeable through the       prometheus.server.persistentVolume.size        and       prometheus.server.retention        Helm values [Src: Kasten Docs 9.0.2 p.746].",
+      "location": {
+        "line": 308
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.746",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 746,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-038",
+      "text": "Leave that server enabled. Disabling it reduces functionality in various parts of the system, including usage data, reporting, and the multi-cluster dashboard; if it has been disabled, it can be re-enabled during a Helm upgrade with       --set prometheus.server.enabled=true        [Src: Kasten Docs 9.0.2 p.763].",
+      "location": {
+        "line": 309
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.763",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 763,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-039",
+      "text": "Action metrics are the ones you will query first. Veeam Kasten records counts for cluster and application-specific actions, labels them with the action's context, and includes the final status as       state        for ended actions \u2014 with an action's state reported as values including       pending       ,       running       ,       attempt_failed       ,       failed       ,       succeeded       ,       cancelled       ,       skipped       , and       deleting        [Src: Kasten Docs 9.0.2 p.748].",
+      "location": {
+        "line": 310
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.748",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 748,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-040",
+      "text": "PromQL \u00b7 successful backups in the past 24 hours",
+      "location": {
+        "line": 315
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-041",
+      "text": "Swap the labels and you have the query that matters more:       sum(round(increase(action_ended_total{action=\"restore\",state=\"failed\"}[1h])))        returns failed restores in the past hour [Src: Kasten Docs 9.0.2 p.748].",
+      "location": {
+        "line": 322
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.748",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 748,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-042",
+      "text": "Metrics can leave the cluster two ways: Prometheus remote write pushes them to remote Prometheus-compatible endpoints such as Grafana, Datadog, or Thanos, and external Prometheus integration has an outside Prometheus instance scrape the built-in server \u2014 remote write is documented as the recommended route for most use cases [Src: Kasten Docs 9.0.2 p.754]. Grafana then visualizes what Prometheus collected, and alerts fire when metrics cross the levels you care about [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 327
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.754",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 754,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-043",
+      "text": "The product's own guidance is to create alerts for any actions where       state=failed       , and for Catalog Volume Used Space &gt; 50%, because that condition could impact Veeam Kasten upgrades [Src: Kasten Docs 9.0.2 p.1093]. The second one is the link back to Section 02: the alert that protects your upgrade window. For version tracking from an external monitor, the       k10_build_info        Prometheus gauge metric exposes the running Veeam Kasten version as a label [Src: Kasten Docs 9.0.2 p.1099].",
+      "location": {
+        "line": 332
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-044",
+      "text": "From \"that looks wrong\" to a support case",
+      "location": {
+        "line": 338
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-045",
+      "text": "Confirm which actions are failing and on which applications, using the compliance states and the action list. A non-compliant application tells you a policy's actions are failing or have not run yet [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 345
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-046",
+      "text": "Download the support logs from the dashboard",
+      "location": {
+        "line": 349
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-047",
+      "text": "Admin users running 4.5.7 or later can get support logs from the System Information page under the Settings menu in the navigation sidebar \u2014 no terminal required [Src: Kasten Docs 9.0.2 p.862].",
+      "location": {
+        "line": 350
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-048",
+      "text": "The debug script generates a compressed archive,       k10_debug_logs.tar.gz       , containing separate log files for the Veeam Kasten services; it assumes your default context points at the cluster and that Veeam Kasten is installed in the       kasten-io        namespace, and option flags exist for a different namespace or output file [Src: Kasten Docs 9.0.2 p.862]. It can also gather metrics from the Prometheus server installed by Veeam Kasten when you pass       --prom-duration       ; the duration drives the size of the captured data, and       --prom-metrics-only        separates metric",
+      "location": {
+        "line": 355
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.862",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 862,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-049",
+      "text": "The       k10tools        binary has commands that help validate whether a cluster is set up correctly before installing Veeam Kasten and debug the Veeam Kasten micro services [Src: Kasten Docs 9.0.2 p.864]. Storage class validation is available the same way, and admin users can validate storage classes from the System Information page of the Settings menu \u2014 the state \"Unknown\" is shown until validation is run [Src: Kasten Docs 9.0.2 p.864].",
+      "location": {
+        "line": 360
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.864",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 864,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-050",
+      "text": "Support runs through Veeam Kasten Community Support or a case opened at the Veeam customer portal [Src: Kasten Docs 9.0.2 p.861]. Collecting the bundle first is what turns a case into a diagnosis instead of a request for logs.",
+      "location": {
+        "line": 365
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.861",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 861,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-051",
+      "text": "Source: Veeam Kasten 9.0.2 user guide, p.862. The collected logs also contain a Prometheus health-check section with a curated set of metrics for evaluating the storage and retention health of the Prometheus instance [Src: Kasten Docs 9.0.2 p.863].",
+      "location": {
+        "line": 378
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.863",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 863,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-052",
+      "text": "Veeam Kasten is a stateful application running on the cluster, so it must be responsible for backing up its own data to enable recovery in the event of disaster \u2014 the backup enabled by the Veeam Kasten Disaster Recovery (KDR) policy [Src: Kasten Docs 9.0.2 p.565]. KDR provides the ability to recover the Veeam Kasten platform from a variety of disasters: unintended deletion of Veeam Kasten or its restore points, failure of the underlying storage used by Veeam Kasten, or accidental destruction of the Kubernetes cluster Veeam Kasten is deployed on [Src: Kasten Docs 9.0.2 p.565]. The API exposes t",
+      "location": {
+        "line": 398
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.565",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 565,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-053",
+      "text": "The Veeam Data Platform parallel is configuration backup, and it holds up well: both protect the metadata that makes restore points findable, both are scheduled, and both are worthless if you cannot decrypt them. Where it breaks is the dependency list. A KDR recovery needs three things you must arrange in advance \u2014 a location profile that the target cluster can also reach, the passphrase used when KDR was configured, and the source instance's cluster identifier [Src: Kasten Docs 9.0.2 p.571].",
+      "location": {
+        "line": 399
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-054",
+      "text": "Where you turn it on.          The Veeam Kasten Disaster Recovery settings are on the Setup Kasten DR page under the Settings menu in the navigation sidebar; you specify a location profile for the exported KDR backups and choose the passphrase method used to encrypt them [Src: Kasten Docs 9.0.2 p.571, p.572]. Note the sidebar: Restore Kasten sits directly below it, which is the page you will use on the far side of a disaster.",
+      "location": {
+        "line": 405
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571, p.572",
+      "source_doc": "Kasten Docs 9.0.2 p.571",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-055",
+      "text": "Choose a location profile that supports immutable backups \u2014 the guide states this strongly, so that restore point catalog data can be recovered in the event of incidents including ransomware and accidental deletion [Src: Kasten Docs 9.0.2 p.571]. And check your intended target: Veeam Repository location profiles cannot be used as a destination for KDR backups [Src: Kasten Docs 9.0.2 p.572]. Passphrase options include a passphrase you supply, HashiCorp Vault, and AWS Secrets Manager [Src: Kasten Docs 9.0.2 p.572]; Azure Key Vault Secrets was added as a passphrase provider for Disaster Recovery,",
+      "location": {
+        "line": 412
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-056",
+      "text": "The KDR mode specifies how internal Veeam Kasten resources are protected. It must be set before enabling the KDR policy, and changes to the mode only apply to future KDR policy runs [Src: Kasten Docs 9.0.2 p.565]. Starting in Veeam Kasten v8.0.0, all installations default to Quick DR (Local Catalog Snapshot) mode \u2014 a mode that should only be enabled if the storage provisioner used for Veeam Kasten persistent volume claims supports both creating storage snapshots and restoring the existing volume from one [Src: Kasten Docs 9.0.2 p.565].",
+      "location": {
+        "line": 417
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.565",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 565,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-057",
+      "text": "Storage used for Veeam Kasten persistent volume claims supports both creating storage snapshots and provisioning a volume from a snapshot [Src: Kasten Docs 9.0.2 p.568]",
+      "location": {
+        "line": 425
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.568",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 568,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-058",
+      "text": "Creates a local snapshot of the catalog persistent volume claim and incrementally exports only the minimally required catalog data [Src: Kasten Docs 9.0.2 p.568]",
+      "location": {
+        "line": 426
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.568",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 568,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-059",
+      "text": "Storage can create snapshots but cannot provision a volume from one; or you want to reduce local snapshot retention without affecting exported backups. May be selected on any snapshot-capable storage for the highest level of resilience [Src: Kasten Docs 9.0.2 p.568]",
+      "location": {
+        "line": 430
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.568",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 568,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-060",
+      "text": "Everything the local-snapshot mode does, plus an incremental export of the catalog snapshot data [Src: Kasten Docs 9.0.2 p.568]",
+      "location": {
+        "line": 431
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.568",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 568,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-061",
+      "text": "No available cluster storage supports snapshot creation, or there is no requirement to recover local restore points or action history [Src: Kasten Docs 9.0.2 p.569, p.570]",
+      "location": {
+        "line": 435
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.569, p.570",
+      "source_doc": "Kasten Docs 9.0.2 p.569",
+      "source_page": 569,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-062",
+      "text": "Incrementally exports only the minimally required catalog data; does not support recovery of local restore points and action history [Src: Kasten Docs 9.0.2 p.570]",
+      "location": {
+        "line": 436
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.570",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 570,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-063",
+      "text": "Supported for backwards-compatibility only \u2014 the mode is deprecated and will be removed in a future release, and all clusters should be migrated to a supported Quick DR configuration [Src: Kasten Docs 9.0.2 p.566, p.567]",
+      "location": {
+        "line": 440
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.566, p.567",
+      "source_doc": "Kasten Docs 9.0.2 p.566",
+      "source_page": 566,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-064",
+      "text": "Exports a full copy of the catalog database [Src: Kasten Docs 9.0.2 p.567]",
+      "location": {
+        "line": 441
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.567",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 567,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-065",
+      "text": "Quick DR modes protect additional Veeam Kasten resource types compared with Legacy DR, including policy presets, transform sets, blueprint bindings, and basic user policies; reports, action pod specs, and audit configuration are protected by neither [Src: Kasten Docs 9.0.2 p.570]. If your storage cannot take or restore local snapshots, Legacy mode is selected explicitly with the Helm value       kastenDisasterRecovery.quickMode.enabled=false        [Src: Kasten Docs 9.0.2 p.566].",
+      "location": {
+        "line": 445
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.570",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 570,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-066",
+      "text": "Enabling KDR creates a dedicated policy that backs up Veeam Kasten's resources and catalog data to an external location profile [Src: Kasten Docs 9.0.2 p.571]. That policy is named       k10-disaster-recovery-policy       , is created automatically when KDR is enabled, and can be viewed through the Policies page in the navigation sidebar; Run Once starts a manual backup, and Edit changes the frequency and retention [Src: Kasten Docs 9.0.2 p.587]. The frequency guidance is worth writing down: the KDR policy should match the frequency of the lowest recovery point objective (RPO) policy on the cl",
+      "location": {
+        "line": 449
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-067",
+      "text": "The policy you did not create, and should still review.          Frequency and retention are editable, and the location profile shown here is an immutable one [Src: Kasten Docs 9.0.2 p.571, p.587]. If you recognize this layout from your own application policies, that is the point \u2014 KDR is a policy like any other, pointed at Veeam Kasten's own namespace.",
+      "location": {
+        "line": 455
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571, p.587",
+      "source_doc": "Kasten Docs 9.0.2 p.571",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-068",
+      "text": "Stage 01 \u2014 export off-site.          The documented rebuild strategy starts by configuring policies to export backups to an off-site location [Src: Kasten Docs 9.0.2 p.1093]. Without this, KDR recovers a catalog that points at data the surviving site cannot read.",
+      "location": {
+        "line": 470
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-069",
+      "text": "Stage 02 \u2014 protect the catalog.          Enable Disaster Recovery for Veeam Kasten to export the Veeam Kasten catalog to external storage, using a user-provided passphrase key or third-party management of the secret that encrypts the catalog data [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 477
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-070",
+      "text": "Stage 03 \u2014 new cluster.          In the event of a complete cluster or site loss, a new cluster can be deployed in a secondary site or the public cloud [Src: Kasten Docs 9.0.2 p.1093]. This is the stage where the rebuild strategy pays its cost in time \u2014 the tradeoff documented against the replicate strategy, which pre-seeds a secondary site instead [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 484
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-071",
+      "text": "Stage 04 \u2014 redeploy.          Veeam Kasten can be redeployed via Helm, and a location profile created to point to the off-site data repository [Src: Kasten Docs 9.0.2 p.1093]. This is Module 03's install, run against an empty cluster \u2014 which is the argument for having practiced it.",
+      "location": {
+        "line": 491
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-072",
+      "text": "Stage 05 \u2014 import the catalog.          The Veeam Kasten catalog can be imported, via the previously set passphrase, to the new instance of Veeam Kasten [Src: Kasten Docs 9.0.2 p.1093]. In the dashboard this is the Restore Kasten page, which asks for the location profile holding the exported KDR backups, the cluster identifier of the source instance, and the passphrase method used at setup [Src: Kasten Docs 9.0.2 p.571, p.572].",
+      "location": {
+        "line": 498
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-073",
+      "text": "Stage 05 in the dashboard.          Recovering an instance asks for the location profile, the cluster identifier of the source instance, and the passphrase used when the KDR policy was configured \u2014 then a restore point and a summary [Src: Kasten Docs 9.0.2 p.571, p.572]. Every field on this screen is something you decided months earlier, which is why the passphrase belongs in your secrets store and your runbook, not in someone's memory.",
+      "location": {
+        "line": 507
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.571, p.572",
+      "source_doc": "Kasten Docs 9.0.2 p.571",
+      "source_page": 571,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-074",
+      "text": "Veeam Kasten catalog backup and restore are handled through this dedicated disaster recovery process, and the guide's recommendation is to enable Veeam Kasten DR and regularly test the process [Src: Kasten Docs 9.0.2 p.1093]. Treat the KDR test like the restore tests you already run: on a schedule, with the passphrase retrieved from where it is meant to live rather than from your own notes.",
+      "location": {
+        "line": 516
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-075",
+      "text": "\"Who backs up the backup system?\" is the question that ends a lot of Kubernetes protection projects late. The answer here is concrete and demonstrable: the platform runs a dedicated policy over its own namespace, exports the catalog to an external location profile you choose \u2014 one that supports immutable backups, so the catalog survives ransomware and accidental deletion \u2014 and encrypts it with a passphrase held in a passphrase provider, then recovers onto a new cluster from that export [Src: Kasten Docs 9.0.2 p.565, p.571, p.1093].",
+      "location": {
+        "line": 522
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.565, p.571, p.1093",
+      "source_doc": "Kasten Docs 9.0.2 p.565, p.571",
+      "source_page": 565,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-076",
+      "text": "Veeam Kasten provides a way to collect and clean up resources that are either orphaned or whose expiration period has passed, through a garbage collector daemon [Src: Kasten Docs 9.0.2 p.839]. Three Helm options tune it:       garbagecollector.daemonPeriod        sets the length of time between two consecutive garbage collection events in seconds,       garbagecollector.keepMaxActions        sets how many finished actions to keep \u2014 with no actions deleted if the value is less than or equal to zero \u2014 and       garbagecollector.actions.enabled        enables the action collectors [Src: Kasten Do",
+      "location": {
+        "line": 543
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.839",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 839,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-077",
+      "text": "What the daemon cleans is a specific list: actions above the retained maximum, oldest first and handled independently per action type;       RestorePointContents        for expired manual backups, as determined by their       expiresAt        value; and the temporary objects left behind by restore operations \u2014       CSISnapshot        objects, persistent volumes, profiles, services, network policies, secrets, and config maps [Src: Kasten Docs 9.0.2 p.839]. Export pods are cleaned up by the garbage collection daemon after the configured grace period [Src: Kasten Docs 9.0.2 p.1097].",
+      "location": {
+        "line": 544
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.839",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 839,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-078",
+      "text": "When restore points are retired \u2014 manually or through a policy retention schedule \u2014 Veeam Kasten cleans up the associated resources, but the cleanup is not immediate for all of them; backup data in an object store may take a significant amount of time to be removed [Src: Kasten Docs 9.0.2 p.365]. Data references shared between restore points, aggregated data awaiting garbage collection, version retention for immutable backups, and safety windows for re-referencing data are among the reasons a retirement might not immediately free space, and deduplication can mean minimal or no reclamation at a",
+      "location": {
+        "line": 549
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.365",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 365,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-079",
+      "text": "Log volume is the other thing worth setting deliberately. Log retention is tuned with Helm values including a rotation count and a size threshold that triggers rotation, applied during an upgrade of the release [Src: Kasten Docs 9.0.2 p.176].",
+      "location": {
+        "line": 553
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.176",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 176,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-080",
+      "text": "1                                   Daily                                  Read the dashboard: any application that moved to non-compliant, and any failed action [Src: Kasten Docs 9.0.2 p.301].",
+      "location": {
+        "line": 572
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.301",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 301,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-081",
+      "text": "2                                   Weekly                                  Confirm the KDR policy is running to schedule [Src: Kasten Docs 9.0.2 p.587], and check catalog storage space against the 50% mark [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 573
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.587",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 587,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-082",
+      "text": "3                                   Monthly                                  Test restores rather than waiting for a disaster \u2014 in the same namespace, a different namespace, and a different cluster [Src: Kasten Docs 9.0.2 p.1093] \u2014 and test the KDR process itself [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 574
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-083",
+      "text": "4                                   Quarterly                                  Plan the next upgrade hop, and review the supported Kubernetes and OpenShift matrix against the cluster's roadmap [Src: Kasten Docs 9.0.2 p.198, p.862].",
+      "location": {
+        "line": 575
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.198, p.862",
+      "source_doc": "Kasten Docs 9.0.2 p.198",
+      "source_page": 198,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-084",
+      "text": "Monitoring configuration is reviewed as the deployment evolves, so you are watching the right metrics and getting alerts for new issues [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 580
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-085",
+      "text": "Alerts exist for failed actions and for catalog volume used space, the two conditions the guide calls out [Src: Kasten Docs 9.0.2 p.1093].",
+      "location": {
+        "line": 581
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.1093",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 1093,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-086",
+      "text": "The KDR passphrase is retrievable by someone other than you, from a passphrase provider rather than a personal note [Src: Kasten Docs 9.0.2 p.572].",
+      "location": {
+        "line": 582
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.572",
+      "source_doc": "Kasten Docs 9.0.2",
+      "source_page": 572,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-087",
+      "text": "The upgrade path is known before the upgrade window opens, from the System Information page or the upgrade primer [Src: Kasten Docs 9.0.2 p.198, p.872].",
+      "location": {
+        "line": 583
+      },
+      "marker_type": "cited",
+      "source": "Kasten Docs 9.0.2 p.198, p.872",
+      "source_doc": "Kasten Docs 9.0.2 p.198",
+      "source_page": 198,
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-088",
+      "text": "01                                     Planning an upgrade inside the four-version support window, with at least 50% free catalog storage, using the System Information page or the upgrade primer to find the path",
+      "location": {
+        "line": 668
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-089",
+      "text": "02                                     Keeping pace with the Kubernetes and OpenShift versions Veeam Kasten supports, and sequencing cluster upgrades against product upgrades",
+      "location": {
+        "line": 669
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    },
+    {
+      "claim_id": "C-v1-090",
+      "text": "04                                     Collecting diagnostics in order: dashboard, support logs from System Information, the debug bundle, the platform checks, then the support case",
+      "location": {
+        "line": 671
+      },
+      "marker_type": "uncited",
+      "fact_checker_status": "pending"
+    }
+  ]
+}

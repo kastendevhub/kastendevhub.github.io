@@ -1,0 +1,65 @@
+[
+ {
+  "id": "ED-v1-004",
+  "sev": "significant",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 hero blurb (systemic \u2014 25 instances across 5 files)",
+  "orig": "The centre of gravity here is the restore: three sources a restore point can come from, three levels of granularity you can restore at, and one decision \u2014 which path fits the situation in front of you.",
+  "prop": "The center of gravity here is the restore: three sources a restore point can come from, three levels of granularity you can restore at, and one decision \u2014 which path fits the situation in front of you.",
+  "why": "Veeam Editorial Style Guide: US English spelling. British forms have drifted into five of the six files and need a single sweep, not one fix. Full list \u2014 Lesson01: \"organised\" (l.222), \"division of labour\" (l.275), \"real behaviour\" (l.493). Lesson02: \"summarising\" (l.384), \"fulfils\" (l.421), \"fulfils\"/\"fulfilled\" (l.434, l.440), \"catalogue entry\" (l.441), \"honour it\" (l.489), \"recognise it here\" (l.504), \"documented behaviour\" (l.546), \"parameterised\" (l.577). Lesson03: \"recognise\" (l.300, l.325, l.396, l.778), \"organisation\" (l.612), \"automatic behaviour\" (l.960). Lesson04: \"backwards-compatibility\" (l.440) and \"backwards compatibility\" (l.634) \u2192 \"backward compatibility\". Lesson05: \"centre\" (l.47), \"centre on\" (l.83), \"Two behaviours\" (l.157, l.487), \"Practise using it\" (l.412) \u2192 \"Practice using it\". Note that the same words are already correct elsewhere in the same course (\"organized\" L05 l.122, \"visualizes\" L04 l.327, \"optimize\"/\"standardize\" L05 l.670/677), so the inconsistency is visible inside single lessons, not only across them.",
+  "rev": "Editor"
+ },
+ {
+  "id": "KA-v1-004",
+  "sev": "significant",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 Who can do what \u00b7 04 \u2014 bind the administrator role",
+  "orig": "    <p class=\"prose\">That is the command form for an individual user or service account [Src: Kasten Docs 9.0.2 p.266]. You will do it from the dashboard most of the time, which is the next part.</p>",
+  "prop": "    <p class=\"prose\">That is the command form for an individual user or service account [Src: Kasten Docs 9.0.2 p.266], and on its own it is not the whole grant. In addition to the <code>k10-admin</code> ClusterRole, administrators also require the <code>k10-ns-admin</code> Role for Secret and ConfigMap access within the Veeam Kasten install namespace [Src: Kasten Docs 9.0.2 p.267]; that Role needs a RoleBinding in the release namespace, and Veeam Kasten creates one for the default group <code>k10:admins</code>, so adding the user to that group covers both bindings at once [Src: Kasten Docs 9.0.2 p.268]. You will do it from the dashboard most of the time, which is the next part.</p>",
+  "why": "A team following this section literally ends up with a half-privileged administrator. The guide is explicit: 'In addition to the k10-admin ClusterRole, administrators also require the k10-ns-admin Role for Secret and ConfigMap access within the Veeam Kasten install namespace' (Kasten Docs 9.0.2 p.267), bound by a RoleBinding in the release namespace, with a RoleBinding for the k10:admins group created for you (Kasten Docs 9.0.2 p.268). The symptom in the field is an 'administrator' who can drive the dashboard until an operation touches a Secret \u2014 creating a location profile credential, for instance \u2014 and then fails on permissions. The module names four roles and omits the one that makes the first of them work.",
+  "rev": "Kasten Architect"
+ },
+ {
+  "id": "KA-v1-005",
+  "sev": "significant",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 Restores \u00b7 02 \u2014 Applications, and the virtual machines among them",
+  "orig": "    <p class=\"prose\">Do not let the familiarity carry you too far, though. Virtual machines can only be restored into a new namespace [Src: Kasten Docs 9.0.2 p.417]. The in-place restore you would reach for out of habit is not on the menu for that object type.</p>",
+  "prop": "    <p class=\"prose\">Do not let the familiarity carry you too far, though. In the guide's discussion of renaming a restored application's persistent volume claims \u2014 which for a virtual machine also means renaming its DataVolumes and transforming the references and owner references to them \u2014 it states that VirtualMachines can only be restored into a new namespace [Src: Kasten Docs 9.0.2 p.417]. The virtual-machine restore workflow itself is documented as similar to restoring any other application, initiated from the Restore Points page against the Virtual Machine application type [Src: Kasten Docs 9.0.2 p.544, p.545]. Prove which target namespaces your platform actually accepts with a test restore before a runbook depends on the answer.</p>",
+  "why": "The sentence is real but its scope is not. 'VirtualMachines can only be restored into a new namespace' sits at the end of the PVC-renaming and transform discussion on Kasten Docs 9.0.2 p.417, in a paragraph about renaming a VM's PVCs and DataVolumes; the virtual-machine restore section itself describes the workflow as similar to any other application with no such restriction (Kasten Docs 9.0.2 p.544, p.545). Lifted out and stated flatly \u2014 'the in-place restore \u2026 is not on the menu' \u2014 it tells an OpenShift Virtualization team their in-place VM recovery path does not exist, which changes how they write their DR plan. Scope it to what the page says and route the rest to a test.",
+  "rev": "Kasten Architect"
+ },
+ {
+  "id": "KS-v1-007",
+  "sev": "significant",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 Who can do what \u00b7 04",
+  "orig": "Veeam Kasten also supports a more flexible permissions model that scopes a user's permissions to perform actions only within the context of specified applications [Src: Kasten Docs 9.0.2 p.263].",
+  "prop": "Veeam Kasten also supports a more flexible permissions model that scopes a user's permissions to perform actions only within the context of specified applications [Src: Kasten Docs 9.0.2 p.263] \u2014 the middle ground between k10-admin's everything and k10-basic's whole namespace, for the case where one team owns several applications inside a namespace they don't otherwise control.",
+  "why": "This sentence lands right after the four built-in roles have been cleanly explained, table and all \u2014 the section is doing well up to this point \u2014 and then names a fifth capability, calls it 'more flexible,' and moves on without saying what it actually does or when you'd reach for it instead of the roles just covered. That's the exact shape of a demo stall: a platform team or a VDP admin who just followed the k10-admin / k10-basic / k10-config-view logic hears 'also supports a more flexible model' and asks 'flexible how?' \u2014 and the page has already turned the page on them. One clause closes it without inventing anything not already implied by 'scopes... to specified applications.'",
+  "rev": "Senior Kasten SE"
+ },
+ {
+  "id": "ED-v1-025",
+  "sev": "minor",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 Section 03 \u00b7 \"Same cluster, different namespace, is a restore\" card",
+  "orig": "If you find yourself building an import policy to move a namespace inside one cluster, stop and go back to section 02.",
+  "prop": "If you find yourself building an import policy to move a namespace inside one cluster, stop and go back to Section 02.",
+  "why": "Cross-reference capitalisation. Lesson03 capitalises internal references (\"Section 5 comes back to both\", \"Section 6 is where you give the data somewhere else to live\") and Lesson01 does too (\"Section 03 is entirely about this\"); Lesson05 lowercases them. Two more instances in this file: \"this is the path section 03 walks\" (l.334) and \"map exactly onto the three paths in section 02\" (l.664). Capitalised is the right call here because these are labelled, numbered components the learner can navigate to from the rail, not generic prose references.",
+  "rev": "Editor"
+ },
+ {
+  "id": "KS-v1-002",
+  "sev": "minor",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 Policies \u00b7 01",
+  "orig": "Protecting an application with Veeam Kasten, which is accomplished by creating a policy, rests on three concepts:",
+  "prop": "Protecting an application with Veeam Kasten for Kubernetes, which is accomplished by creating a policy, rests on three concepts:",
+  "why": "Same naming-standard gap as Lesson 02: the hero objectives never name the product, so this sentence is the first prose use of 'Veeam Kasten' on the page, and it should be the full name on first use per the glossary rule. Cosmetic, not a comprehension issue, but worth a consistent pass across all five lessons rather than three-for-five.",
+  "rev": "Senior Kasten SE"
+ },
+ {
+  "id": "KSA-v1-005",
+  "sev": "minor",
+  "loc": "Lesson05_Restores_and_Day_to_Day_Administration.html \u00b7 hero objectives list",
+  "orig": "<li>Assign who can protect and restore what using the built-in Veeam Kasten roles, and work a daily and weekly operating routine off the dashboard</li>",
+  "prop": "<li>Assign who can protect and restore what using the built-in Veeam Kasten for Kubernetes roles, and work a daily and weekly operating routine off the dashboard</li>",
+  "why": "Same naming-standard issue as Lesson 02: this objectives-list item is the first substantive mention of the product on the page (the version-badge chip aside), and it uses the short form. The full form \"Veeam Kasten for Kubernetes\" does not appear until the section#policies lede immediately after, so the order is backward relative to the rest of the course.",
+  "rev": "Kasten Systems Architect"
+ }
+]

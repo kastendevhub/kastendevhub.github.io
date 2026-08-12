@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 01 · From Veeam Data Platform Admin to Veeam Kasten Admin (Veeam Kasten for Kubernetes Fundamentals)</title>
+<link rel="stylesheet" href="course.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* Module-scoped tweaks only.
+     The long-title step-down that used to live here is now the kit's shared
+     .hero__title--long modifier in course.css (UX-v3-016), so the H1 carries
+     that class instead of a module-local clamp.
+     The concept-map widget reuses the kit's .tabs block; these two rules give
+     the tab strip room for five long labels and keep each mapped pair's two
+     columns top-aligned. */
+  #map .tabs__list { gap: 6px 14px; }
+  #map .text-columns { align-items: start; }
+</style>
+</head>
+<body>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="index.html">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Course overview
+  </a>
+  <span class="breadcrumb__current">Module 01 of 05 · From Veeam Data Platform Admin to Veeam Kasten Admin</span>
+</nav>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progress"></div></div>
+
+<nav class="rail" aria-label="Section navigation">
+  <button class="rail__dot is-active" data-target="hero"        data-label="Module overview"    aria-label="Jump to module overview"></button>
+  <button class="rail__dot"           data-target="orientation" data-label="A different problem" aria-label="Jump to why Kubernetes is a different problem"></button>
+  <button class="rail__dot"           data-target="map"         data-label="The concept map"     aria-label="Jump to the concept map"></button>
+  <button class="rail__dot"           data-target="capture"     data-label="Snapshot vs export"  aria-label="Jump to snapshot versus export"></button>
+  <button class="rail__dot"           data-target="platform"    data-label="In the cluster"      aria-label="Jump to what runs in the cluster"></button>
+  <button class="rail__dot"           data-target="integration" data-label="Veeam repositories"    aria-label="Jump to the Veeam Backup and Replication repository section"></button>
+  <button class="rail__dot"           data-target="check"       data-label="Knowledge check"     aria-label="Jump to knowledge check"></button>
+  <button class="rail__dot"           data-target="review"      data-label="Recap"               aria-label="Jump to the recap"></button>
+</nav>
+
+<main>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__corner"></div>
+  <div class="hero__inner">
+    <div>
+      <div class="hero__module-tag">Module 01</div>
+      <h1 class="hero__title--long">From Veeam Data Platform Admin<br/><em>to Veeam Kasten Admin</em></h1>
+      <p class="hero__blurb">
+        You already know how to protect an estate: you build a job, point it at a repository, set retention, and prove you can restore. This module carries that model across to Veeam Kasten for Kubernetes — naming the counterpart for each concept you already run, and being straight with you about the point where each parallel stops being safe to lean on.
+      </p>
+      <div class="hero__meta">
+        <div><strong>5 sections</strong><br/>plus a knowledge check</div>
+        <div><strong>No cluster needed</strong><br/>nothing to install yet</div>
+        <div><strong>Veeam Kasten 9.0.2</strong><br/>concepts and vocabulary</div>
+      </div>
+      <div class="prereqs"><span class="prereqs__label">Before you start:</span> hands-on Veeam Data Platform administration — backup jobs, backup repositories, retention, and restore points. No Kubernetes knowledge is assumed. Every Kubernetes term used here is either defined on the spot or deferred to Module 02, which covers the platform properly.</div>
+    </div>
+    <div class="objectives">
+      <div class="objectives__title">By the end of this module you'll be able to:</div>
+      <ol>
+        <li>Explain why protecting a Kubernetes application is a different problem than protecting a virtual machine</li>
+        <li>Map five Veeam Data Platform concepts onto their Veeam Kasten counterparts, and state where each analogy breaks</li>
+        <li>Distinguish a Veeam Kasten snapshot from an exported backup, and say why a snapshot on its own is not a backup</li>
+        <li>Describe what Veeam Kasten puts inside a cluster, and how its two editions differ</li>
+        <li>Explain where a Veeam Backup &amp; Replication repository fits as an export target, and the constraints that come with it</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ SECTION 01 — ORIENTATION ════════ -->
+<section id="orientation">
+  <div class="wrap">
+    <span class="eyebrow">Orientation · 01</span>
+    <h2>Why this is a different problem</h2>
+    <p class="lede">
+      Before any vocabulary, the shape of the problem has to change in your head. This section shows you what a Kubernetes application is made of, why "back up the disk" no longer describes the job, and what kind of product Veeam Kasten for Kubernetes is. After it, the concept map in the next section will read as obvious rather than arbitrary.
+    </p>
+
+    <div class="prose">
+      <p class="text-lead">In your Veeam Data Platform world, the thing you protect has an edge you can point at. A virtual machine is a bounded object: a name in an inventory, a set of virtual disks, a configuration file. You select it, you protect it, and the boundary of what you captured is obvious.</p>
+      <p>Kubernetes gives you no such object. What a Veeam Kasten policy protects is defined as a collection of namespaced Kubernetes resources such as ConfigMaps and Secrets, the relevant non-namespaced resources the application uses such as StorageClasses, the Kubernetes workloads themselves — Deployments, StatefulSets, OpenShift DeploymentConfigs and standalone Pods — the deployment and release information available from Helm v3 — Helm is Kubernetes' package manager, covered fully in Module 02, so file the term away rather than chasing it now — and all of the persistent storage resources associated with those workloads, meaning the PersistentVolumeClaims and PersistentVolumes <span class="glossary"><span class="glossary-term" tabindex="0" role="button" aria-describedby="gloss-app">[Src: Kasten Docs 9.0.2 p.346]</span><span class="glossary-pop" id="gloss-app" role="tooltip"><strong>application</strong>In Veeam Kasten, "application" is a defined technical term, not a loose word — it is the whole collection of Kubernetes objects listed here, captured together as one protected unit.</span></span>.</p>
+      <p>Read that list again as a backup admin. It is a dozen kinds of object, most of which hold no data at all — they hold the <em>shape</em> of the running system. Capture the volumes and miss the Secrets, and the restored application starts up and then fails to authenticate. Capture everything except the Helm release information, and the next upgrade has nothing to reconcile against. The data is the straightforward part; the assembly is the hard part.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+        </div>
+        <h3>What changes about the job</h3>
+        <div>
+          <div class="compare__qa-row">
+            <div class="compare__q">What is the unit of protection?</div>
+            <div class="compare__a">Not a machine. An application — a set of Kubernetes objects plus its volumes, protected together <span>[Src: Kasten Docs 9.0.2 p.346]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">Where does it live?</div>
+            <div class="compare__a">Inside a namespace — a named boundary that groups an application's pieces together on the cluster, roughly the way a folder groups related VMs in your inventory (Module 02 covers it properly) — alongside other applications. Namespace selection is how most policies choose what to protect <span>[Src: Kasten Docs 9.0.2 p.347]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">How do you find it?</div>
+            <div class="compare__a">You do not build an inventory by hand. Automatic application discovery is part of the platform <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">Does the cluster itself get protected?</div>
+            <div class="compare__a">Backing up control-plane components such as etcd and the system namespaces is not the recommended approach here; the focus is the applications <span>[Src: Kasten Docs 9.0.2 p.1092]</span>.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare__card card-dark">
+        <h3 class="card-dark__title">Two ideas to carry forward</h3>
+        <p class="card-dark__lede">Everything else in this module rests on these. If only two sentences survive the week, make them these two.</p>
+        <div class="card-dark__list">
+          <div class="card-dark__row">
+            <span class="card-dark__idx">01</span>
+            <div><strong>You protect applications, not machines.</strong><br/><span>The unit is a namespace-scoped application with all its parts, and the parts that are not data matter as much as the parts that are.</span></div>
+          </div>
+          <div class="card-dark__row">
+            <span class="card-dark__idx">02</span>
+            <div><strong>A snapshot is not yet a backup.</strong><br/><span>In Veeam Kasten these are two separate policy actions with two separate lifetimes. Section 03 is entirely about this.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prose">
+      <h3>What Veeam Kasten for Kubernetes is</h3>
+      <p>Veeam Kasten for Kubernetes is a data management platform purpose-built for Kubernetes, providing backup and restore, disaster recovery, and mobility for Kubernetes applications. Its approach is described as application-centric, it is policy-driven, and it exposes a native Kubernetes application programming interface (API) alongside a web-based user interface <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</p>
+      <p>Those three capabilities are the product's three principal use cases: backup and restore, disaster recovery, and application mobility <span>[Src: Kasten Docs 9.0.2 p.2]</span>. The first two you already own conceptually. The third — mobility — is the one with no clean Veeam Data Platform equivalent, and it is worth knowing why it exists here: because a Kubernetes application is described in portable manifests, an application captured on one cluster can be brought up on another, which makes cross-cluster movement a first-class feature rather than a recovery edge case.</p>
+    </div>
+
+    <div class="best">
+      <div class="best-item"><h4>Backup and restore</h4><p>Protect an application and bring it back — into the same namespace, a different one, or a different cluster <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</p></div>
+      <div class="best-item"><h4>Disaster recovery</h4><p>Recover when the cluster or the site is gone, including recovering Veeam Kasten's own catalog <span>[Src: Kasten Docs 9.0.2 p.1093]</span>.</p></div>
+      <div class="best-item"><h4>Application mobility</h4><p>Move an application and its data across clusters, and potentially across clouds, using a location profile <span>[Src: Kasten Docs 9.0.2 p.315]</span>.</p></div>
+    </div>
+
+    <div class="note note--key">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Remember</div>
+        <p>Your instincts about scheduling, retention, and proving a restore all transfer. What does not transfer is the assumption that the thing you protect has one obvious boundary. Build the habit of asking "which objects did that capture?" — it is the question this product is designed around.</p>
+      </div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════ SECTION 02 — THE CONCEPT MAP ════════ -->
+<section id="map">
+  <div class="wrap">
+    <span class="eyebrow">The concept map · 02</span>
+    <h2>Five concepts you already run</h2>
+    <p class="lede">
+      This is the backbone of the module and the thing to come back to. Five concepts you operate every day, each paired with its Veeam Kasten counterpart — and for each pair, the place where the analogy quietly stops being true. Work through the five yourself in the widget below; the full map is repeated as a table underneath so you can scan it later.
+    </p>
+
+    <div class="widget">
+      <div class="widget__tag"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · pick a concept you already know</div>
+      <h3>Veeam Data Platform to Veeam Kasten, concept by concept</h3>
+      <p class="toggle-widget__sub">Select any of the five concepts below. Each opens the pair — what you run today on the left, its Veeam Kasten counterpart on the right — followed by the honest limit of the comparison. Arrow keys move between them.</p>
+
+      <div class="tabs">
+        <div class="tabs__list" role="tablist" aria-label="Veeam Data Platform concepts to map">
+          <button type="button" class="tabs__tab" role="tab" id="cm-tab-1" aria-controls="cm-panel-1" aria-selected="true" tabindex="0">Backup job</button>
+          <button type="button" class="tabs__tab" role="tab" id="cm-tab-2" aria-controls="cm-panel-2" aria-selected="false" tabindex="-1">Backup repository</button>
+          <button type="button" class="tabs__tab" role="tab" id="cm-tab-3" aria-controls="cm-panel-3" aria-selected="false" tabindex="-1">Snapshot vs backup</button>
+          <button type="button" class="tabs__tab" role="tab" id="cm-tab-4" aria-controls="cm-panel-4" aria-selected="false" tabindex="-1">Application-aware processing</button>
+          <button type="button" class="tabs__tab" role="tab" id="cm-tab-5" aria-controls="cm-panel-5" aria-selected="false" tabindex="-1">Proxies and agents</button>
+        </div>
+
+        <div class="tabs__panel" role="tabpanel" id="cm-panel-1" aria-labelledby="cm-tab-1">
+          <div class="text-columns">
+            <div class="text-columns__col">
+              <h4>What you run today — the backup job</h4>
+              <p>A job names what to protect, when to run, where to put the result, and how long to keep it. It is the single object you open when someone asks why last night failed.</p>
+            </div>
+            <div class="text-columns__col">
+              <h4>The counterpart — the policy</h4>
+              <p>A policy defines a selection of Kubernetes resources plus one or more data management actions, configured to run on a periodic or event-driven basis. No policies exist after installation; you create every one <span>[Src: Kasten Docs 9.0.2 p.307]</span>. Actions can run at hourly, daily, weekly, monthly or yearly granularity, or on demand <span>[Src: Kasten Docs 9.0.2 p.362]</span>.</p>
+            </div>
+          </div>
+          <div class="note note--caution">
+            <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <div class="note__body">
+              <div class="note__label">Where the analogy breaks</div>
+              <p>A job's membership is a list you curated. A policy's membership is a <em>selection</em> — a namespace or a label expression — evaluated when the policy runs. Deploy a new application into a namespace a policy already selects and it is protected without anyone editing anything. That is a feature, and it is also how unreviewed workloads quietly land in your protected estate.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs__panel" role="tabpanel" id="cm-panel-2" aria-labelledby="cm-tab-2" hidden>
+          <div class="text-columns">
+            <div class="text-columns__col">
+              <h4>What you run today — the backup repository</h4>
+              <p>A configured storage target that jobs write to. You add it once, jobs point at it, and it holds the backup files.</p>
+            </div>
+            <div class="text-columns__col">
+              <h4>The counterpart — the location profile</h4>
+              <p>For actions that outlive any one cluster, Veeam Kasten needs configured access to external object storage or external NFS or SMB file storage, and that is what a location profile provides. Location profiles are used to create backups from snapshots, to move applications and their data across clusters and potentially across clouds, and to import those backups into another cluster <span>[Src: Kasten Docs 9.0.2 p.315]</span>.</p>
+            </div>
+          </div>
+          <div class="note note--caution">
+            <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <div class="note__body">
+              <div class="note__label">Where the analogy breaks</div>
+              <p>Resist the habit of treating the target as a folder you can also poke at. The exported data is organised into storage repositories controlled and maintained by the Veeam Kasten instance, and using, connecting to, modifying, copying, or otherwise accessing one of those repositories independently is unsupported and might cause data corruption or loss to some or all of the restore points <span>[Src: Kasten Docs 9.0.2 p.352]</span>. Read-only curiosity is not a safe habit here.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs__panel" role="tabpanel" id="cm-panel-3" aria-labelledby="cm-tab-3" hidden>
+          <div class="text-columns">
+            <div class="text-columns__col">
+              <h4>What you run today — snapshot versus backup</h4>
+              <p>You already hold the distinction: a storage or hypervisor snapshot is fast and local and dependent on the production system; a backup is a separate copy you can survive a storage failure with. You know which one you would want at 3 a.m.</p>
+            </div>
+            <div class="text-columns__col">
+              <h4>The counterpart — snapshot versus export</h4>
+              <p>Snapshots are the basis of persistent data capture in Veeam Kasten <span>[Src: Kasten Docs 9.0.2 p.349]</span>. A backup is produced by an <em>export</em>, which converts application and volume snapshots into backups by transforming them into an infrastructure-independent format and storing them in a target location <span>[Src: Kasten Docs 9.0.2 p.351]</span>.</p>
+            </div>
+          </div>
+          <div class="note note--caution">
+            <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <div class="note__body">
+              <div class="note__label">Where the analogy breaks</div>
+              <p>This is the row where your instincts help you the most and your muscle memory helps you the least. The distinction is familiar, but in Veeam Kasten the export is an explicit, separately configured, separately scheduled, separately retained action that you have to turn on. A policy that snapshots nightly and exports nothing runs green forever and leaves you with no durable copy. Section 03 walks the whole chain.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs__panel" role="tabpanel" id="cm-panel-4" aria-labelledby="cm-tab-4" hidden>
+          <div class="text-columns">
+            <div class="text-columns__col">
+              <h4>What you run today — application-aware processing</h4>
+              <p>You tick a box and the product quiesces the database before the snapshot, then releases it. The mechanism is built in, and for the workloads it covers you rarely think about it.</p>
+            </div>
+            <div class="text-columns__col">
+              <h4>The counterpart — Kanister blueprints and action hooks</h4>
+              <p>Application-consistent backups can be enabled where a data service needs quiescing before a volume snapshot: a quiescing function defined in the application <span class="glossary"><span class="glossary-term" tabindex="0" role="button" aria-describedby="gloss-bp">blueprint</span><span class="glossary-pop" id="gloss-bp" role="tooltip"><strong>blueprint</strong>A Kanister blueprint is the Kubernetes object that holds the application-specific actions Veeam Kasten calls at defined points in a backup or restore.</span></span> is invoked first, then the volume snapshot is taken, and the application is unquiesced as soon as the storage system reports that the point-in-time copy has started rather than waiting for the whole snapshot <span>[Src: Kasten Docs 9.0.2 p.923]</span>. Blueprints can also run as action hooks on a policy <span>[Src: Kasten Docs 9.0.2 p.890]</span>.</p>
+            </div>
+          </div>
+          <div class="note note--caution">
+            <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <div class="note__body">
+              <div class="note__label">Where the analogy breaks</div>
+              <p>Application-aware processing is a checkbox. This is an object you deploy and bind. A blueprint is assigned to a workload either by creating a BlueprintBinding or by adding the <code>kanister.kasten.io/blueprint</code> annotation, Veeam Kasten looks for blueprints in its own namespace only, and it calls only actions with reserved names such as <code>backupPrehook</code> and <code>backupPosthook</code> — an action with a name outside that set is silently ignored unless it is configured as a policy action hook <span>[Src: Kasten Docs 9.0.2 p.890]</span>. "Silently ignored" is the phrase to underline.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs__panel" role="tabpanel" id="cm-panel-5" aria-labelledby="cm-tab-5" hidden>
+          <div class="text-columns">
+            <div class="text-columns__col">
+              <h4>What you run today — proxies and agents</h4>
+              <p>Data movement is done by roles you deploy, size, and place: proxies near the data, agents on the guest. You scale them by adding more, and you troubleshoot a slow job by looking at them.</p>
+            </div>
+            <div class="text-columns__col">
+              <h4>The counterpart — in-cluster services</h4>
+              <p>Veeam Kasten runs as a set of services inside the cluster, in its own namespace — the install default is <code>kasten-io</code> <span>[Src: Kasten Docs 9.0.2 p.15]</span> — as Pods you can list. The names show the division of labour: <code>catalog-svc</code>, <code>executor-svc</code>, <code>crypto-svc</code>, <code>controllermanager-svc</code>, <code>dashboardbff-svc</code>, <code>aggregatedapis-svc</code>, <code>auth-svc</code>, <code>frontend-svc</code>, <code>jobs-svc</code>, <code>kanister-svc</code> and <code>state-svc</code> <span>[Src: Kasten Docs 9.0.2 p.49, p.50]</span>.</p>
+            </div>
+          </div>
+          <div class="note note--caution">
+            <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+            <div class="note__body">
+              <div class="note__label">Where the analogy breaks</div>
+              <p>You do not place these. There is no proxy to put on the right subnet and no agent to push to a guest — the platform you are protecting is also the platform that runs the protection, and it decides where those Pods land. Data-moving Pods are created for the work and cleaned up afterwards rather than sitting idle: export Pods are removed by garbage collection after a configured grace period <span>[Src: Kasten Docs 9.0.2 p.1097]</span>. Your sizing conversation moves from "how many proxies" to "what resources does this cluster have spare".</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="mini-takeaway">Takeaway: four of these five map cleanly enough to trust. The snapshot-versus-export row is the one that costs people real data, because it feels the most familiar.</p>
+    </div>
+
+    <h3>The map on one page</h3>
+    <table class="data-table">
+      <caption class="visually-hidden">Veeam Data Platform concepts mapped to their Veeam Kasten counterparts, with the limit of each analogy</caption>
+      <thead><tr><th scope="col">What you run today</th><th scope="col">Veeam Kasten counterpart</th><th scope="col">Where the analogy breaks</th></tr></thead>
+      <tbody>
+        <tr><td>Backup job</td><td data-label="Veeam Kasten counterpart">Policy <span>[Src: Kasten Docs 9.0.2 p.307]</span></td><td data-label="Where the analogy breaks">Membership is an evaluated selection, not a curated list</td></tr>
+        <tr><td>Backup repository</td><td data-label="Veeam Kasten counterpart">Location profile <span>[Src: Kasten Docs 9.0.2 p.315]</span></td><td data-label="Where the analogy breaks">The target is managed by Veeam Kasten and not yours to touch <span>[Src: Kasten Docs 9.0.2 p.352]</span></td></tr>
+        <tr><td>Snapshot versus backup</td><td data-label="Veeam Kasten counterpart">Snapshot versus export <span>[Src: Kasten Docs 9.0.2 p.351]</span></td><td data-label="Where the analogy breaks">The export is a separate action you have to enable <span>[Src: Kasten Docs 9.0.2 p.352]</span></td></tr>
+        <tr><td>Application-aware processing</td><td data-label="Veeam Kasten counterpart">Kanister blueprints and action hooks <span>[Src: Kasten Docs 9.0.2 p.923]</span></td><td data-label="Where the analogy breaks">An object you deploy and bind, with reserved action names <span>[Src: Kasten Docs 9.0.2 p.890]</span></td></tr>
+        <tr><td>Proxies and agents</td><td data-label="Veeam Kasten counterpart">In-cluster services in <code>kasten-io</code> <span>[Src: Kasten Docs 9.0.2 p.15]</span></td><td data-label="Where the analogy breaks">You do not size or place them; the cluster does</td></tr>
+      </tbody>
+    </table>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0489__Using_Veeam_Kasten_Immutable_Backups_Workflow_Immutable_Back__1580x1796__216.png" loading="lazy" alt="The Veeam Kasten New Policy dialog. Backup Frequency offers Hourly, Daily, Weekly, Monthly, Yearly and On Demand, with Daily selected; below it a Snapshot Retention block sets counts of daily, weekly, monthly and yearly snapshots; below that an Enable Backups via Snapshot Exports toggle is switched on, revealing an Export Frequency list and an Export Location Profile list with a profile selected.">
+      <figcaption class="screenshot__caption">
+        <strong>Three rows of the map, on one screen.</strong> Frequency and retention are the job settings you already know. The toggle in the lower half is the row that matters: snapshots are configured above it, and everything below it exists only because you turned the export on. The Export Location Profile list is where a location profile gets chosen <span>[Src: Kasten Docs 9.0.2 p.352]</span>.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.489. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <div class="note note--tip">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+      <div class="note__body">
+        <div class="note__label">Pro tip</div>
+        <p>When you first work in the dashboard, translate out loud. "This is the job list. This is the repository list. This is the job's advanced settings." Naming the counterpart is a slow habit that pays for itself, because when it fails — and the snapshot-versus-export row will fail it — the failure is loud enough to notice.</p>
+      </div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════ SECTION 03 — SNAPSHOT VS EXPORT ════════ -->
+<section id="capture">
+  <div class="wrap">
+    <span class="eyebrow">Data capture · 03</span>
+    <h2>A snapshot is not a backup until you export it</h2>
+    <p class="lede">
+      This is the single most expensive misunderstanding available to a Veeam Data Platform administrator arriving at Veeam Kasten, so it gets its own section. Work through the three stages below and you will be able to look at any policy and answer the only question that matters: if the storage system went away tonight, what would still exist tomorrow?
+    </p>
+
+    <div class="prose">
+      <p>Start with what a snapshot is good at, because it is genuinely good. Snapshots are the basis of persistent data capture in Veeam Kasten, and on most storage systems their performance impact on the primary workload is low, they need no downtime, they restore quickly, and they capture data incrementally <span>[Src: Kasten Docs 9.0.2 p.349]</span>. That is a strong set of properties, and it is why the snapshot action is the one every policy starts from.</p>
+      <p>Now the limits, stated plainly in the documentation. Storage snapshots suffer from constraints such as relatively low limits on the maximum number of snapshots per volume or per storage array. More importantly, snapshots are not always durable: a catastrophic storage system failure will destroy your snapshots along with your primary data, and on a number of storage systems a snapshot's lifecycle is tied to its source volume, so deleting the volume may garbage-collect every related snapshot at the same time <span>[Src: Kasten Docs 9.0.2 p.349]</span>. The documented guidance that follows is direct: create durable backups by exporting the data <span>[Src: Kasten Docs 9.0.2 p.349]</span>.</p>
+      <p>One nuance worth carrying, because it stops this becoming dogma. A number of public cloud providers store snapshots in object storage and retain them independently of the primary volume's lifecycle — though this is not true of all public clouds, and enabling exports in a public cloud may still be worthwhile for safety <span>[Src: Kasten Docs 9.0.2 p.350]</span>. "Snapshots are never durable" is too strong; "you do not get to assume they are" is right.</p>
+    </div>
+
+    <div class="task__interactive-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — click each stage</div>
+    <div class="flow">
+      <div class="flow__title">From a running application to something you can restore next year</div>
+      <div class="flow__desc">Click a stage to inspect it.</div>
+      <div class="flow__chain" role="tablist" aria-label="Snapshot to export to restore point stages">
+        <div class="flow__node is-active" role="tab" tabindex="0" aria-selected="true" aria-controls="captureDetail" id="captureStep0">
+          <div class="flow__node-tag">STAGE 01</div>
+          <div class="flow__node-title">Snapshot</div>
+          <div class="flow__node-desc">The policy's primary action captures the application.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 01 — Snapshot.</strong> Every policy that protects an application starts with the snapshot action, with an optional export action after it to produce a durable backup [Src: Kasten Docs 9.0.2 p.348]. The capture covers the application's Kubernetes resources and a point-in-time copy of its volumes, and it is fast and low-impact [Src: Kasten Docs 9.0.2 p.349]. What it is not is independent of the storage system underneath it.</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="captureDetail" id="captureStep1">
+          <div class="flow__node-tag">STAGE 02</div>
+          <div class="flow__node-title">Export</div>
+          <div class="flow__node-desc">The snapshot becomes a portable backup.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 02 — Export.</strong> To convert snapshots into backups you select <em>Enable Backups via Snapshot Exports</em> during policy creation, and the same settings are available when manually exporting a restore point [Src: Kasten Docs 9.0.2 p.352]. The export transforms the application and volume snapshots into an infrastructure-independent format and stores them in a target location [Src: Kasten Docs 9.0.2 p.351]. The backup it produces consists of the application's metadata plus the snapshot data for its volumes, and the metadata destination is an Object Storage Location, an NFS or SMB File Storage Location, or a Veeam Repository Location, named in the Export Location Profile field [Src: Kasten Docs 9.0.2 p.352]. Retention is configured separately: by default backup retention matches snapshot retention, but the two can be set independently [Src: Kasten Docs 9.0.2 p.364].</div>
+        </div>
+        <div class="flow__arrow">→</div>
+        <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="captureDetail" id="captureStep2">
+          <div class="flow__node-tag">STAGE 03</div>
+          <div class="flow__node-title">Restore point</div>
+          <div class="flow__node-desc">Two kinds of restore point, and you pick.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 03 — Restore point.</strong> A restore point is a grouped collection of the data artifacts belonging to an application, and the restore view distinguishes snapshots from backups as well as manual restore points from policy-generated ones. When both a snapshot and a backup exist for the same data, a layered box indicates it, and selecting that layered restore point lets you choose between the local snapshot and the exported backup [Src: Kasten Docs 9.0.2 p.395]. This is the screen that tells you the truth about a policy — if an application only ever shows one kind, you know which action is not running.</div>
+        </div>
+      </div>
+      <div class="flow__detail" id="captureDetail" role="tabpanel" aria-labelledby="captureStep0" aria-live="polite"></div>
+    </div>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">The failure mode, spelled out</div>
+        <p>A policy with the snapshot action alone will report success indefinitely. Its compliance is fine, its history is green, and its restore points are real — until the storage system that holds them fails, at which point the snapshots go with the primary data <span>[Src: Kasten Docs 9.0.2 p.349]</span>. Nothing in that policy's own status will ever tell you this. The check is structural, not operational: does this policy export, and to where?</p>
+      </div>
+    </div>
+
+    <div class="note note--fact mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Did you know?</div>
+        <p>The separation is not only a safety mechanism — it is a cost lever, and the documented pattern will look familiar to anyone who has tuned local versus offloaded retention. The guidance is to reduce local retention, which can be more expensive, and increase remote retention, which is more cost-effective; you can run shorter retention on snapshots and extended periods on exports, and you can even split the work across two policies so one snapshots without exporting and the other snapshots and exports <span>[Src: Kasten Docs 9.0.2 p.1092]</span>.</p>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0131__Installing_Veeam_Kasten_Generic_Storage_Backup_and_Restore_G__1592x1418__045.png" loading="lazy" alt="A policy's Advanced Settings panel in Veeam Kasten. It contains Pre and Post-Snapshot Action Hooks with Before, After - On Success and After - On Failure checkboxes; a Location Profile for Kanister Actions selector; a separate Pre and Post-Export Action Hooks group with the same three checkboxes; and an Ignore Exceptions and Continue if Possible option.">
+      <figcaption class="screenshot__caption">
+        <strong>The two actions are separate all the way down.</strong> Snapshot hooks and export hooks are distinct groups on the same panel, which is the clearest evidence in the interface that these are two stages and not one. This panel is also where a blueprint's hooks get attached to a policy <span>[Src: Kasten Docs 9.0.2 p.890]</span>.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.131. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════ SECTION 04 — WHAT RUNS IN THE CLUSTER, AND EDITIONS ════════ -->
+<section id="platform">
+  <div class="wrap">
+    <span class="eyebrow">In the cluster · 04</span>
+    <h2>What gets deployed, and which edition</h2>
+    <p class="lede">
+      Two practical questions a Veeam Data Platform administrator asks early: what does this put on the cluster, and what am I licensed for? Neither answer is complicated, and both change how you talk about Veeam Kasten with the platform team who owns the cluster.
+    </p>
+
+    <div class="prose">
+      <h3>It is a workload on the cluster it protects</h3>
+      <p>Veeam Kasten is deployed into its own namespace, <code>kasten-io</code> by convention, and runs as a set of Pods there. After an install you confirm it the same way you would confirm any Kubernetes workload — by listing the Pods in that namespace and waiting for all of them to reach Running <span>[Src: Kasten Docs 9.0.2 p.15]</span>.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__bar">
+        <span class="code-block__lang">shell</span>
+        <button type="button" class="code-block__copy" aria-label="Copy code to clipboard">Copy</button>
+      </div>
+      <pre><code>kubectl get pods --namespace kasten-io</code></pre>
+    </div>
+
+    <div class="prose">
+      <p>That one command replaces a surprising amount of your old troubleshooting surface. There is no proxy server to log into, no agent version to reconcile, and no separate management host: the services listed in the concept map are all Pods in that namespace, and Module 04 covers watching them as the workload they are. Module 03 covers getting them there, which is a Helm install of the <code>kasten/k10</code> chart into that namespace <span>[Src: Kasten Docs 9.0.2 p.4]</span>.</p>
+    </div>
+
+    <details class="supp">
+      <summary>
+        <span class="supp__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>Supplementary · optional</span>
+        <span class="supp__title">Why the product's technical strings still say k10</span>
+        <svg class="supp__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="supp__body">
+        <p>The product is Veeam Kasten for Kubernetes, and that is what you call it. You will nonetheless meet the string <code>k10</code> constantly and it is not a mistake — it is the chart and release name in the documented install command <span>[Src: Kasten Docs 9.0.2 p.4]</span>:</p>
+        <p><code>helm install k10 kasten/k10 --namespace=kasten-io</code></p>
+        <p>Treat those as identifiers, the way you treat a service name in a config file. When you type a command, type what the documentation types. When you write or speak about the product, use its name.</p>
+      </div>
+    </details>
+
+    <div class="prose">
+      <h3>Two editions, one install</h3>
+      <p>Veeam Kasten is available in two editions <span>[Src: Kasten Docs 9.0.2 p.2]</span>. The detail that matters operationally is that both editions use the same container images and follow an identical install process <span>[Src: Kasten Docs 9.0.2 p.3]</span> — so the edition question is a licensing conversation, not an architecture one.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+        </div>
+        <h3>Veeam Kasten Free — the Starter edition</h3>
+        <div>
+          <div class="compare__qa-row">
+            <div class="compare__q">What does it cost?</div>
+            <div class="compare__a">It is the default edition and is provided at no charge <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">What is it intended for?</div>
+            <div class="compare__a">Evaluation, or use in small non-production clusters <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">What is missing from it?</div>
+            <div class="compare__a">Functionally it is the same as Enterprise, but limited from a support and scale perspective <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <h3>Enterprise</h3>
+        <div>
+          <div class="compare__qa-row">
+            <div class="compare__q">How do you get it?</div>
+            <div class="compare__a">Customers choosing to upgrade obtain a license key, or install from cloud marketplaces <span>[Src: Kasten Docs 9.0.2 p.3]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">Is it a different build?</div>
+            <div class="compare__a">No — the same container images and the same install process as Starter <span>[Src: Kasten Docs 9.0.2 p.3]</span>.</div>
+          </div>
+          <div class="compare__qa-row">
+            <div class="compare__q">Where is the feature comparison?</div>
+            <div class="compare__a">The documentation points at the product page for a comparison of the editions rather than listing one <span>[Src: Kasten Docs 9.0.2 p.3]</span>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>"Functionally the same" is a phrase to read carefully rather than gratefully. It means a proof of concept on the Starter edition demonstrates real behaviour, which is a genuine advantage. It does not mean a Starter deployment is a supported production deployment — the limits are on support and scale, and both of those are exactly what you need when a restore matters <span>[Src: Kasten Docs 9.0.2 p.2]</span>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════ SECTION 05 — VEEAM BACKUP & REPLICATION INTEGRATION ════════ -->
+<section id="integration">
+  <div class="wrap">
+    <span class="eyebrow">Where your repositories fit · 05</span>
+    <h2>Exporting to a Veeam Backup &amp; Replication repository</h2>
+    <p class="lede">
+      Here is where your existing estate re-enters the picture. A Veeam Backup &amp; Replication repository can be the destination a Veeam Kasten policy exports to, which means Kubernetes data can land in storage you already own, monitor, and pay for. This section covers what that gives you and the constraints that come attached — including one that has caught experienced administrators.
+    </p>
+
+    <div class="prose">
+      <p>A Veeam Repository can serve as the destination for both the application metadata and the persistent volume snapshot data, for any cluster where a Veeam Backup &amp; Replication repository is available and the storage provisioner for the persistent volumes supports block mode export <span>[Src: Kasten Docs 9.0.2 p.127]</span>. In location-profile terms it is one more type of target alongside object storage and NFS or SMB file storage <span>[Src: Kasten Docs 9.0.2 p.352]</span>.</p>
+      <p>What arrives on the other side will look reassuringly familiar. A Veeam Backup &amp; Replication backup job is created on the server for each Veeam Kasten policy, with a Veeam Kasten catalog identifier appended to the job name so that clusters backing up to the same server stay distinct, and each protected application namespace produces a single, separate restore point object. Following export, each backup is converted to a synthetic full backup <span>[Src: Kasten Docs 9.0.2 p.129]</span>.</p>
+    </div>
+
+    <figure class="screenshot">
+      <img class="screenshot__img" src="images/named/p0489__Using_Veeam_Kasten_Immutable_Backups_Workflow_Immutable_Back__1502x1068__214.png" loading="lazy" alt="The Edit Backup Repository wizard in the Veeam Backup &amp; Replication console, on its Repository step. It shows a path to the backup folder with capacity and free space, a fast cloning checkbox for XFS volumes, a setting to make recent backups immutable for a number of days, and load control options limiting concurrent tasks and data rate.">
+      <figcaption class="screenshot__caption">
+        <strong>The console you already drive.</strong> Nothing about the repository changes to accept Kubernetes data — this is the same repository configuration you manage today, and the load-control and immutability settings you already reason about still apply to it. What changes is that one of its writers is now a policy on a cluster.
+        <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.489. ↔ Click the image to view it full size.</span>
+      </figcaption>
+    </figure>
+
+    <h3>The constraints to know before you promise it</h3>
+    <table class="data-table">
+      <caption class="visually-hidden">Constraints on exporting from Veeam Kasten to a Veeam Backup &amp; Replication repository</caption>
+      <thead><tr><th scope="col">Constraint</th><th scope="col">What it means for you</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Block mode export is mandatory</td>
+          <td data-label="What it means for you">Exporting to a Veeam Repository requires the block mode export mechanism for all volume snapshots the policy creates, and selecting a Veeam Repository as the Export Location Profile enables block mode export automatically <span>[Src: Kasten Docs 9.0.2 p.128]</span>. The storage provisioner has to be capable of block mode exports <span>[Src: Kasten Docs 9.0.2 p.129]</span>.</td>
+        </tr>
+        <tr>
+          <td>Not every repository type qualifies</td>
+          <td data-label="What it means for you">Export to Veeam Backup &amp; Replication direct object storage repository types is not supported <span>[Src: Kasten Docs 9.0.2 p.128]</span>.</td>
+        </tr>
+        <tr>
+          <td>One backup server per instance</td>
+          <td data-label="What it means for you">Each Veeam Kasten instance may export to a single, unique Veeam Backup &amp; Replication backup server. Multiple location profiles may point at separate repositories exposed by that same server, and multiple Veeam Kasten instances may integrate with the same server <span>[Src: Kasten Docs 9.0.2 p.129]</span>.</td>
+        </tr>
+        <tr>
+          <td>Copies made downstream are not restore sources</td>
+          <td data-label="What it means for you">Copies of the backup data produced inside Veeam Backup &amp; Replication — by exporting to a scale-out backup repository (SOBR), by backup copy jobs, or by backup to tape jobs — cannot be directly restored in Veeam Kasten <span>[Src: Kasten Docs 9.0.2 p.129]</span>.</td>
+        </tr>
+        <tr>
+          <td>One object per export, not per volume</td>
+          <td data-label="What it means for you">All exported volume data is uploaded by a single datamover Pod and stored as a single object in the repository for each export, independent of how many persistent volumes the policy protects <span>[Src: Kasten Docs 9.0.2 p.129]</span>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">The one that catches people</div>
+        <p>Read the fourth row again, because it inverts a reflex. Your instinct with any new data source is to get it into the wider protection chain — copy it out, tier it, send it to tape. Those copies remain valid Veeam Backup &amp; Replication restore points and you may well still want them, but Veeam Kasten cannot restore an application directly from them <span>[Src: Kasten Docs 9.0.2 p.129]</span>. Decide deliberately which copy is the one your Kubernetes recovery plan depends on, and write it down.</p>
+      </div>
+    </div>
+
+    <div class="sales-aside mt-24">
+      <span class="sales-aside__label">For a customer conversation</span>
+      <p>The value here is not a feature list, it is an operating model. A customer adopting Kubernetes does not have to stand up a parallel backup estate with its own storage or its own retention argument — the Kubernetes applications can export into the repository their virtual estate already uses, appearing there as an ordinary backup job with the Veeam Kasten catalog identifier appended to its name <span>[Src: Kasten Docs 9.0.2 p.129]</span>, which is the same job-level reporting your team already relies on rather than a new audit capability. The constraints above are the honest fine print you should raise yourself rather than have discovered later.</p>
+    </div>
+
+    <div class="note note--key mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+      <div class="note__body">
+        <div class="note__label">Remember</div>
+        <p>Two more things worth holding from this section. A manual export that is not associated with a policy produces a standalone <code>K10ManualBackup</code> backup job containing the application namespace, saved as a full, independent VeeamZIP backup <span>[Src: Kasten Docs 9.0.2 p.129]</span>. And an exported restore point can be imported and restored on another supported cluster, provided the target cluster is configured with the same Veeam Repository location profile used for the volume data <span>[Src: Kasten Docs 9.0.2 p.129]</span> — which is application mobility using storage you already run.</p>
+      </div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════ KNOWLEDGE CHECK ════════ -->
+<section id="check" class="check-section">
+  <div class="wrap">
+    <span class="eyebrow">Knowledge check · 06</span>
+    <h2>Check your understanding</h2>
+    <p class="lede">Five questions on the concept map, the snapshot-and-export distinction, the two editions, and the Veeam Backup &amp; Replication integration. Each one has a single best answer, and every option tells you why it is right or wrong.</p>
+
+    <div class="quiz">
+      <script type="application/json" class="quiz__data">
+      [
+        {
+          "q": "A colleague says protecting a Kubernetes application is the same job as protecting a VM, just with a different console. What is the strongest correction?",
+          "opts": [
+            { "t": "It is the same job, but the disks are usually smaller in Kubernetes.", "correct": false, "why": "Size is not the difference, and the documentation makes no claim about relative volume sizes. The difference is what constitutes the protected object." },
+            { "t": "The unit of protection is an application — a collection of namespaced resources, relevant non-namespaced resources, workloads, Helm v3 release information, and the persistent storage resources those workloads use — so much of what you capture is not data at all.", "correct": true, "why": "Correct. That is the documented definition of an application in Veeam Kasten, and it is why 'back up the disk' no longer describes the job [Src: Kasten Docs 9.0.2 p.346]." },
+            { "t": "It is the same job, but you have to build the inventory of applications by hand first.", "correct": false, "why": "The opposite: automatic application discovery is part of the platform, so you are not hand-curating an inventory [Src: Kasten Docs 9.0.2 p.2]." }
+          ]
+        },
+        {
+          "q": "A policy has run its snapshot action nightly for three months and has never reported a failure. No export action was ever enabled. The storage array holding the cluster's volumes suffers a catastrophic failure. What do you have?",
+          "opts": [
+            { "t": "Three months of restore points, because the snapshots are held separately from the volumes.", "correct": false, "why": "Not something you may assume. A catastrophic storage system failure destroys snapshots along with the primary data, and on a number of systems a snapshot's lifecycle is tied to its source volume [Src: Kasten Docs 9.0.2 p.349]." },
+            { "t": "The most recent snapshot only, because Veeam Kasten retains one copy off the array by default.", "correct": false, "why": "There is no such default. Durable copies come from the export action, which was never enabled here [Src: Kasten Docs 9.0.2 p.349]." },
+            { "t": "Very likely nothing recoverable, because snapshots are not always durable and no export was ever configured to produce a durable backup.", "correct": true, "why": "Correct, and this is the failure mode the module warns about: the policy reports success throughout, because a missing export is a structural gap rather than an operational error [Src: Kasten Docs 9.0.2 p.349]." }
+          ]
+        },
+        {
+          "q": "You are explaining Veeam Kasten to your team using the concepts they already know. Which pairing is right?",
+          "opts": [
+            { "t": "A backup repository corresponds to a location profile, which is the configured access to external object storage or external NFS or SMB file storage that exports are written to.", "correct": true, "why": "Correct. Location profiles are what let Veeam Kasten create backups from snapshots and move applications across clusters [Src: Kasten Docs 9.0.2 p.315]." },
+            { "t": "A backup repository corresponds to a policy, because that is where retention is configured.", "correct": false, "why": "A policy is the counterpart of a backup job — a selection of Kubernetes resources plus one or more data management actions on a schedule [Src: Kasten Docs 9.0.2 p.307]. Retention being configured there does not make it the storage target." },
+            { "t": "A backup repository corresponds to the kasten-io namespace, because that is where Veeam Kasten stores its data.", "correct": false, "why": "That namespace holds the Veeam Kasten services themselves, which you confirm by listing its Pods [Src: Kasten Docs 9.0.2 p.15]. It is not the export destination." }
+          ]
+        },
+        {
+          "q": "Your team wants to prove Veeam Kasten works on a small test cluster before buying anything, then move the same configuration into production. What does the edition difference mean for that plan?",
+          "opts": [
+            { "t": "The proof of concept has to be rebuilt for production, because the Enterprise edition uses different container images and a different install process.", "correct": false, "why": "The opposite: both editions use the same container images and follow an identical install process, so the install you rehearse is the install you run [Src: Kasten Docs 9.0.2 p.3]." },
+            { "t": "The test cluster can run the free Starter edition, which is functionally the same as Enterprise — but it is limited on support and scale, so production needs the licensed edition.", "correct": true, "why": "Correct on both halves. Starter is the default edition, provided at no charge and intended for evaluation or small non-production clusters, and is functionally the same as Enterprise but limited from a support and scale perspective [Src: Kasten Docs 9.0.2 p.2]. Same images, same install process [Src: Kasten Docs 9.0.2 p.3] — what changes is what you are entitled to when a restore matters." },
+            { "t": "Nothing changes at all: the editions are identical, so the Starter edition is a supported production deployment.", "correct": false, "why": "‘Functionally the same’ is not ‘the same’. The limits are on support and scale, and those are exactly what you need on a bad day [Src: Kasten Docs 9.0.2 p.2]." }
+          ]
+        },
+        {
+          "q": "Veeam Kasten exports to one of your Veeam Backup & Replication repositories. You add a backup copy job so a second copy lands on another repository. A cluster is later lost and you need the application back. Which statement is accurate?",
+          "opts": [
+            { "t": "Either copy works as a restore source, since both are valid restore points on the backup server.", "correct": false, "why": "They are valid restore points for Veeam Backup & Replication, but that is a different question from what Veeam Kasten can restore from [Src: Kasten Docs 9.0.2 p.129]." },
+            { "t": "Only the copy produced by the backup copy job can be used, because it is the more recent synthetic full.", "correct": false, "why": "Reversed, and the reasoning is wrong too — each exported backup is converted to a synthetic full following export [Src: Kasten Docs 9.0.2 p.129]." },
+            { "t": "Veeam Kasten cannot restore directly from the copy, because copies of backup data made inside Veeam Backup & Replication are not usable as direct Veeam Kasten restore sources.", "correct": true, "why": "Correct, and it applies to scale-out backup repository exports, backup copy jobs, and backup to tape jobs alike — so decide up front which copy your Kubernetes recovery plan depends on [Src: Kasten Docs 9.0.2 p.129]." }
+          ]
+        }
+      ]
+      </script>
+    </div>
+    <div class="quiz-score">
+      <div class="quiz-score__pct">0%</div>
+      <div class="quiz-score__label">Complete the knowledge check to see your score.</div>
+    </div>
+  </div>
+  <div class="continue" data-continue>
+  <button class="continue__btn" type="button">Continue
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </button>
+</div>
+</section>
+
+<!-- ════════ RECAP ════════ -->
+<section id="review" class="review">
+  <div class="review__inner">
+    <span class="eyebrow eyebrow--bright">Recap · 07</span>
+    <h2>What you covered</h2>
+    <p class="lede">You now have a translation layer between the product you know and the product you are learning — and, more usefully, you know where that layer leaks on each of the five concepts.</p>
+    <div class="review-grid">
+      <div class="review-item"><div class="review-item__num">01</div><div class="review-item__text">Why protecting a Kubernetes application is a different problem than protecting a virtual machine</div></div>
+      <div class="review-item"><div class="review-item__num">02</div><div class="review-item__text">Five Veeam Data Platform concepts mapped to their Veeam Kasten counterparts, and where each analogy breaks</div></div>
+      <div class="review-item"><div class="review-item__num">03</div><div class="review-item__text">A Veeam Kasten snapshot versus an exported backup, and why a snapshot on its own is not a backup</div></div>
+      <div class="review-item"><div class="review-item__num">04</div><div class="review-item__text">What Veeam Kasten puts inside a cluster, and how its two editions differ</div></div>
+      <div class="review-item"><div class="review-item__num">05</div><div class="review-item__text">Where a Veeam Backup &amp; Replication repository fits as an export target, and the constraints that come with it</div></div>
+    </div>
+    <p class="lede">Next up, Module 02 turns the Kubernetes words used loosely here — namespace, workload, PersistentVolumeClaim, StorageClass, Helm — into working vocabulary, still read through a backup administrator's eyes.</p>
+  </div>
+</section>
+
+</main>
+
+<nav class="lesson-nav">
+  <a href="index.html" class="lesson-nav__card">
+    <div class="lesson-nav__dir">← Back</div>
+    <div class="lesson-nav__title">Course overview</div>
+  </a>
+  <a href="Lesson02_Kubernetes_Foundations_for_Backup_Admins.html" class="lesson-nav__card">
+    <div class="lesson-nav__dir">Next →</div>
+    <div class="lesson-nav__title">Module 02 · Kubernetes Foundations for Backup Admins</div>
+  </a>
+</nav>
+
+<footer>
+  Veeam Kasten for Kubernetes Fundamentals · Module 01 of 05 · built against Veeam Kasten 9.0.2
+</footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+  <button class="lightbox__close" type="button" aria-label="Close enlarged view">&times;</button>
+  <img src="" alt="">
+</div>
+
+<script src="components.js"></script>
+
+</body>
+</html>

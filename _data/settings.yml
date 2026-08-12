@@ -25,6 +25,8 @@ menu__settings:
       url: '/demos/'      
     - title: 'Authors'
       url: '/authors/'
+    - title: 'Onboard'
+      url: '/onboard'
     - title: '90DaysOfDevOps'
       url: 'https://www.90daysofdevops.com/'
 
