@@ -53,23 +53,23 @@
       <div class="hero__module-tag">Module 02</div>
       <h1>Kubernetes Foundations<br/><em>for Backup Admins</em></h1>
       <p class="hero__blurb">
-        You already know how to protect a virtual estate. This module teaches the parts of Kubernetes you need in order to protect one — the cluster and its nodes, the workloads that run on them, the namespace that holds an application, and the storage layer that snapshots live in. Every concept is introduced through the closest thing you already administer in Veeam Data Platform and VMware vSphere, and every analogy is followed by the place where it stops being true. Nothing here needs a cluster in front of you: this is the mental model you will install against in Module 03.
+        You already know how to protect a virtual estate. This module teaches just the parts of Kubernetes you need to protect one — the cluster and its nodes, the workloads, the namespace that holds an application, and the storage layer where snapshots live. Each concept starts from the closest thing you already administer, and no cluster is needed: this is the mental model you will install against in Module 03.
       </p>
       <div class="hero__meta">
         <div><strong>8 sections</strong><br/>plus a knowledge check</div>
         <div><strong>~45 minutes</strong><br/>estimated</div>
         <div><strong>Veeam Kasten 9.0.2</strong><br/>Kubernetes foundations</div>
       </div>
-      <div class="prereqs"><span class="prereqs__label">Before you start:</span> Module 01 — the Veeam Data Platform to Veeam Kasten concept map, and the snapshot-versus-export distinction this module builds on. No Kubernetes knowledge is assumed: every term used here is either defined on the spot or named as coming later.</div>
+      <div class="prereqs"><span class="prereqs__label">Before you start:</span> Module 01 — the Veeam Data Platform to Veeam Kasten concept map, and the snapshot-versus-export distinction this module builds on. No Kubernetes knowledge is assumed; every term is defined on the spot or flagged as coming later.</div>
     </div>
     <div class="objectives">
       <div class="objectives__title">By the end of this module you'll be able to:</div>
       <ol>
         <li>Describe how a cluster, its control plane, and its nodes divide the work — and name two places the vCenter Server and ESXi host comparison breaks down</li>
-        <li>Distinguish a Pod, a Deployment, and a StatefulSet, and explain which of them carries the data you are being paid to protect</li>
-        <li>Explain why Veeam Kasten for Kubernetes treats a namespace as an application, and what that means for how you will scope protection</li>
+        <li>Distinguish a Pod, a Deployment, and a StatefulSet, and explain which carries the data you are paid to protect</li>
+        <li>Explain why Veeam Kasten for Kubernetes treats a namespace as an application, and what that means for scoping protection</li>
         <li>Trace a request for storage from PersistentVolumeClaim through StorageClass and the CSI driver to a bound volume and a VolumeSnapshot</li>
-        <li>Explain what a Helm chart and a Helm release are, and describe where Veeam Kasten itself runs once it is installed</li>
+        <li>Explain what a Helm chart and a Helm release are, and where Veeam Kasten itself runs once installed</li>
       </ol>
     </div>
   </div>
@@ -86,12 +86,12 @@
     <span class="eyebrow">Orientation · 01</span>
     <h2>Same job, unfamiliar machinery</h2>
     <p class="lede">
-      This section sets the contract for the rest of the module: which of your existing instincts transfer to Kubernetes, which ones will actively mislead you, and the four questions every concept below gets answered against. Read it and you will know how to read everything that follows.
+      This section sets the contract for the module: which of your instincts transfer to Kubernetes, which will mislead you, and the four questions every concept below gets answered against.
     </p>
 
     <div class="prose">
-      <p>Your job description does not change. You still need to know what exists, decide what is protected, prove it is protected, and get data back when someone deletes the wrong thing. What changes is the shape of the thing you are protecting. In a vSphere estate the unit of protection is a virtual machine: a long-lived object with an identity, a set of virtual disks, and a place in an inventory tree. In Kubernetes the unit of protection is an <em>application</em> — a set of running processes plus the configuration that describes them plus, sometimes, the volumes they mounted. The running processes are disposable by design. The configuration and the volumes are not.</p>
-      <p>That single shift explains most of what feels strange later. It is why "restore the machine" is rarely the right recovery request, why the interesting objects are the ones nobody sees in a monitoring dashboard, and why the storage layer matters more here than it does in a VMware-centric backup design.</p>
+      <p>Your job does not change: know what exists, decide what is protected, prove it, and get data back when someone deletes the wrong thing. What changes is the unit of protection. In vSphere it is a virtual machine — a long-lived object with an identity and its own disks; in Kubernetes it is an <em>application</em> — running processes that are disposable by design, plus configuration and volumes that are not.</p>
+      <p>That single shift explains most of what feels strange later: why "restore the machine" is rarely the right recovery request, and why the storage layer matters more here than in a VMware-centric backup design. And you are not learning Kubernetes to develop on it — only the slice that decides what gets backed up, what a restore can put back, and what the storage layer can do.</p>
     </div>
 
     <div class="compare">
@@ -101,7 +101,7 @@
         <div class="card-dark__list">
           <div class="card-dark__row">
             <span class="card-dark__idx">01</span>
-            <div><strong>Kubernetes runs on desired state, not on instructions.</strong><br/><span>You declare what should exist; the control plane keeps reality matching that declaration. Nobody powers a workload on by hand.</span></div>
+            <div><strong>Kubernetes runs on desired state, not on instructions.</strong><br/><span>You declare what should exist; the control plane keeps reality matching it. A Veeam Kasten policy (Module 05) works the same way — a declared object on the cluster, not a scheduled job in a console.</span></div>
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">02</span>
@@ -109,7 +109,7 @@
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">03</span>
-            <div><strong>The application is the unit of protection.</strong><br/><span>Veeam Kasten works at that level: it discovers applications on the cluster it runs in and protects them as whole objects <span class="glossary"><span class="glossary-term" tabindex="0" role="button" aria-describedby="gloss-app">— stateful and stateless parts together</span><span class="glossary-pop" id="gloss-app" role="tooltip"><strong>Application object</strong>Veeam Kasten's application object encapsulates information about all stateful and stateless resources that make up the application <span>[Src: Kasten Docs 9.0.2 p.620]</span>.</span></span>.</span></div>
+            <div><strong>The application is the unit of protection.</strong><br/><span>Veeam Kasten works at that level: it discovers applications on the cluster it runs in and protects them as whole objects <span class="glossary"><span class="glossary-term" tabindex="0" role="button" aria-describedby="gloss-app">— stateful and stateless parts together</span><span class="glossary-pop" id="gloss-app" role="tooltip"><strong>Application object</strong>Veeam Kasten's application object encapsulates information about all stateful and stateless resources that make up the application.</span></span>.</span></div>
           </div>
         </div>
       </div>
@@ -119,15 +119,7 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">The analogy contract</div>
-        <p>Every concept below is introduced four ways, in this order: <strong>what it is</strong>, <strong>the closest thing you already administer</strong>, <strong>where that comparison breaks</strong>, and <strong>what it means for backup</strong>. The third part is the one that matters. An analogy you trust past its limit is worse than no analogy at all, so each one is retired out loud rather than quietly stretched.</p>
-      </div>
-    </div>
-
-    <div class="note note--key mt-24">
-      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
-      <div class="note__body">
-        <div class="note__label">Remember</div>
-        <p>You are not learning Kubernetes in order to develop on it. You are learning the parts of it that decide what gets backed up, what a restore can put back, and what the storage layer is capable of. That is a much smaller subject than "Kubernetes", and it is the whole subject of this module.</p>
+        <p>Every concept below is introduced four ways, in this order: <strong>what it is</strong>, <strong>the closest thing you already administer</strong>, <strong>where that comparison breaks</strong>, and <strong>what it means for backup</strong>. The third part matters most — an analogy trusted past its limit is worse than none, so each one is retired out loud rather than quietly stretched.</p>
       </div>
     </div>
   </div>
@@ -144,12 +136,12 @@
     <span class="eyebrow">Cluster · 02</span>
     <h2>The cluster, the control plane, and the nodes</h2>
     <p class="lede">
-      By the end of this section you'll be able to point at the three layers of a cluster, say which one you talk to and which one runs the work, and explain why the vCenter Server plus ESXi host picture gets you about 70% of the way there before it starts costing you.
+      The three layers of a cluster: which one you talk to, which one runs the work, and where the vCenter Server plus ESXi host picture starts costing you.
     </p>
 
     <div class="prose">
-      <p>A <strong>cluster</strong> is the whole unit: a set of machines that pool their compute and present one API. A <strong>node</strong> is one of those machines — physical or virtual — that runs the workloads. The <strong>control plane</strong> is the set of components that hold the cluster's desired state, decide which node each workload lands on, and continuously reconcile what is running against what was declared. Placing work on a specific node is not something you do by hand. You submit a description of what you want to the API, and the control plane schedules it.</p>
-      <p>The command-line client you will see in every Kubernetes procedure — <code>kubectl</code> — is nothing more than a client for that API. It is closer to PowerShell against a management server than to a console session on a host. There is no node-level UI you log into to fix a workload, and no per-node inventory you browse to find one.</p>
+      <p>A <strong>cluster</strong> is the whole unit: machines that pool their compute and present one API. A <strong>node</strong> is one of those machines — physical or virtual — running the workloads; the <strong>control plane</strong> holds the cluster's desired state, places each workload on a node, and continuously reconciles what is running against what was declared. You never place work by hand — you submit a description to the API and the control plane schedules it.</p>
+      <p>The command-line client in every Kubernetes procedure — <code>kubectl</code> — is just a client for that API, closer to PowerShell against a management server than to a console session on a host. There is no node-level UI to log into and no per-node inventory to browse.</p>
     </div>
 
     <!-- ═══ Bespoke interactive: the two-world explorer ═══ -->
@@ -157,7 +149,7 @@
     <div class="toggle-widget">
       <div class="widget__tag"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · VM world vs Kubernetes world</div>
       <h3>The same estate, described twice</h3>
-      <p class="toggle-widget__sub">One layered stack per world, then the two laid side by side. Follow the highlighted row — it is the thing you would put in a backup policy — and notice how far down the stack it moves when the world changes.</p>
+      <p class="toggle-widget__sub">Follow the highlighted row — the thing you would put in a backup policy — and watch where it moves when the world changes.</p>
       <div class="toggle-widget__controls" role="group" aria-label="Choose a world">
         <button type="button" class="toggle-widget__btn is-active" data-view="vm"   aria-pressed="true">VM world</button>
         <button type="button" class="toggle-widget__btn"           data-view="k8s"  aria-pressed="false">Kubernetes world</button>
@@ -217,7 +209,7 @@
           </tbody>
         </table>
       </div>
-      <p class="mini-takeaway">Takeaway: the management layer and the compute layer map across cleanly. The row that moves is the one you care about most — the unit of protection drops from "a machine" to "a boundary containing an application".</p>
+      <p class="mini-takeaway">Takeaway: management and compute map across cleanly. The row that moves is the unit of protection — from "a machine" to "a boundary containing an application".</p>
     </div>
 
     <div class="compare mt-24">
@@ -241,7 +233,7 @@
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">02</span>
-            <div><strong>The control plane is not your backup target either.</strong><br/><span>Veeam Kasten is built to protect Kubernetes applications and cannot be used to deploy or restore a cluster's overall state, so cluster build-out stays with your infrastructure-as-code tooling <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</span></div>
+            <div><strong>The control plane is not your backup target either.</strong><br/><span>Veeam Kasten is built to protect Kubernetes applications and cannot be used to deploy or restore a cluster's overall state, so cluster build-out stays with your infrastructure-as-code tooling.</span></div>
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">03</span>
@@ -255,7 +247,7 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
         <div class="note__body">
         <div class="note__label">Heads up</div>
-        <p>The word "cluster" means something different on each side of this comparison. A vSphere cluster is a grouping of hosts inside a larger inventory. A Kubernetes cluster is the entire management domain — its own API, its own accounts, its own set of nodes. Two Kubernetes clusters are two separate worlds, which is exactly why moving an application between clusters is treated as a restore operation rather than a migration wizard <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</p>
+        <p>"Cluster" means something different on each side: a vSphere cluster is a grouping of hosts inside a larger inventory, while a Kubernetes cluster is the entire management domain — its own API, accounts, and nodes. Two Kubernetes clusters are two separate worlds, which is exactly why moving an application between clusters is treated as a restore operation rather than a migration wizard.</p>
       </div>
     </div>
   </div>
@@ -272,42 +264,50 @@
     <span class="eyebrow">Workloads · 03</span>
     <h2>Pods, Deployments, and StatefulSets</h2>
     <p class="lede">
-      By the end of this section you'll be able to say what runs (a Pod), what keeps it running (a Deployment or a StatefulSet), and which of the two tells you at a glance that there is data underneath worth protecting.
+      What runs (a Pod), what keeps it running (a Deployment or a StatefulSet), and which of the two tells you at a glance that there is data worth protecting underneath.
     </p>
 
     <div class="prose">
-      <p>A <strong>Pod</strong> is the smallest thing Kubernetes runs: one or more containers that share a network identity and a lifecycle. Pods are created and destroyed constantly — by upgrades, by scaling, by a node going away. You do not repair a Pod; something replaces it. Nothing inside a Pod's own filesystem is expected to survive that replacement.</p>
-      <p>Because Pods are disposable, you rarely create one directly. Instead you declare a controller that owns them. A <strong>Deployment</strong> says "keep this many identical, interchangeable copies running" — right for a web front end, an API tier, anything where copy three is indistinguishable from copy one. A <strong>StatefulSet</strong> says "keep these copies running, each with a stable name and its own storage" — right for a database, a message broker, anything where copy three has its own data and is not interchangeable with copy one.</p>
+      <p>A <strong>Pod</strong> is the smallest thing Kubernetes runs: one or more containers sharing a network identity and a lifecycle. Pods are created and destroyed constantly — by upgrades, scaling, or a node going away — and nothing inside a Pod's own filesystem is expected to survive replacement. You do not repair a Pod; something replaces it.</p>
+      <p>Because Pods are disposable, you rarely create one directly — you declare a controller that owns them. A <strong>Deployment</strong> keeps a set number of identical, interchangeable copies running: right for a web front end or API tier. A <strong>StatefulSet</strong> keeps copies that each have a stable name and their own storage: right for a database or message broker, where copy three is not interchangeable with copy one.</p>
     </div>
 
     <div class="flipcards">
       <div class="flip" role="button" tabindex="0" aria-pressed="false" aria-label="Pod — flip for details">
         <div class="flip__inner">
           <div class="flip__face flip__front"><span class="flip__num">01</span><h4>Pod</h4><span class="flip__hint">Flip ↻</span></div>
-          <div class="flip__face flip__back"><p>One or more containers running together with a shared network identity. Replaced rather than repaired, and renamed when it is replaced. Closest instinct: a running process group, not a VM. For backup: a Pod is evidence that something is running, not the thing you restore.</p></div>
+          <div class="flip__face flip__back"><p>Containers running together with a shared network identity — replaced rather than repaired, and renamed when replaced. Closest instinct: a running process group, not a VM. For backup: evidence that something is running, not the thing you restore.</p></div>
         </div>
       </div>
       <div class="flip" role="button" tabindex="0" aria-pressed="false" aria-label="Deployment — flip for details">
         <div class="flip__inner">
           <div class="flip__face flip__front"><span class="flip__num">02</span><h4>Deployment</h4><span class="flip__hint">Flip ↻</span></div>
-          <div class="flip__face flip__back"><p>A controller that keeps a declared number of interchangeable Pods running and rolls them over during upgrades. Closest instinct: a template plus a policy that maintains the fleet. For backup: what matters is the declaration, not the copies it produced.</p></div>
+          <div class="flip__face flip__back"><p>A controller that keeps a declared number of interchangeable Pods running and rolls them during upgrades. Closest instinct: a template plus a policy that maintains the fleet. For backup: the declaration matters, not the copies it produced.</p></div>
         </div>
       </div>
       <div class="flip" role="button" tabindex="0" aria-pressed="false" aria-label="StatefulSet — flip for details">
         <div class="flip__inner">
           <div class="flip__face flip__front"><span class="flip__num">03</span><h4>StatefulSet</h4><span class="flip__hint">Flip ↻</span></div>
-          <div class="flip__face flip__back"><p>A controller for Pods that each keep a stable identity and their own persistent volume. Closest instinct: the tier of the application you would have given its own dedicated disks. For backup: this is where your attention goes — a StatefulSet is a strong signal that volumes with data are present.</p></div>
+          <div class="flip__face flip__back"><p>A controller for Pods that each keep a stable identity and their own persistent volume. Closest instinct: the tier you would give dedicated disks. For backup: a strong signal that volumes with data are present.</p></div>
         </div>
       </div>
     </div>
 
     <div class="prose mt-24">
       <h3>Why the stateful ones are the ones you protect</h3>
-      <p>Rebuild a stateless front end from its declaration and you have lost nothing. Rebuild a database from its declaration and you have an empty database. That asymmetry is the entire reason a Kubernetes backup product exists, and it is visible in how Veeam Kasten presents a cluster: its dashboard can filter down to only the applications that have stateful services, which it defines as applications containing a persistent volume <span>[Src: Kasten Docs 9.0.2 p.301]</span>.</p>
-      <p>Veeam Kasten classifies Pods, VirtualMachines, StatefulSets, Deployments, and DeploymentConfigs as <em>workloads</em>, and treats an application as something made up of multiple Kubernetes resources and workloads together <span>[Src: Kasten Docs 9.0.2 p.303]</span>. So a single application card in its dashboard may account for several volumes, several network resources, several workloads, and additional configuration objects at once <span>[Src: Kasten Docs 9.0.2 p.303]</span>.</p>
+      <p>Rebuild a stateless front end from its declaration and you have lost nothing; rebuild a database that way and you have an empty database. That asymmetry is why a Kubernetes backup product exists, and Veeam Kasten's dashboard can filter down to only the applications with stateful services — defined as applications containing a persistent volume.</p>
+      <p>Veeam Kasten classifies Pods, VirtualMachines, StatefulSets, Deployments, and DeploymentConfigs as <em>workloads</em>, and treats an application as multiple Kubernetes resources and workloads together. One application card in its dashboard may therefore account for several volumes, network resources, workloads, and configuration objects at once.</p>
     </div>
 
-    <table class="data-table">
+    <div class="note note--caution mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+      <div class="note__body">
+        <div class="note__label">Heads up</div>
+        <p>Do not read "StatefulSet" as "everything with data". Some data services are managed by their own custom controllers instead, and Veeam Kasten supports pre- and post-snapshot Blueprint actions for those custom-resource-managed workloads by mapping Pod and volume-claim ownership when a policy runs. The reliable signal that data is present is a persistent volume, not the controller type.</p>
+      </div>
+    </div>
+
+    <table class="data-table mt-24">
       <thead><tr><th scope="col">Object</th><th scope="col">Closest thing you administer today</th><th scope="col">Where the comparison breaks</th></tr></thead>
       <tbody>
         <tr><td>Pod</td><td data-label="Closest thing you administer today">A running service on a machine</td><td data-label="Where the comparison breaks">It has no persistent identity and no lifespan you should depend on</td></tr>
@@ -316,19 +316,11 @@
       </tbody>
     </table>
 
-    <div class="note note--caution mt-24">
-      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
-      <div class="note__body">
-        <div class="note__label">Heads up</div>
-        <p>Do not read "StatefulSet" as "everything with data". Some modern data services are managed by their own custom controllers rather than by a StatefulSet, and Veeam Kasten added support for pre- and post-snapshot Blueprint actions for those custom-resource-managed workloads by mapping Pod and volume-claim ownership when a policy runs <span>[Src: Kasten Docs 9.0.2 p.1096]</span>. The reliable signal that data is present is a persistent volume, not the controller type.</p>
-      </div>
-    </div>
-
-    <div class="note note--tip">
+    <div class="note note--tip mt-24">
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
       <div class="note__body">
         <div class="note__label">Pro tip</div>
-        <p>A crash-consistent volume snapshot is not always enough for a database, exactly as it is not in a virtual estate. Veeam Kasten handles that case with Kanister Blueprints, which run pre- and post-backup hooks for workloads that need application-specific work such as pausing a database before a backup or migration <span>[Src: Kasten Docs 9.0.2 p.1090]</span>. You will meet these again when you build policies.</p>
+        <p>A crash-consistent volume snapshot is not always enough for a database — exactly as in a virtual estate. Veeam Kasten handles that with Kanister Blueprints, which run pre- and post-backup hooks for workloads needing application-specific work, such as pausing a database before a backup or migration. You will meet these again when you build policies.</p>
       </div>
     </div>
   </div>
@@ -345,12 +337,12 @@
     <span class="eyebrow">Namespaces · 04</span>
     <h2>Namespaces: where an application lives</h2>
     <p class="lede">
-      By the end of this section you'll be able to explain what a namespace groups, why Veeam Kasten treats one as an application, and how that default changes the way you will scope a protection policy compared with picking objects out of an inventory tree.
+      What a namespace groups, why Veeam Kasten treats one as an application, and how that default changes the way you scope a protection policy.
     </p>
 
     <div class="prose">
-      <p>A <strong>namespace</strong> is a named boundary inside a cluster that holds a set of related objects — workloads, configuration, secrets, storage claims, service definitions. Names are unique within a namespace rather than across the cluster, access control is commonly granted per namespace, and a team is commonly given one to work in. (On Red Hat OpenShift, which this course also targets, the same boundary surfaces as a <strong>Project</strong> — Veeam Kasten's own OpenShift install instructions treat the two words as one thing, telling you to create "a project (namespace)" for the installation <span>[Src: Kasten Docs 9.0.2 p.67]</span>.) In practice a namespace is how an application is deployed: one namespace, one application, all of its parts inside it.</p>
-      <p>That convention is load-bearing for Veeam Kasten. The platform by default equates namespaces to applications — for ease of use, for consistency with Kubernetes practice and role-based access control, and because it mirrors the most common application deployment pattern <span>[Src: Kasten Docs 9.0.2 p.301]</span>. It is a default, not a cage: policies can be defined to operate on more than one namespace, or on only a subset of an application that lives inside a single namespace <span>[Src: Kasten Docs 9.0.2 p.301]</span>.</p>
+      <p>A <strong>namespace</strong> is a named boundary inside a cluster holding a set of related objects — workloads, configuration, secrets, storage claims, service definitions. Names are unique within it, access control is commonly granted per namespace, and in practice one namespace holds one application with all of its parts. On Red Hat OpenShift the same boundary surfaces as a <strong>Project</strong> — Veeam Kasten's own install instructions treat the two words as one thing, telling you to create "a project (namespace)" for the installation.</p>
+      <p>That convention is load-bearing: Veeam Kasten by default equates namespaces to applications — for ease of use, consistency with Kubernetes practice and role-based access control, and because it mirrors the most common deployment pattern. It is a default, not a cage: policies can span more than one namespace, or cover only a subset of one.</p>
     </div>
 
     <div class="compare">
@@ -370,15 +362,15 @@
         <div class="card-dark__list">
           <div class="card-dark__row">
             <span class="card-dark__idx">01</span>
-            <div><strong>A folder is organizational. A namespace is functional.</strong><br/><span>Moving a VM between folders changes nothing about the VM. Objects do not move casually between namespaces — references, names, and access rules are all scoped to the one they are in.</span></div>
+            <div><strong>A folder is organizational. A namespace is functional.</strong><br/><span>Moving a VM between folders changes nothing about it; objects do not move casually between namespaces — references, names, and access rules are scoped to the one they are in.</span></div>
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">02</span>
-            <div><strong>Some of the application is not in the namespace at all.</strong><br/><span>Cluster-scoped objects such as StorageClasses and custom resource definitions live outside every namespace, and an application that depends on them needs a policy that protects both the application and its cluster-scoped resources <span>[Src: Kasten Docs 9.0.2 p.429]</span>.</span></div>
+            <div><strong>Some of the application is not in the namespace at all.</strong><br/><span>Cluster-scoped objects such as StorageClasses and custom resource definitions live outside every namespace, and an application that depends on them needs a policy that protects both the application and its cluster-scoped resources.</span></div>
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">03</span>
-            <div><strong>Deleting the namespace deletes the contents.</strong><br/><span>This is the accident you are protecting against, and it takes volumes and their snapshots with it. Section 06 explains why that detail decides whether a snapshot counts as a backup.</span></div>
+            <div><strong>Deleting the namespace deletes the contents.</strong><br/><span>This is the accident you are protecting against — and it takes volumes and their snapshots with it (Section 06 explains why that decides whether a snapshot counts as a backup).</span></div>
           </div>
         </div>
       </div>
@@ -387,7 +379,7 @@
     <figure class="screenshot mt-24">
       <img class="screenshot__img" src="images/named/p0055__Installing_Veeam_Kasten_Installing_Veeam_Kasten_on_Kubernete__1280x645__019.png" loading="lazy" alt="The Veeam Kasten dashboard shown inside the Red Hat OpenShift administrator console. An Apps panel reports 67 total applications with 2 compliant, 65 unmanaged and 0 non-compliant; a Data Usage doughnut shows 170.3 GB of backups split into 170 GB of snapshots and 280.4 MB of object storage; a Recent Activity table lists ten completed Policy Run actions for the pacman-backup and wordpress-backup policies with start times and durations of one to three minutes.">
       <figcaption class="screenshot__caption">
-        <strong>Applications, counted for you.</strong> Nobody registered these applications by hand. Veeam Kasten abstracts each application it has automatically discovered on the cluster it is running in <span>[Src: Kasten Docs 9.0.2 p.620]</span>, then reports each one as unmanaged when no protection policy covers it, non-compliant when a policy applies but its actions are failing or have not run yet, and compliant when a policy applies and its service-level agreements (SLAs) are being respected <span>[Src: Kasten Docs 9.0.2 p.301]</span> — meaning the policy's own configured schedule and retention, not a separately negotiated or externally audited service-level agreement <span>[Src: Kasten Docs 9.0.2 p.382]</span>.
+        <strong>Applications, counted for you.</strong> Nobody registered these by hand: Veeam Kasten abstracts each application it has automatically discovered on the cluster it runs in. Each one is unmanaged when no policy covers it, non-compliant when a policy's actions are failing or have not run yet, and compliant when its service-level agreements (SLAs) are respected — meaning the policy's own configured schedule and retention, not an externally negotiated agreement.
         <span class="screenshot__source">Source: Kasten Docs 9.0.2 p.55. ↔ Click the image to view it full size.</span>
       </figcaption>
     </figure>
@@ -396,15 +388,7 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
       <div class="note__body">
         <div class="note__label">Why this is good news for you</div>
-        <p>Discovery is the part of onboarding a new estate that costs the most in a virtual environment: finding everything, deciding what is in scope, keeping the list current as people build things. Here the inventory maintains itself, and the interesting number on that dashboard is the unmanaged count — the applications that exist and are not yet covered by any policy <span>[Src: Kasten Docs 9.0.2 p.301]</span>. That number is your work queue.</p>
-      </div>
-    </div>
-
-    <div class="note note--key mt-24">
-      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
-      <div class="note__body">
-        <div class="note__label">Remember</div>
-        <p>Namespace is the noun you will think in from now on. When a colleague asks whether something is protected, the answer is a namespace and a policy — not a machine name.</p>
+        <p>Discovery is the costliest part of onboarding a new estate: finding everything, deciding scope, keeping the list current. Here the inventory maintains itself, and the interesting number is the unmanaged count — applications not yet covered by any policy. That number is your work queue, and namespace is the noun you now think in: when a colleague asks whether something is protected, the answer is a namespace and a policy — not a machine name.</p>
       </div>
     </div>
   </div>
@@ -421,12 +405,12 @@
     <span class="eyebrow">Storage · 05</span>
     <h2>Volumes, claims, and storage classes</h2>
     <p class="lede">
-      By the end of this section you'll be able to trace a request for storage from the claim an application writes to the volume that gets bound to it, name the component that does the provisioning, and explain why this layer sets the ceiling for your data protection design.
+      A storage request traced from claim to bound volume, the component that does the provisioning, and why this layer sets the ceiling for your data protection design.
     </p>
 
     <div class="prose">
-      <p>Three objects do the work. A <strong>PersistentVolumeClaim</strong> is the application saying "I need this much storage, of this class". A <strong>StorageClass</strong> is the named offering that claim asks for — the tier, the parameters, and which provisioner fulfils it. A <strong>PersistentVolume</strong> is the actual volume that gets created and bound to the claim. The application author writes the claim; the cluster produces the volume.</p>
-      <p>Doing the provisioning is the <strong>CSI driver</strong> — CSI being the Container Storage Interface, the standard contract between Kubernetes and a storage system. Your array vendor ships the driver; the cluster calls it to create volumes, attach them, and — when the driver has that capability — snapshot them.</p>
+      <p>Three objects do the work. A <strong>PersistentVolumeClaim</strong> is the application saying "I need this much storage, of this class"; a <strong>StorageClass</strong> is the named offering that claim asks for; a <strong>PersistentVolume</strong> is the actual volume created and bound to the claim. The application author writes the claim; the cluster produces the volume.</p>
+      <p>The provisioning is done by the <strong>CSI driver</strong> — the Container Storage Interface is the standard contract between Kubernetes and a storage system. Your array vendor ships the driver; the cluster calls it to create volumes, attach them, and — when the driver can — snapshot them.</p>
     </div>
 
     <div class="task__interactive-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>Interactive — click each stage</div>
@@ -438,28 +422,28 @@
           <div class="flow__node-tag">STAGE 01</div>
           <div class="flow__node-title">The claim</div>
           <div class="flow__node-desc">The application asks for storage by size and class.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 01 — the claim.</strong> A PersistentVolumeClaim is part of the application's own definition: it names a size, an access mode, and a StorageClass. This is the object a developer writes and the object you will see listed under an application in Veeam Kasten. Closest instinct: a request for a disk of a particular tier, submitted rather than fulfilled.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 01 — the claim.</strong> A PersistentVolumeClaim is part of the application's own definition: a size, an access mode, and a StorageClass — the object a developer writes and the one you will see listed under an application in Veeam Kasten. Closest instinct: a request for a disk of a particular tier, submitted rather than fulfilled.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep1">
           <div class="flow__node-tag">STAGE 02</div>
           <div class="flow__node-title">The class</div>
           <div class="flow__node-desc">The named offering decides who fulfils the claim.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 02 — the class.</strong> A StorageClass is the cluster's catalogue entry: a name a claim can ask for, plus the provisioner and parameters behind it. Closest instinct: a storage policy in a virtual estate. Where it breaks: a StorageClass is cluster-scoped, so it is not inside the namespace it serves — which is why protecting an application sometimes means protecting cluster-scoped resources alongside it <span>[Src: Kasten Docs 9.0.2 p.429]</span>.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 02 — the class.</strong> A StorageClass is the cluster's catalogue entry: a name a claim can ask for, plus the provisioner and parameters behind it. Closest instinct: a storage policy. Where it breaks: a StorageClass is cluster-scoped, not inside the namespace it serves — why protecting an application sometimes means protecting cluster-scoped resources alongside it.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep2">
           <div class="flow__node-tag">STAGE 03</div>
           <div class="flow__node-title">The driver</div>
           <div class="flow__node-desc">The CSI driver creates the volume on real storage.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 03 — the driver.</strong> The provisioner named by the class does the work against the storage system. Where a platform offers both a CSI driver and an older in-tree provisioner, the CSI provisioner is the one to choose: the legacy in-tree provisioners are deprecated and will be removed in later Kubernetes versions, and claims made by them are being migrated to CSI drivers <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 03 — the driver.</strong> The provisioner named by the class does the work against the storage system. Choose the CSI provisioner over an older in-tree one: legacy in-tree provisioners are deprecated and will be removed in later Kubernetes versions, with their claims migrated to CSI drivers.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="flowDetail" id="flowStep3">
           <div class="flow__node-tag">STAGE 04</div>
           <div class="flow__node-title">The bound volume</div>
           <div class="flow__node-desc">A PersistentVolume is bound to the claim and mounted.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 04 — the bound volume.</strong> The PersistentVolume exists as its own object with its own lifecycle, bound to the claim that asked for it and mounted into the Pod. This is the data. Everything Veeam Kasten does about that data — snapshot it, export it, restore it — happens through this object and the driver that created it.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 04 — the bound volume.</strong> The PersistentVolume is its own object with its own lifecycle, bound to the claim and mounted into the Pod. This is the data — everything Veeam Kasten does with it (snapshot, export, restore) happens through this object and the driver that created it.</div>
         </div>
       </div>
       <div class="flow__detail" id="flowDetail" role="tabpanel" aria-labelledby="flowStep0" aria-live="polite"></div>
@@ -467,13 +451,23 @@
 
     <div class="prose mt-24">
       <h3>What this means for backup</h3>
-      <p>In a virtual estate the storage layer is largely an implementation detail of the backup design: the hypervisor presents disks, and your backup server reads them. Here the storage layer is a first-class dependency, because the ability to take a fast, consistent point-in-time copy belongs to the driver rather than to the backup product. Veeam Kasten supports direct integration with a set of storage providers — among them Amazon Elastic Block Store, Azure Managed Disks, Google Persistent Disk, Ceph, Cinder-based providers on OpenStack, vSphere Cloud Native Storage, Portworx, and Veeam Backup — as well as integration through CSI <span>[Src: Kasten Docs 9.0.2 p.102]</span>.</p>
-      <p>Two practical consequences follow. First, a storage system with no CSI driver that can snapshot pushes you onto a file-copy-based path: Veeam Kasten supports Generic Storage Backups for such systems, and the documentation states plainly that this approach is not recommended <span>[Src: Kasten Docs 9.0.2 p.1090]</span>. Most NFS storage services on the market do not provide a CSI driver with snapshot and clone capabilities, and migrating persistent data to storage that does is the recommended course <span>[Src: Kasten Docs 9.0.2 p.1090]</span>. Second, snapshot limits are a design input: verify from your provisioner's documentation whether there is a cap on the total number of snapshots per persistent volume claim, because that cap constrains policy retention settings <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</p>
+      <p>In a virtual estate the storage layer is an implementation detail — the hypervisor presents disks, your backup server reads them. Here it is a first-class dependency: the fast, consistent point-in-time copy belongs to the driver, not the backup product. Veeam Kasten supports direct integration with a set of storage providers — among them Amazon Elastic Block Store, Azure Managed Disks, Google Persistent Disk, Ceph, Cinder-based providers on OpenStack, vSphere Cloud Native Storage, Portworx, and Veeam Backup — as well as integration through CSI.</p>
+    </div>
+
+    <div class="best mt-24">
+      <div class="best-item">
+        <h4>No snapshot-capable CSI driver? Design problem</h4>
+        <p>Such systems push you onto a file-copy path: Veeam Kasten supports Generic Storage Backups for them, and the documentation states plainly that this approach is not recommended. Most NFS storage services do not provide a CSI driver with snapshot and clone capabilities; migrating persistent data to storage that does is the recommended course.</p>
+      </div>
+      <div class="best-item">
+        <h4>Snapshot limits are a design input</h4>
+        <p>Verify from your provisioner's documentation whether there is a cap on the total number of snapshots per persistent volume claim — that cap constrains policy retention settings.</p>
+      </div>
     </div>
 
     <div class="sales-aside mt-24">
       <span class="sales-aside__label">For a customer conversation</span>
-      <p>When a customer asks why the storage question comes up so early in a Kubernetes data protection design, the honest answer is the one above: the snapshot capability lives in their CSI driver, so the driver they chose sets the ceiling for how efficiently their applications can be protected. Establishing that before a deployment is far cheaper than discovering it during one.</p>
+      <p>Why does storage come up so early in a Kubernetes data protection design? Because the snapshot capability lives in the customer's CSI driver, so the driver they chose sets the ceiling for how efficiently their applications can be protected. Establishing that before a deployment is far cheaper than discovering it during one.</p>
     </div>
   </div>
   <div class="continue" data-continue>
@@ -489,26 +483,26 @@
     <span class="eyebrow">Snapshots · 06</span>
     <h2>VolumeSnapshots, and why drivers differ</h2>
     <p class="lede">
-      By the end of this section you'll be able to state the three conditions that let Veeam Kasten take CSI volume snapshots, explain in one sentence why a volume snapshot on its own is not a backup, and describe what Veeam Kasten does to stop a snapshot being deleted underneath you.
+      The three conditions that let Veeam Kasten take CSI volume snapshots, why a snapshot on its own is not a backup, and how Veeam Kasten stops one being deleted underneath you.
     </p>
 
     <div class="prose">
-      <p>A <strong>VolumeSnapshot</strong> is a Kubernetes object that asks the storage layer for a point-in-time copy of a volume. The request is standard; the ability to honour it is not. That ability is a property of each individual CSI driver, which is why the useful question is never "can Kubernetes snapshot a volume" but "can <em>this</em> driver snapshot a volume".</p>
-      <p>Veeam Kasten can invoke volume snapshot operations through CSI, and three requirements have to be met for that to work: Kubernetes v1.14.0 or higher, the <code>VolumeSnapshotDataSource</code> feature enabled in the cluster, and a CSI driver that has Volume Snapshot support <span>[Src: Kasten Docs 9.0.2 p.102]</span>. Read the first two as inherited history: the releases this build supports start at Kubernetes 1.31 on a certified distribution, with 1.30 and 1.29 supported only as OpenShift <span>[Src: Kasten Docs 9.0.2 p.862]</span>, and volume snapshots became a stable API long before any of them — so there is no feature gate left for you to switch on. Only the third requirement still has to be proved on your cluster. Using a CSI driver with VolumeSnapshot support is described as a requirement for building a good data protection solution with Veeam Kasten <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</p>
+      <p>A <strong>VolumeSnapshot</strong> is a Kubernetes object that asks the storage layer for a point-in-time copy of a volume. The request is standard; the ability to honour it is a property of each individual CSI driver. So the useful question is never "can Kubernetes snapshot a volume" but "can <em>this</em> driver snapshot a volume".</p>
+      <p>Veeam Kasten can invoke volume snapshot operations through CSI when three requirements are met: Kubernetes v1.14.0 or higher, the <code>VolumeSnapshotDataSource</code> feature enabled in the cluster, and a CSI driver that has Volume Snapshot support. The first two are inherited history — supported releases start at Kubernetes 1.31 on a certified distribution, with 1.30 and 1.29 supported only as OpenShift — so only the third still has to be proved on your cluster. Using a CSI driver with VolumeSnapshot support is described as a requirement for building a good data protection solution with Veeam Kasten.</p>
     </div>
 
     <div class="best">
       <div class="best-item">
         <h4>Prove it before you design around it</h4>
-        <p>Whether a CSI provisioner supports VolumeSnapshots may be stated in the storage vendor's documentation, and it can also be validated with Veeam Kasten's own tooling rather than taken on trust <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</p>
+        <p>Whether a CSI provisioner supports VolumeSnapshots may be stated in the storage vendor's documentation, and it can also be validated with Veeam Kasten's own tooling rather than taken on trust.</p>
       </div>
       <div class="best-item">
         <h4>The CSI pre-flight check is a real test</h4>
-        <p>Run with a specified StorageClass, the primer tool — the pre-flight tool you install and run in Module 03 — runs in a Pod in the cluster and creates a sample application with a persistent volume, writes data to it, snapshots the volume, creates a new volume from that snapshot, and validates the data in the new volume <span>[Src: Kasten Docs 9.0.2 p.102]</span>. Module 03 covers both invocations: the basic run, and this one.</p>
+        <p>Run with a specified StorageClass, the primer tool (which you install and run in Module 03) runs in a Pod in the cluster: it creates a sample application with a persistent volume, writes data, snapshots the volume, creates a new volume from that snapshot, and validates the data.</p>
       </div>
       <div class="best-item">
         <h4>One annotation makes a class usable</h4>
-        <p>For each CSI driver, a VolumeSnapshotClass has to carry the Veeam Kasten annotation before its snapshots can be used <span>[Src: Kasten Docs 9.0.2 p.102]</span>. You will apply it in Module 03; recognise it here.</p>
+        <p>An annotation is a small key-value note attached to a Kubernetes object's metadata — tools like Veeam Kasten read specific annotations to decide how to treat the object. For each CSI driver, a VolumeSnapshotClass has to carry the Veeam Kasten annotation before its snapshots can be used. You apply it in Module 03; recognise it here.</p>
       </div>
     </div>
 
@@ -523,13 +517,15 @@ metadata:
     k10.kasten.io/is-snapshot-class: "true"
   name: csi-hostpath-snapclass</code></pre>
     </div>
-    <p class="caption">The annotation and class name above are quoted from the Storage Integration reference <span>[Src: Kasten Docs 9.0.2 p.102]</span>. <code>k10</code> appears in lowercase inside the annotation key <code>k10.kasten.io/is-snapshot-class</code> because that key is a verbatim technical string; the product name is Veeam Kasten.</p>
+    <p class="caption">The annotation and class name above are quoted from the Storage Integration reference. <code>k10</code> appears in lowercase inside the annotation key <code>k10.kasten.io/is-snapshot-class</code> because that key is a verbatim technical string; the product name is Veeam Kasten.</p>
+
+    <p class="prose">First, know that a CSI snapshot is really two objects: the VolumeSnapshot request inside the application's namespace, and a cluster-scoped VolumeSnapshotContent that points at the actual copy on the storage system.</p>
 
     <div class="note note--caution mt-24">
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">Heads up — the most important sentence in this module</div>
-        <p>CSI snapshots are not durable. A snapshot has a namespaced VolumeSnapshot object and a non-namespaced VolumeSnapshotContent object, and with the default and recommended deletion policy, deleting the volume or the namespace containing it cleans up the namespaced object and cascades into deleting the VolumeSnapshotContent object and therefore the underlying storage snapshot <span>[Src: Kasten Docs 9.0.2 p.102]</span>. Setting <code>deletionPolicy</code> to <code>Delete</code> is not sufficient either, because some storage systems force snapshot deletion when the associated volume is deleted, and snapshots can also be force-deleted through the array's own management interface <span>[Src: Kasten Docs 9.0.2 p.102]</span>. Enabling backups together with volume snapshots is therefore required for a durable backup <span>[Src: Kasten Docs 9.0.2 p.102]</span>.</p>
+        <p>CSI snapshots are not durable: a snapshot has a namespaced VolumeSnapshot object and a non-namespaced VolumeSnapshotContent object, and with the default and recommended deletion policy, deleting the volume or its namespace cascades into deleting the VolumeSnapshotContent object and therefore the underlying storage snapshot. Setting <code>deletionPolicy</code> to <code>Delete</code> is not sufficient either, because some storage systems force snapshot deletion when the associated volume is deleted, and snapshots can also be force-deleted through the array's own management interface. Enabling backups together with volume snapshots is therefore required for a durable backup.</p>
       </div>
     </div>
 
@@ -550,11 +546,11 @@ metadata:
         <div class="card-dark__list">
           <div class="card-dark__row">
             <span class="card-dark__idx">01</span>
-            <div><strong>One namespace deletion can take the snapshots with it.</strong><br/><span>In a virtual estate, deleting a VM does not commonly reach into the array and remove its snapshots. Here the cascade is documented behaviour <span>[Src: Kasten Docs 9.0.2 p.102]</span>.</span></div>
+            <div><strong>One namespace deletion can take the snapshots with it.</strong><br/><span>In a virtual estate, deleting a VM does not commonly reach into the array and remove its snapshots. Here the cascade is documented behaviour.</span></div>
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">02</span>
-            <div><strong>Veeam Kasten defends the copy it restores from.</strong><br/><span>It creates a clone of the original VolumeSnapshotClass with the deletion policy set to <code>Retain</code>, and when restoring a CSI VolumeSnapshot it creates an independent replica using that cloned class to avoid accidental deletion of the underlying content <span>[Src: Kasten Docs 9.0.2 p.102]</span>.</span></div>
+            <div><strong>Veeam Kasten defends the copy it restores from.</strong><br/><span>It creates a clone of the original VolumeSnapshotClass with the deletion policy set to <code>Retain</code>, and when restoring a CSI VolumeSnapshot it creates an independent replica using that cloned class to avoid accidental deletion of the underlying content.</span></div>
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">03</span>
@@ -577,22 +573,23 @@ metadata:
     <span class="eyebrow">Helm · 07</span>
     <h2>Helm: charts, values, and releases</h2>
     <p class="lede">
-      By the end of this section you'll be able to explain what a Helm chart is, what a release is, and what the install command you will run in Module 03 is doing — so that the installation reads as a familiar act rather than an incantation.
+      What a Helm chart is, what a release is, and what the Module 03 install command is doing — a familiar act rather than an incantation.
     </p>
 
     <div class="prose">
-      <p><strong>Helm</strong> is the package manager for Kubernetes applications. A <strong>chart</strong> is the package: a parameterised set of Kubernetes object definitions plus the default values for them. <strong>Values</strong> are the parameters you override at install time. A <strong>release</strong> is one named installation of a chart into a cluster — the thing that exists afterwards, that can be upgraded in place, and that can be rolled back or removed as a unit.</p>
-      <p>The closest thing in your current world is an installer package plus an answer file: the chart is the package, the values are the answers, and the release is the installed instance you later patch. Where the comparison breaks is that a release is not a set of files on a machine — it is a set of objects in the cluster's API, which is why an upgrade is a declaration change rather than a program that runs on a server.</p>
+      <p><strong>Helm</strong> is the package manager for Kubernetes applications. A <strong>chart</strong> is the package — a parameterised set of Kubernetes object definitions plus their defaults — and <strong>values</strong> are the parameters you override at install time. A <strong>release</strong> is one named installation of a chart into a cluster: upgradeable in place, and rolled back or removed as a unit.</p>
+      <p>Closest instinct: an installer package plus an answer file — the chart is the package, the values are the answers, the release is the installed instance you later patch. Where it breaks: a release is not files on a machine but a set of objects in the cluster's API, so an upgrade is a declaration change rather than a program that runs on a server.</p>
     </div>
 
-    <div class="prose">
-      <dl>
-        <dt>Chart repository</dt><dd>A location Helm pulls charts from. Veeam Kasten's charts come from the Kasten Helm charts repository, which you add to Helm before installing <span>[Src: Kasten Docs 9.0.2 p.4]</span>.</dd>
-        <dt>Chart version and product version</dt><dd>The chart version selects which Veeam Kasten version you install, so pinning it is how you control what lands in the cluster <span>[Src: Kasten Docs 9.0.2 p.759]</span>.</dd>
-        <dt>Release name</dt><dd>The name you give the installation. Veeam Kasten's documented install names the release <code>k10</code> <span>[Src: Kasten Docs 9.0.2 p.4]</span>.</dd>
-        <dt>Target namespace</dt><dd>Where the release's objects are created. The Veeam Kasten install default is <code>kasten-io</code> <span>[Src: Kasten Docs 9.0.2 p.15]</span>.</dd>
-      </dl>
-    </div>
+    <table class="data-table">
+      <thead><tr><th scope="col">Term</th><th scope="col">What it is</th></tr></thead>
+      <tbody>
+        <tr><td>Chart repository</td><td data-label="What it is">Where Helm pulls charts from. Veeam Kasten's charts come from the Kasten Helm charts repository, added to Helm before installing.</td></tr>
+        <tr><td>Chart version</td><td data-label="What it is">Selects which Veeam Kasten version you install — pinning it controls what lands in the cluster.</td></tr>
+        <tr><td>Release name</td><td data-label="What it is">The name you give the installation. The documented install names the release <code>k10</code>.</td></tr>
+        <tr><td>Target namespace</td><td data-label="What it is">Where the release's objects are created. The install default is <code>kasten-io</code>.</td></tr>
+      </tbody>
+    </table>
 
     <div class="code-block">
       <div class="code-block__bar">
@@ -615,21 +612,54 @@ metadata:
       </div>
       <pre><code>helm install k10 kasten/k10 --namespace=kasten-io</code></pre>
     </div>
-    <p class="caption">Read it as three sentences: know where the charts live, refresh that knowledge, then create a release called <code>k10</code> from the <code>kasten/k10</code> chart inside the <code>kasten-io</code> namespace. Commands quoted from the install reference <span>[Src: Kasten Docs 9.0.2 p.4]</span>.</p>
+    <p class="caption">Read it as three sentences: know where the charts live, refresh that knowledge, then create a release called <code>k10</code> from the <code>kasten/k10</code> chart inside the <code>kasten-io</code> namespace. Commands quoted from the install reference.</p>
+
+    <div class="note note--tip mt-24">
+      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+      <div class="note__body">
+        <div class="note__label">Pro tip</div>
+        <p>Two version checks save time later. The Helm 3 package manager has to be in place before installing, at a version compatible with the Kubernetes cluster you are deploying into. The chart can also be signature-verified with the published public key during installation.</p>
+      </div>
+    </div>
 
     <div class="note note--fact mt-24">
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
       <div class="note__body">
         <div class="note__label">Did you know?</div>
-        <p>Helm is not the only route in. On Red Hat OpenShift there are two documented methods to install Veeam Kasten — a Helm-based installation and an Operator-based installation <span>[Src: Kasten Docs 9.0.2 p.53]</span>. Whichever you choose, the documentation encourages automating that deployment as part of the same tooling that builds the cluster, so that after a total cluster loss you can rebuild the platform and then recover applications and data with Veeam Kasten <span>[Src: Kasten Docs 9.0.2 p.1090]</span>.</p>
+        <p>Helm is not the only route in: on Red Hat OpenShift there are two documented install methods — Helm-based and Operator-based. Whichever you choose, the documentation encourages automating that deployment with the same tooling that builds the cluster, so that after a total cluster loss you can rebuild the platform and then recover applications and data with Veeam Kasten.</p>
       </div>
     </div>
 
-    <div class="note note--tip">
-      <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
-      <div class="note__body">
-        <div class="note__label">Pro tip</div>
-        <p>Two version checks save time later. The Helm 3 package manager has to be in place before installing, and its version should be compatible with the version of the Kubernetes cluster you are deploying into <span>[Src: Kasten Docs 9.0.2 p.4]</span>. Veeam Kasten's Helm chart can also be signature-verified with the published public key during installation <span>[Src: Kasten Docs 9.0.2 p.4]</span>.</p>
+    <p class="prose">Values files raise one last question — where configuration and credentials actually live. Two namespaced objects you will keep meeting:</p>
+
+    <div class="compare mt-24">
+      <div class="compare__card">
+        <div class="compare__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        </div>
+        <h3>ConfigMap — the ordinary settings</h3>
+        <div>
+          <div class="compare__qa-row"><div class="compare__q">What it is</div><div class="compare__a">A namespaced object (first seen in Module 01's application definition) holding plain settings as key-value pairs, mounted or injected into the Pods that need them.</div></div>
+          <div class="compare__qa-row"><div class="compare__q">Closest instinct</div><div class="compare__a">A config file that lives in the platform instead of on a machine.</div></div>
+          <div class="compare__qa-row"><div class="compare__q">For backup</div><div class="compare__a">Part of what a Veeam Kasten policy captures with the application — configuration is application state too.</div></div>
+        </div>
+      </div>
+      <div class="compare__card card-dark">
+        <h3 class="card-dark__title">Secret — the sensitive values</h3>
+        <div class="card-dark__list">
+          <div class="card-dark__row">
+            <span class="card-dark__idx">01</span>
+            <div><strong>Credentials, keys, tokens.</strong><br/><span>A Secret keeps sensitive values out of pod definitions, container images, and values files; at runtime it is mounted or injected into the pods that need it.</span></div>
+          </div>
+          <div class="card-dark__row">
+            <span class="card-dark__idx">02</span>
+            <div><strong>Base64 is an encoding, not an encryption.</strong><br/><span>Treat access to Secrets with the same care you give stored credentials today.</span></div>
+          </div>
+          <div class="card-dark__row">
+            <span class="card-dark__idx">03</span>
+            <div><strong>Captured with the application.</strong><br/><span>Secrets are part of what a policy protects — which is why a restored application can authenticate at all.</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -646,12 +676,12 @@ metadata:
     <span class="eyebrow">Veeam Kasten · 08</span>
     <h2>Where Veeam Kasten sits in all of this</h2>
     <p class="lede">
-      By the end of this section you'll be able to describe Veeam Kasten's place in a cluster — which namespace it runs in, what shape it takes, how it finds applications without being told about them — and how that differs from the management server you are used to installing.
+      Veeam Kasten's place in a cluster — where it runs, what shape it takes, how it finds applications — and how that differs from the management server you are used to installing.
     </p>
 
     <div class="prose">
-      <p>Veeam Kasten does not sit beside the cluster looking in. It runs <em>inside</em> the cluster, as a set of its own services in their own namespace. The install default for that namespace is <code>kasten-io</code> <span>[Src: Kasten Docs 9.0.2 p.15]</span>, and after installing, the way you confirm the platform is healthy is to watch its Pods reach a running state <span>[Src: Kasten Docs 9.0.2 p.15]</span>.</p>
-      <p>Those services are individually named — an aggregated API service, an authentication service, a catalog service and others appear in the Pod list <span>[Src: Kasten Docs 9.0.2 p.15]</span> — and Veeam Kasten's own tooling talks about validating a cluster before installation and debugging the platform's micro services afterwards <span>[Src: Kasten Docs 9.0.2 p.866]</span>. Read that as a design statement: this is not one monolithic server process, it is a set of cooperating in-cluster components.</p>
+      <p>Veeam Kasten does not sit beside the cluster looking in — it runs <em>inside</em> it, as a set of its own services in their own namespace. The install default is <code>kasten-io</code>, and you confirm the platform is healthy by watching its Pods reach a running state.</p>
+      <p>Those services are individually named — an aggregated API service, an authentication service, a catalog service and others appear in the Pod list — and Veeam Kasten's own tooling talks about validating a cluster before installation and debugging the platform's micro services afterwards. Read that as a design statement: not one monolithic server process, but cooperating in-cluster components.</p>
     </div>
 
     <div class="code-block">
@@ -661,20 +691,20 @@ metadata:
       </div>
       <pre><code>kubectl get pods --namespace kasten-io --watch</code></pre>
     </div>
-    <p class="caption">The documented validation step. All of the Pods should ultimately display a status of <code>Running</code>; it may take a couple of minutes for them to come up <span>[Src: Kasten Docs 9.0.2 p.15]</span>.</p>
+    <p class="caption">The documented validation step. All of the Pods should ultimately display a status of <code>Running</code>; it may take a couple of minutes for them to come up.</p>
 
     <div class="feature-rows mt-24">
       <div class="feature-row">
         <span class="feature-row__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-        <div class="feature-row__body"><h4>It discovers instead of being told</h4><p>Veeam Kasten's application object abstracts an application that has been automatically discovered on the cluster where Veeam Kasten is running, and captures its stateful and stateless resources together <span>[Src: Kasten Docs 9.0.2 p.620]</span>. There is no inventory to register and no agent to push.</p></div>
+        <div class="feature-row__body"><h4>It discovers instead of being told</h4><p>Veeam Kasten's application object abstracts an application automatically discovered on the cluster where it runs, capturing stateful and stateless resources together. No inventory to register, no agent to push.</p></div>
       </div>
       <div class="feature-row">
         <span class="feature-row__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg></span>
-        <div class="feature-row__body"><h4>It speaks the cluster's own language</h4><p>Policies encode business rules and translate them into the actions Veeam Kasten applies to the applications it has discovered <span>[Src: Kasten Docs 9.0.2 p.620]</span>. Its own objects — policies, profiles, actions, restore points — live in the cluster API like any other Kubernetes resource.</p></div>
+        <div class="feature-row__body"><h4>It speaks the cluster's own language</h4><p>Policies encode business rules and translate them into the actions applied to discovered applications. Its own objects — policies, profiles, actions, restore points — live in the cluster API like any other resource.</p></div>
       </div>
       <div class="feature-row">
         <span class="feature-row__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
-        <div class="feature-row__body"><h4>It is hardened as an in-cluster tenant</h4><p>Because it runs as Pods among other Pods, its security posture is a cluster concern: all Veeam Kasten Pods enable a read-only root filesystem security context by default, with writable paths backed by dedicated volume mounts <span>[Src: Kasten Docs 9.0.2 p.1096]</span>. On Red Hat OpenShift specifically, that posture has a name — Security Context Constraints: Veeam Kasten installs customized SecurityContextConstraints (SCC) to ensure that all workloads associated with it have just enough privileges to perform their respective tasks <span>[Src: Kasten Docs 9.0.2 p.60]</span>.</p></div>
+        <div class="feature-row__body"><h4>It is hardened as an in-cluster tenant</h4><p>All Veeam Kasten Pods enable a read-only root filesystem security context by default, with writable paths backed by dedicated volume mounts. On Red Hat OpenShift it installs customized SecurityContextConstraints (SCC) so that all its associated workloads have just enough privileges for their respective tasks.</p></div>
       </div>
     </div>
 
@@ -682,14 +712,14 @@ metadata:
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">Where the "management server" comparison breaks</div>
-        <p>A Veeam Backup &amp; Replication server outlives the workloads it protects and holds its own configuration outside them. An in-cluster platform does not get that luxury: if the cluster is gone, Veeam Kasten is gone with it. That is why exported backups and a documented way to recover the platform itself matter here in a way they do not for a management server sitting on its own machine — and why the documentation is explicit that Veeam Kasten protects Kubernetes applications and cannot be used to deploy or restore the cluster's overall state <span>[Src: Kasten Docs 9.0.2 p.1090]</span>. Module 04 picks this up.</p>
+        <p>A Veeam Backup &amp; Replication server outlives the workloads it protects; an in-cluster platform does not — if the cluster is gone, Veeam Kasten is gone with it. That is why exported backups and a documented way to recover the platform itself matter here, and why the documentation is explicit that Veeam Kasten protects Kubernetes applications and cannot be used to deploy or restore the cluster's overall state. Module 04 picks this up.</p>
       </div>
     </div>
 
     <div class="sorter mt-24">
       <div class="widget__tag"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · quick self-check, nothing scored</div>
       <h3 class="sorter__h">Which scope does each object live in?</h3>
-      <p class="sorter__cap">Scope decides what a namespace-based policy can reach. File each object where it lives; each filing explains the reasoning. Refile any card as many times as you like.</p>
+      <p class="sorter__cap">Scope decides what a namespace-based policy can reach. File each object where it lives — each filing explains the reasoning, and you can refile as often as you like.</p>
       <p class="sorter__progress" aria-live="polite">0 of 6 filed correctly</p>
       <p class="sorter__tray-label">Cards to sort</p>
       <div class="sorter__tray" role="group" aria-label="Cards to sort"></div>
@@ -729,7 +759,7 @@ metadata:
   <div class="wrap">
     <span class="eyebrow">Knowledge check · 09</span>
     <h2>Check your understanding</h2>
-    <p class="lede">Five questions on the ideas this module set up. Each one has a single best answer, and every option explains itself once you choose.</p>
+    <p class="lede">Five questions, one best answer each — and every option explains itself once you choose.</p>
 
     <div class="quiz">
       <script type="application/json" class="quiz__data">
@@ -796,7 +826,7 @@ metadata:
     <h2>What you covered</h2>
     <p class="lede">You now have the vocabulary and the mental model the rest of this course assumes. Next you install against it.</p>
     <div class="review-grid">
-      <div class="review-item"><div class="review-item__num">01</div><div class="review-item__text">The three layers of a cluster — API and control plane, nodes, workloads — and the two places the vCenter Server and ESXi host comparison stops paying: there is no node-level object to protect, and cluster build-out is not Veeam Kasten's job</div></div>
+      <div class="review-item"><div class="review-item__num">01</div><div class="review-item__text">The three layers of a cluster — control plane, nodes, workloads — and where the vCenter Server and ESXi host comparison stops paying: no node-level object to protect, and cluster build-out is not Veeam Kasten's job</div></div>
       <div class="review-item"><div class="review-item__num">02</div><div class="review-item__text">Pods as disposable compute, Deployments as interchangeable copies, StatefulSets as identity plus storage — and the persistent volume, not the controller type, as the reliable signal that data is present</div></div>
       <div class="review-item"><div class="review-item__num">03</div><div class="review-item__text">The namespace as the unit an application lives in and the unit Veeam Kasten treats as an application by default, with cluster-scoped dependencies as the exception to watch</div></div>
       <div class="review-item"><div class="review-item__num">04</div><div class="review-item__text">Claim, class, driver, volume — and why CSI snapshot capability varies by driver, and why a snapshot needs a backup beside it before it counts as durable</div></div>

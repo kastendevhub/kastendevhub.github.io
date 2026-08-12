@@ -1,2 +1,0 @@
-v4 shipped 2026-08-06 — human accepted after the safety-review round.
-Cycle: custom (2 review rounds + render hotfix + KA/UX safety pass). See CHANGELOG.md.

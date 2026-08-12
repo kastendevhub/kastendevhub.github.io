@@ -52,7 +52,7 @@
       <div class="hero__module-tag">Module 04</div>
       <h1>Maintaining Veeam Kasten<br/><em>Over Time</em></h1>
       <p class="hero__blurb">
-        Modules 01 to 03 got you from the Veeam Data Platform concept bridge, through the Kubernetes vocabulary, to a deployed and configured Veeam Kasten for Kubernetes instance. This module is about the year after that: keeping Veeam Kasten current as its own release train and the cluster's Kubernetes version both move, watching the platform's health rather than only the workloads it protects, knowing where the logs and diagnostics live before you need them, and making sure the thing that protects everything else is itself protected. Same instincts you already have as a Veeam Data Platform administrator — patch, watch, back up the configuration — pointed at a system that lives inside the cluster it protects.
+        Modules 01 to 03 left you with a deployed, configured Veeam Kasten for Kubernetes instance. This module is the year after that: keeping it current, watching its health, and protecting the protector itself — the same patch-watch-back-up instincts you run today, pointed at a system that lives inside the cluster it protects.
       </p>
       <div class="hero__meta">
         <div><strong>5 sections</strong><br/>plus a knowledge check</div>
@@ -80,12 +80,12 @@
     <span class="eyebrow">Overview · 01</span>
     <h2>Day two: you now own the protector</h2>
     <p class="lede">
-      This section maps the maintenance routine you already run for Veeam Data Platform onto Veeam Kasten, so the rest of the module has somewhere to attach. By the end of it you'll be able to name the Veeam Kasten equivalent of patching, job-health checking, and configuration backup — and say where each parallel stops being useful.
+      This section maps your Veeam Data Platform maintenance routine onto Veeam Kasten: the equivalent of patching, job-health checking, and configuration backup — and where each parallel stops being useful.
     </p>
 
     <div class="prose">
-      <p>As a Veeam Data Platform administrator you have a rhythm. You patch the backup server on a schedule you control. You open the console in the morning and read job sessions. You keep a configuration backup, because the catalog of what you protect is worth more than any single restore point. Veeam Kasten asks for the same three habits, in a different shape: the product is a set of services running <em>inside</em> the cluster it protects, upgraded with the same Helm release you installed it with, observed through metrics rather than a console you keep open, and protected by a policy it creates for itself.</p>
-      <p>Two differences change the calendar more than anything else in this module. First, cadence: Veeam Kasten ships far more frequently than a Veeam Data Platform release cycle — the product documentation's own maintenance guidance is to always upgrade and not stay on an outdated version for comfort, noting releases every two weeks [Src: Kasten Docs 9.0.2 p.1093]. Second, the floor moves: Veeam Kasten supports a defined list of Kubernetes and OpenShift versions and does not support distribution versions that are no longer actively supported by their vendor or community [Src: Kasten Docs 9.0.2 p.861], so a cluster upgrade you do not own can put your backup platform out of support.</p>
+      <p>As a Veeam Data Platform administrator you have a rhythm: patch on your schedule, read job sessions in the morning, keep a configuration backup. Veeam Kasten asks for the same three habits in a different shape — a set of services running <em>inside</em> the cluster it protects, upgraded with the Helm release you installed, observed through metrics rather than an open console, and protected by a policy it creates for itself.</p>
+      <p>Two differences change the calendar. Cadence: Veeam Kasten ships far more frequently than Veeam Data Platform — the maintenance guidance is to always upgrade, noting releases every two weeks. And the floor moves: distribution versions no longer actively supported by their vendor or community are not supported by Veeam Kasten either, so a cluster upgrade you do not own can put your backup platform out of support.</p>
     </div>
 
     <div class="compare">
@@ -99,7 +99,7 @@
           </div>
           <div class="card-dark__row">
             <span class="card-dark__idx">02</span>
-            <div><strong>The catalog is the product.</strong><br/><span>Restore points are only useful while something knows they exist. Veeam Kasten Disaster Recovery exists to protect that catalog, and catalog storage space is also what gates your upgrades [Src: Kasten Docs 9.0.2 p.1093].</span></div>
+            <div><strong>The catalog is the product.</strong><br/><span>Restore points are only useful while something knows they exist — the catalog is that something: Veeam Kasten's own record of every restore point, policy, and action, playing the role the configuration database plays for a Veeam Backup &amp; Replication server. Veeam Kasten Disaster Recovery exists to protect that catalog, and catalog storage space is also what gates your upgrades.</span></div>
           </div>
         </div>
       </div>
@@ -110,23 +110,23 @@
       <tbody>
         <tr>
           <td>Patch the backup server, then upgrade components</td>
-          <td data-label="The Veeam Kasten equivalent">Upgrade the Helm release in the Veeam Kasten namespace, reusing your current values [Src: Kasten Docs 9.0.2 p.199]</td>
-          <td data-label="Where the parallel breaks">Two constraints have no console equivalent: upgrades are supported across a maximum of four versions, and at least 50% free space is required in catalog storage [Src: Kasten Docs 9.0.2 p.198]</td>
+          <td data-label="The Veeam Kasten equivalent">Upgrade the Helm release in the Veeam Kasten namespace, reusing your current values</td>
+          <td data-label="Where the parallel breaks">Two constraints have no console equivalent: a four-version maximum per upgrade, and at least 50% free space in catalog storage</td>
         </tr>
         <tr>
           <td>Read job sessions in the console each morning</td>
-          <td data-label="The Veeam Kasten equivalent">Read the dashboard's compliance states, then the action metrics behind them [Src: Kasten Docs 9.0.2 p.301, p.748]</td>
-          <td data-label="Where the parallel breaks">Alerting is something you wire up: Veeam Kasten exposes a Prometheus endpoint for a central system to extract data from [Src: Kasten Docs 9.0.2 p.746]</td>
+          <td data-label="The Veeam Kasten equivalent">Read the dashboard's compliance states, then the action metrics behind them</td>
+          <td data-label="Where the parallel breaks">Alerting is something you wire up: Veeam Kasten exposes a Prometheus endpoint for a central system to extract data from</td>
         </tr>
         <tr>
           <td>Keep a configuration backup of the backup server</td>
-          <td data-label="The Veeam Kasten equivalent">Enable the Veeam Kasten Disaster Recovery (KDR) policy, which backs up Veeam Kasten's own resources and catalog to a location profile [Src: Kasten Docs 9.0.2 p.565, p.571]</td>
-          <td data-label="Where the parallel breaks">Recovery depends on a passphrase you stored and a location profile configured on the target cluster [Src: Kasten Docs 9.0.2 p.571, p.572]</td>
+          <td data-label="The Veeam Kasten equivalent">Enable the Veeam Kasten Disaster Recovery (KDR) policy, which backs up Veeam Kasten's own resources and catalog to a location profile</td>
+          <td data-label="Where the parallel breaks">Recovery depends on a passphrase you stored and a location profile configured on the target cluster</td>
         </tr>
         <tr>
           <td>Watch repositories for space and stale data</td>
-          <td data-label="The Veeam Kasten equivalent">Let the garbage collector clean up resources that are orphaned or past their expiration period [Src: Kasten Docs 9.0.2 p.839]</td>
-          <td data-label="Where the parallel breaks">Retiring a restore point does not always free space right away, and deduplication can make the reclamation minimal [Src: Kasten Docs 9.0.2 p.365]</td>
+          <td data-label="The Veeam Kasten equivalent">Let the garbage collector clean up resources that are orphaned or past their expiration period</td>
+          <td data-label="Where the parallel breaks">Retiring a restore point does not always free space right away, and deduplication can make the reclamation minimal</td>
         </tr>
       </tbody>
     </table>
@@ -135,7 +135,7 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
       <div class="note__body">
         <div class="note__label">Remember</div>
-        <p>Three of the four day-two duties in that table — upgrades, dashboard health, and catalog protection — all touch catalog storage. If you take one number away from this module, take 50%: the free space Veeam Kasten needs in catalog storage for upgrades [Src: Kasten Docs 9.0.2 p.1093].</p>
+        <p>Three of the four duties above — upgrades, dashboard health, catalog protection — touch catalog storage. If you take one number from this module, take 50%: the free space Veeam Kasten needs in catalog storage for upgrades.</p>
       </div>
     </div>
 
@@ -153,13 +153,13 @@
     <span class="eyebrow">Upgrades · 02</span>
     <h2>Upgrading Veeam Kasten, and keeping pace with the cluster</h2>
     <p class="lede">
-      This section gives you the upgrade rules, the command that performs the upgrade, and a planner you can use to decide whether your instance is one hop or several hops from current. It also covers the version support you do not control: the Kubernetes and OpenShift releases underneath you.
+      The upgrade rules, the command that performs the upgrade, and a planner for deciding whether you are one hop or several from current — plus the version floor you do not control: the Kubernetes and OpenShift releases underneath you.
     </p>
 
     <h3>The two rules that decide your upgrade plan</h3>
     <div class="prose">
-      <p>Veeam Kasten upgrades are supported across a maximum of four versions (for example, 2.0.10 to 2.0.14). If your instance is further behind, a step upgrade process is recommended, using the <code>--version</code> flag with <code>helm upgrade</code> to control the version jumps — and at least 50% free space is required in catalog storage [Src: Kasten Docs 9.0.2 p.198].</p>
-      <p>You do not have to work the arithmetic out by hand. You can verify available catalog free space and see your recommended upgrade path from the System Information page under the Settings menu in the navigation sidebar [Src: Kasten Docs 9.0.2 p.198]. From a terminal you can ask the same question with <code>k10tools</code> — get the binary before you need it, since it is a separate download rather than something the Helm chart installs for you: Veeam Kasten publishes <code>k10tools</code> for Linux, macOS, and Windows, and the current release is linked from the Veeam Kasten Tools page in the product documentation [Src: Kasten Docs 9.0.2 p.866]. Its <code>k10tools primer upgrade</code> sub-command finds the recommended upgrade path for your version and checks there is adequate space, for Helm deployments — and it requires internet access to <code>gcr.io</code>, so on a restricted or air-gapped cluster the System Information page is the route that still works [Src: Kasten Docs 9.0.2 p.872].</p>
+      <p>Veeam Kasten upgrades are supported across a maximum of four versions (for example, 2.0.10 to 2.0.14). If your instance is further behind, a step upgrade process is recommended, using the <code>--version</code> flag with <code>helm upgrade</code> to control the version jumps — and at least 50% free space is required in catalog storage.</p>
+      <p>You do not have to work the arithmetic out by hand: the System Information page (Settings menu, navigation sidebar) shows catalog free space and your recommended upgrade path. From a terminal, <code>k10tools primer upgrade</code> finds the recommended path and checks there is adequate space, for Helm deployments — it requires internet access to <code>gcr.io</code>, so on an air-gapped cluster use the System Information page instead. Download <code>k10tools</code> before you need it: it ships separately for Linux, macOS, and Windows, linked from the Veeam Kasten Tools page.</p>
     </div>
 
     <div class="code-block">
@@ -174,13 +174,13 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">Catalog space is the constraint people trip over</div>
-        <p>A release may perform a catalog schema upgrade, and the schema upgrade requires at least 50% of free space in the <code>catalog-pv-claim</code> persistent volume — the claim's size may need to be increased first. Available catalog storage space is visible in the dashboard under Settings &gt; System Information &gt; Upgrade Status [Src: Kasten Docs 9.0.2 p.1097].</p>
+        <p>A release may perform a catalog schema upgrade, which requires at least 50% of free space in the <code>catalog-pv-claim</code> persistent volume — the claim's size may need increasing first. The figure is in the dashboard under Settings &gt; System Information &gt; Upgrade Status.</p>
       </div>
     </div>
 
     <h3>The upgrade itself</h3>
     <div class="prose">
-      <p>An upgrade is a Helm upgrade of the release you installed, run against the namespace you installed into — the documented example assumes the <code>kasten-io</code> namespace and the release name <code>k10</code> [Src: Kasten Docs 9.0.2 p.199]. The documented sequence refreshes the chart repository, captures your current values, and upgrades using them, so your configuration survives the upgrade [Src: Kasten Docs 9.0.2 p.200].</p>
+      <p>An upgrade is a Helm upgrade of the release you installed — the documented example assumes the <code>kasten-io</code> namespace and release name <code>k10</code>. The sequence refreshes the chart repository, captures your current values, and upgrades using them, so your configuration survives.</p>
     </div>
 
     <div class="code-block">
@@ -194,7 +194,7 @@
     </div>
 
     <div class="prose">
-      <p>For a step upgrade, the same sequence carries a pinned version — this is the form the upgrade primer prints as its recommended upgrade path, with the target release on the end [Src: Kasten Docs 9.0.2 p.872].</p>
+      <p>For a step upgrade, the same sequence carries a pinned version — this is the form the upgrade primer prints as its recommended upgrade path, with the target release on the end.</p>
     </div>
 
     <div class="code-block">
@@ -211,9 +211,27 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">Heads up</div>
-        <p>Read the Upgrade Notes for every release you pass through, not only the one you land on — that is where the breaking details live. Recent examples: an <code>app_namespace</code> label was added to per-application metrics, so Prometheus queries that pin the exact label set may need updating [Src: Kasten Docs 9.0.2 p.1097]; metrics sourced through Red Hat ACM Observability moved from <code>cluster_id</code> to <code>cluster_uid</code>, so dashboards and alert rules filtering on the old label need changing [Src: Kasten Docs 9.0.2 p.1099]; and policy, profile, and action names became limited to 63 characters, with names above that rejected at creation time [Src: Kasten Docs 9.0.2 p.1099]. If Generic Storage Backup is in use and a new Kanister-tools image ships, extra steps may be needed to update the Kanister sidecar image [Src: Kasten Docs 9.0.2 p.200].</p>
+        <p>Read the Upgrade Notes for every release you pass through, not only the one you land on — that is where the breaking details live. If Generic Storage Backup is in use and a new Kanister-tools image ships, extra steps may be needed to update the Kanister sidecar image.</p>
       </div>
     </div>
+
+    <table class="data-table">
+      <thead><tr><th scope="col">Recent Upgrade Notes example</th><th scope="col">What breaks if you skip it</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>An <code>app_namespace</code> label was added to per-application metrics</td>
+          <td data-label="What breaks if you skip it">Prometheus queries that pin the exact label set may need updating</td>
+        </tr>
+        <tr>
+          <td>Metrics sourced through Red Hat ACM Observability moved from <code>cluster_id</code> to <code>cluster_uid</code></td>
+          <td data-label="What breaks if you skip it">Dashboards and alert rules filtering on the old label need changing</td>
+        </tr>
+        <tr>
+          <td>Policy, profile, and action names became limited to 63 characters</td>
+          <td data-label="What breaks if you skip it">Names above that are rejected at creation time</td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- Bespoke interactive: upgrade-path planner. Built from kit primitives
          (.widget, .decision__btn, .simoutput) with its own small guarded
@@ -222,7 +240,7 @@
     <div class="widget" id="upgradePlanner">
       <div class="widget__tag"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg>Try it · upgrade-path planner</div>
       <h3>Is your instance one hop from current, or several?</h3>
-      <p class="widget__lede">Answer both questions the way your cluster looks today, then plan the upgrade. The planner applies only the two documented rules: the four-version support window and the catalog free-space requirement [Src: Kasten Docs 9.0.2 p.198].</p>
+      <p class="widget__lede">Answer both questions as your cluster looks today. The planner applies only the two documented rules: the four-version support window and the catalog free-space requirement.</p>
 
       <div class="planner__row">
         <div class="decision__title">1 · How many releases behind the target version are you?</div>
@@ -255,27 +273,27 @@
 
     <h3>Keeping pace with Kubernetes</h3>
     <div class="prose">
-      <p>The other half of staying current is the platform underneath. Veeam Kasten publishes the certified Kubernetes distributions and respective OpenShift versions it supports, and does not support distribution versions that are no longer actively supported by their vendor or community [Src: Kasten Docs 9.0.2 p.861]. A single Veeam Kasten release can move both ends of that list: release 8.5.9 added support for Kubernetes 1.34 [Src: Kasten Docs 9.0.2 p.1098] and, in the same release, removed support for Kubernetes 1.30 while OpenShift 4.17 clusters continued to be supported [Src: Kasten Docs 9.0.2 p.1099].</p>
+      <p>The other half of staying current is the platform underneath: Veeam Kasten publishes the certified Kubernetes distributions and respective OpenShift versions it supports. A single release can move both ends of that list — 8.5.9 added support for Kubernetes 1.34 and removed support for Kubernetes 1.30, while OpenShift 4.17 clusters continued to be supported.</p>
     </div>
 
     <table class="data-table">
       <thead><tr><th scope="col">Kubernetes</th><th scope="col">Red Hat OpenShift</th><th scope="col">Notes</th></tr></thead>
       <tbody>
-        <tr><td>1.34</td><td data-label="Red Hat OpenShift">4.21</td><td data-label="Notes">Supported [Src: Kasten Docs 9.0.2 p.862]</td></tr>
-        <tr><td>1.33</td><td data-label="Red Hat OpenShift">4.20</td><td data-label="Notes">Supported [Src: Kasten Docs 9.0.2 p.862]</td></tr>
-        <tr><td>1.32</td><td data-label="Red Hat OpenShift">4.19</td><td data-label="Notes">Supported [Src: Kasten Docs 9.0.2 p.862]</td></tr>
-        <tr><td>1.31</td><td data-label="Red Hat OpenShift">4.18</td><td data-label="Notes">Supported [Src: Kasten Docs 9.0.2 p.862]</td></tr>
-        <tr><td>1.30</td><td data-label="Red Hat OpenShift">4.17</td><td data-label="Notes">Kubernetes version <em>only</em> supported when deployed as an OpenShift cluster [Src: Kasten Docs 9.0.2 p.862]</td></tr>
-        <tr><td>1.29</td><td data-label="Red Hat OpenShift">4.16</td><td data-label="Notes">Kubernetes version <em>only</em> supported when deployed as an OpenShift cluster [Src: Kasten Docs 9.0.2 p.862]</td></tr>
+        <tr><td>1.34</td><td data-label="Red Hat OpenShift">4.21</td><td data-label="Notes">Supported</td></tr>
+        <tr><td>1.33</td><td data-label="Red Hat OpenShift">4.20</td><td data-label="Notes">Supported</td></tr>
+        <tr><td>1.32</td><td data-label="Red Hat OpenShift">4.19</td><td data-label="Notes">Supported</td></tr>
+        <tr><td>1.31</td><td data-label="Red Hat OpenShift">4.18</td><td data-label="Notes">Supported</td></tr>
+        <tr><td>1.30</td><td data-label="Red Hat OpenShift">4.17</td><td data-label="Notes">Kubernetes version <em>only</em> supported when deployed as an OpenShift cluster</td></tr>
+        <tr><td>1.29</td><td data-label="Red Hat OpenShift">4.16</td><td data-label="Notes">Kubernetes version <em>only</em> supported when deployed as an OpenShift cluster</td></tr>
       </tbody>
     </table>
-    <p class="caption">Source: Veeam Kasten 9.0.2 user guide, p.862. Check the matrix in the guide for the release you are running before you plan a cluster upgrade.</p>
+    <p class="caption">Check the matrix in the guide for the release you are running before you plan a cluster upgrade.</p>
 
     <div class="note note--tip">
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
       <div class="note__body">
         <div class="note__label">Pro tip</div>
-        <p>Put the cluster's Kubernetes upgrade on the same calendar as the Veeam Kasten upgrade, and sequence them deliberately. Veeam Kasten supports a published list of Kubernetes and OpenShift versions and does not support distribution versions that are no longer actively supported by their vendor or community [Src: Kasten Docs 9.0.2 p.861, p.862], and a single release can add one version and remove another [Src: Kasten Docs 9.0.2 p.1098, p.1099] — so if the platform team moves the cluster first, your options narrow to whichever Veeam Kasten release supports the new version, while upgrading Veeam Kasten first keeps the choice. This is the coordination cost a Veeam Data Platform administrator does not carry when the backup server owns its own Windows host. Put a name on it: agree with the platform team, in writing, who has to sign off before a cluster upgrade proceeds if it would drop the running Veeam Kasten release out of the supported matrix — otherwise the backup platform loses support status by nobody's decision.</p>
+        <p>Put the cluster's Kubernetes upgrade on the same calendar as the Veeam Kasten upgrade: a single release can add one supported version and remove another. If the platform team moves first, your options narrow to whichever release supports the new version; moving Veeam Kasten first keeps the choice. Agree in writing who signs off on any cluster upgrade that would drop the running release out of the supported matrix — the published list of certified Kubernetes and OpenShift versions — otherwise the backup platform loses support by nobody's decision.</p>
       </div>
     </div>
 
@@ -293,26 +311,25 @@
     <span class="eyebrow">Monitoring · 03</span>
     <h2>Watching Veeam Kasten itself</h2>
     <p class="lede">
-      This section takes you from the morning glance to the support case: the three layers of monitoring available to you, the alerts worth creating first, and the order to gather diagnostics in when something looks wrong.
+      From the morning glance to the support case: three layers of monitoring, the alerts worth creating first, and the order to gather diagnostics in when something looks wrong.
     </p>
 
     <h3>Layer one: the dashboard</h3>
     <div class="prose">
-      <p>The top of the Veeam Kasten dashboard shows the applications on the cluster, the policies that exist, and a summary of the cluster's backup data footprint [Src: Kasten Docs 9.0.2 p.301]. Filtered to applications with stateful services, each is placed in one of four states — the closest thing here to your morning read of job sessions [Src: Kasten Docs 9.0.2 p.301].</p>
+      <p>The top of the dashboard shows the cluster's applications, its policies, and a summary of the backup data footprint. Filtered to applications with stateful services, each lands in one of four states — the closest thing here to your morning read of job sessions.</p>
     </div>
 
     <div class="best">
-      <div class="best-item"><h4>Unmanaged</h4><p>No protection policy covers this object [Src: Kasten Docs 9.0.2 p.301].</p></div>
-      <div class="best-item"><h4>Non-compliant</h4><p>A policy applies, but its actions are failing or have not been invoked yet — for example, right after policy creation [Src: Kasten Docs 9.0.2 p.301].</p></div>
-      <div class="best-item"><h4>Compliant</h4><p>A policy applies and its service-level agreements (SLAs) are being respected [Src: Kasten Docs 9.0.2 p.301].</p></div>
-      <div class="best-item"><h4>Removed</h4><p>Objects that no longer exist on the cluster; filter to this state to find a removed application and restore it [Src: Kasten Docs 9.0.2 p.301, p.397].</p></div>
+      <div class="best-item"><h4>Unmanaged</h4><p>No protection policy covers this object.</p></div>
+      <div class="best-item"><h4>Non-compliant</h4><p>A policy applies, but its actions are failing or have not been invoked yet — for example, right after policy creation.</p></div>
+      <div class="best-item"><h4>Compliant</h4><p>A policy applies and its service-level agreements (SLAs) are being respected.</p></div>
+      <div class="best-item"><h4>Removed</h4><p>Objects that no longer exist on the cluster; filter to this state to find a removed application and restore it.</p></div>
     </div>
 
     <h3>Layer two: the built-in Prometheus instance</h3>
     <div class="prose">
-      <p>Veeam Kasten enables centralized monitoring of its activity by integrating with Prometheus, exposing a Prometheus endpoint that a central system can extract data from [Src: Kasten Docs 9.0.2 p.746]. The built-in instance is configured by default with persistent storage of 8Gi and a retention period of 30d, changeable through the <code>prometheus.server.persistentVolume.size</code> and <code>prometheus.server.retention</code> Helm values [Src: Kasten Docs 9.0.2 p.746].</p>
-      <p>Leave that server enabled. Disabling it reduces functionality in various parts of the system, including usage data, reporting, and the multi-cluster dashboard; if it has been disabled, it can be re-enabled during a Helm upgrade with <code>--set prometheus.server.enabled=true</code> [Src: Kasten Docs 9.0.2 p.763].</p>
-      <p>Action metrics are the ones you will query first. Veeam Kasten records counts for cluster and application-specific actions, labels them with the action's context, and includes the final status as <code>state</code> for ended actions — with an action's state reported as values including <code>pending</code>, <code>running</code>, <code>attempt_failed</code>, <code>failed</code>, <code>succeeded</code>, <code>cancelled</code>, <code>skipped</code>, and <code>deleting</code> [Src: Kasten Docs 9.0.2 p.748].</p>
+      <p>Veeam Kasten integrates with Prometheus, exposing an endpoint a central system can extract data from; the built-in instance defaults to 8Gi of persistent storage and a 30d retention period, changeable through the <code>prometheus.server.persistentVolume.size</code> and <code>prometheus.server.retention</code> Helm values. Leave that server enabled — disabling it reduces functionality including usage data, reporting, and the multi-cluster dashboard, and it can be re-enabled during a Helm upgrade with <code>--set prometheus.server.enabled=true</code>.</p>
+      <p>Action metrics are the ones you will query first: Veeam Kasten records counts for cluster and application-specific actions, labels them with the action's context, and includes the final status as <code>state</code> for ended actions — values including <code>pending</code>, <code>running</code>, <code>attempt_failed</code>, <code>failed</code>, <code>succeeded</code>, <code>cancelled</code>, <code>skipped</code>, and <code>deleting</code>.</p>
     </div>
 
     <div class="code-block">
@@ -323,22 +340,22 @@
       <pre><code>sum(round(increase(action_ended_total{action="backup",state="succeeded"}[24h])))</code></pre>
     </div>
 
-    <p class="caption">Read it as: how many backup actions finished successfully in the last 24 hours. <code>action_ended_total</code> is the metric name; the curly braces filter to backup actions that succeeded; <code>[24h]</code> is the lookback window; <code>increase</code> counts how many happened inside it; <code>sum</code> and <code>round</code> collapse that down to one tidy number.</p>
+    <p class="caption">Read it as: how many backup actions finished successfully in the last 24 hours — <code>action_ended_total</code> is the metric, the braces filter to successful backups, <code>[24h]</code> is the lookback window, and <code>increase</code>, <code>sum</code>, and <code>round</code> collapse it to one number.</p>
 
     <div class="prose">
-      <p>Swap the labels and you have the query that matters more: <code>sum(round(increase(action_ended_total{action="restore",state="failed"}[1h])))</code> returns failed restores in the past hour [Src: Kasten Docs 9.0.2 p.748].</p>
+      <p>Swap the labels and you have the query that matters more: <code>sum(round(increase(action_ended_total{action="restore",state="failed"}[1h])))</code> returns failed restores in the past hour.</p>
     </div>
 
     <h3>Layer three: your existing monitoring stack</h3>
     <div class="prose">
-      <p>Metrics can leave the cluster two ways: Prometheus remote write pushes them to remote Prometheus-compatible endpoints such as Grafana, Datadog, or Thanos, and external Prometheus integration has an outside Prometheus instance scrape the built-in server — remote write is documented as the recommended route for most use cases [Src: Kasten Docs 9.0.2 p.754]. Grafana then visualizes what Prometheus collected, and alerts fire when metrics cross the levels you care about [Src: Kasten Docs 9.0.2 p.1093]. In most organizations that central Prometheus/Grafana stack belongs to a platform or observability team rather than the backup team — name who owns wiring the two alerts this module recommends (failed actions, catalog space over 50%) before you assume they already exist.</p>
+      <p>Metrics leave the cluster two ways: Prometheus remote write pushes them to Prometheus-compatible endpoints such as Grafana, Datadog, or Thanos — the recommended route for most use cases — or an external Prometheus scrapes the built-in server. Grafana visualizes what Prometheus collected; alerts fire when metrics cross your thresholds. That stack usually belongs to a platform or observability team — name who owns wiring the two alerts below before you assume they exist.</p>
     </div>
 
     <div class="note note--fact">
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg></span>
       <div class="note__body">
         <div class="note__label">The two alerts to create first</div>
-        <p>The product's own guidance is to create alerts for any actions where <code>state=failed</code>, and for Catalog Volume Used Space &gt; 50%, because that condition could impact Veeam Kasten upgrades [Src: Kasten Docs 9.0.2 p.1093]. The second one is the link back to Section 02: the alert that protects your upgrade window. For version tracking from an external monitor, the <code>k10_build_info</code> Prometheus gauge metric exposes the running Veeam Kasten version as a label [Src: Kasten Docs 9.0.2 p.1099].</p>
+        <p>The product's own guidance: alert on any actions where <code>state=failed</code>, and on Catalog Volume Used Space &gt; 50%, because that condition could impact Veeam Kasten upgrades. The second is the alert that protects your upgrade window from Section 02. For version tracking, the <code>k10_build_info</code> Prometheus gauge metric exposes the running version as a label.</p>
       </div>
     </div>
 
@@ -352,27 +369,27 @@
           <li class="stepper__step">
             <span class="stepper__num" aria-hidden="true">1</span>
             <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="diag0"><span class="stepper__title">Start on the dashboard</span><span class="stepper__chev" aria-hidden="true"></span></button>
-            <div class="stepper__detail" id="diag0" role="region"><p>Confirm which actions are failing and on which applications, using the compliance states and the action list. A non-compliant application tells you a policy's actions are failing or have not run yet [Src: Kasten Docs 9.0.2 p.301].</p></div>
+            <div class="stepper__detail" id="diag0" role="region"><p>Confirm which actions are failing and on which applications, using the compliance states and the action list. A non-compliant application tells you a policy's actions are failing or have not run yet.</p></div>
           </li>
           <li class="stepper__step">
             <span class="stepper__num" aria-hidden="true">2</span>
             <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="diag1"><span class="stepper__title">Download the support logs from the dashboard</span><span class="stepper__chev" aria-hidden="true"></span></button>
-            <div class="stepper__detail" id="diag1" role="region"><p>Admin users running 4.5.7 or later can get support logs from the System Information page under the Settings menu in the navigation sidebar — no terminal required [Src: Kasten Docs 9.0.2 p.862].</p></div>
+            <div class="stepper__detail" id="diag1" role="region"><p>Admin users running 4.5.7 or later can get support logs from the System Information page under the Settings menu in the navigation sidebar — no terminal required.</p></div>
           </li>
           <li class="stepper__step">
             <span class="stepper__num" aria-hidden="true">3</span>
             <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="diag2"><span class="stepper__title">Run the debug script for a fuller bundle</span><span class="stepper__chev" aria-hidden="true"></span></button>
-            <div class="stepper__detail" id="diag2" role="region"><p>The debug script generates a compressed archive, <code>k10_debug_logs.tar.gz</code>, containing separate log files for the Veeam Kasten services; it assumes your default context points at the cluster and that Veeam Kasten is installed in the <code>kasten-io</code> namespace, and option flags exist for a different namespace or output file [Src: Kasten Docs 9.0.2 p.862]. It can also gather metrics from the Prometheus server installed by Veeam Kasten when you pass <code>--prom-duration</code>; the duration drives the size of the captured data, and <code>--prom-metrics-only</code> separates metric collection from log collection [Src: Kasten Docs 9.0.2 p.862, p.863].</p></div>
+            <div class="stepper__detail" id="diag2" role="region"><p>The debug script generates <code>k10_debug_logs.tar.gz</code> with separate log files per Veeam Kasten service; it assumes your default context points at the cluster and the <code>kasten-io</code> namespace, with flags for a different namespace or output file. <code>--prom-duration</code> also gathers metrics from the built-in Prometheus server (duration drives size); <code>--prom-metrics-only</code> separates metric from log collection.</p></div>
           </li>
           <li class="stepper__step">
             <span class="stepper__num" aria-hidden="true">4</span>
             <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="diag3"><span class="stepper__title">Check the platform's own plumbing with k10tools</span><span class="stepper__chev" aria-hidden="true"></span></button>
-            <div class="stepper__detail" id="diag3" role="region"><p>The <code>k10tools</code> binary has commands that help validate whether a cluster is set up correctly before installing Veeam Kasten and debug the Veeam Kasten micro services [Src: Kasten Docs 9.0.2 p.864]. Storage class validation is available the same way, and admin users can validate storage classes from the System Information page of the Settings menu — the state "Unknown" is shown until validation is run [Src: Kasten Docs 9.0.2 p.864].</p></div>
+            <div class="stepper__detail" id="diag3" role="region"><p>The <code>k10tools</code> binary has commands that help validate whether a cluster is set up correctly before installing Veeam Kasten and debug the Veeam Kasten micro services. Admin users can also validate storage classes from the System Information page — the state "Unknown" is shown until validation is run.</p></div>
           </li>
           <li class="stepper__step">
             <span class="stepper__num" aria-hidden="true">5</span>
             <button type="button" class="stepper__btn" aria-expanded="false" aria-controls="diag4"><span class="stepper__title">Open the case with the bundle attached</span><span class="stepper__chev" aria-hidden="true"></span></button>
-            <div class="stepper__detail" id="diag4" role="region"><p>Support runs through Veeam Kasten Community Support or a case opened at the Veeam customer portal [Src: Kasten Docs 9.0.2 p.861]. Collecting the bundle first is what turns a case into a diagnosis instead of a request for logs.</p></div>
+            <div class="stepper__detail" id="diag4" role="region"><p>Support runs through Veeam Kasten Community Support or a case opened at the Veeam customer portal; collecting the bundle first turns a case into a diagnosis instead of a request for logs. Before the case goes in, check the Veeam knowledge base filtered to Veeam Kasten (veeam.com/knowledge-base.html) — searching the exact error text often ends the incident there — and the Veeam Kasten support group on the Veeam Community Resource Hub (community.veeam.com).</p></div>
           </li>
         </ol>
       </div>
@@ -385,7 +402,27 @@
       </div>
       <pre><code>curl -s https://docs.kasten.io/downloads/9.0.2/tools/k10_debug.sh | bash;</code></pre>
     </div>
-    <p class="caption">Source: Veeam Kasten 9.0.2 user guide, p.862. The collected logs also contain a Prometheus health-check section with a curated set of metrics for evaluating the storage and retention health of the Prometheus instance [Src: Kasten Docs 9.0.2 p.863].</p>
+    <p class="caption">The bundle also includes a Prometheus health-check section — curated metrics for the instance's storage and retention health.</p>
+
+    <h4>The two kubectl verbs under all of it</h4>
+    <p class="prose">Every step above eventually rests on two generic Kubernetes commands — cluster tooling, not Veeam Kasten features — that map onto triage instincts you already have.</p>
+
+    <table class="data-table">
+      <thead><tr><th scope="col">The command</th><th scope="col">The question it answers</th><th scope="col">Your existing instinct</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>kubectl get pods</code></td>
+          <td data-label="The question it answers">"Is it running?" — one line of live state per pod, the same view the install walkthrough had you watch in Module 03.</td>
+          <td data-label="Your existing instinct">Scanning the job monitor for red before reading anything else.</td>
+        </tr>
+        <tr>
+          <td><code>kubectl describe</code> <em>on the stuck pod</em></td>
+          <td data-label="The question it answers">"Why is it broken?" — full detail for one resource, ending in an Events list that records what last went wrong (a failed image pull, an unschedulable pod, a failed mount).</td>
+          <td data-label="Your existing instinct">Opening the job's log after the monitor showed red — evidence first, changes second.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="caption">Every escalation path above assumes you can answer these two questions before the case is opened. A copyable form of the second: <em>kubectl describe pod &lt;pod-name&gt; --namespace kasten-io</em> — take the pod name from the kubectl get pods output. A third verb, <em>kubectl explain</em>, prints the cluster API's own documentation for any resource field — useful later, once you express policies as code.</p>
 
     <div class="continue" data-continue>
       <button class="continue__btn" type="button">Continue
@@ -401,19 +438,19 @@
     <span class="eyebrow">Protecting the catalog · 04</span>
     <h2>Who backs up the backup system?</h2>
     <p class="lede">
-      This is the section your director or CISO will ask about first. By the end of it you'll be able to explain what Veeam Kasten Disaster Recovery protects, choose a mode based on what your storage can do, and describe the recovery path from an empty cluster back to a working catalog.
+      The section your director or CISO will ask about first: what Veeam Kasten Disaster Recovery protects, which mode fits your storage, and the recovery path from an empty cluster back to a working catalog.
     </p>
 
     <div class="prose">
-      <p>Veeam Kasten is a stateful application running on the cluster, so it must be responsible for backing up its own data to enable recovery in the event of disaster — the backup enabled by the Veeam Kasten Disaster Recovery (KDR) policy [Src: Kasten Docs 9.0.2 p.565]. KDR provides the ability to recover the Veeam Kasten platform from a variety of disasters: unintended deletion of Veeam Kasten or its restore points, failure of the underlying storage used by Veeam Kasten, or accidental destruction of the Kubernetes cluster Veeam Kasten is deployed on [Src: Kasten Docs 9.0.2 p.565]. The API exposes the same capability as a <em>KastenDR</em> object, whose resources fetch the list of available KDR restore points and restore an instance from one [Src: Kasten Docs 9.0.2 p.620].</p>
-      <p>The Veeam Data Platform parallel is configuration backup, and it holds up well: both protect the metadata that makes restore points findable, both are scheduled, and both are worthless if you cannot decrypt them. Where it breaks is the dependency list. The guide is blunt about what to retain after enabling KDR, without which restore point catalog recovery will not be possible: the source Cluster ID, the KDR passphrase or the external secret manager details, and the KDR location profile details and credential [Src: Kasten Docs 9.0.2 p.585].</p>
+      <p>Veeam Kasten is a stateful application on the cluster, so it must back up its own data — the job of the Veeam Kasten Disaster Recovery (KDR) policy. KDR recovers the platform from unintended deletion of Veeam Kasten or its restore points, failure of its underlying storage, or accidental destruction of the cluster it is deployed on; the API exposes the same capability as a <em>KastenDR</em> object for listing KDR restore points and restoring from one.</p>
+      <p>The Veeam Data Platform parallel is configuration backup: both are scheduled, both protect the metadata that makes restore points findable, both are worthless if you cannot decrypt them. Where it breaks is the dependency list — after enabling KDR, retain the source Cluster ID, the KDR passphrase or external secret manager details, and the KDR location profile details and credential, without which restore point catalog recovery will not be possible.</p>
     </div>
 
     <figure class="screenshot mt-24">
       <img class="screenshot__img" src="images/named/p0565__Operating_Veeam_Kasten_Veeam_Kasten_Disaster_Recovery_Veeam__2724x1898__249.png" loading="lazy" alt="The Setup Kasten DR page in the Veeam Kasten dashboard, reached from the Settings section of the navigation sidebar, showing a Location Profile selector with an Add New button, a Passphrase Method choice of Passphrase, HashiCorp Vault, or AWS Secrets Manager, a passphrase field, and an Enable Kasten DR button">
       <figcaption class="screenshot__caption">
-        <strong>Where you turn it on.</strong> The Veeam Kasten Disaster Recovery settings are on the Setup Kasten DR page under the Settings menu in the navigation sidebar; you specify a location profile for the exported KDR backups and choose the passphrase method used to encrypt them [Src: Kasten Docs 9.0.2 p.571, p.572]. Note the sidebar: Restore Kasten sits directly below it, which is the page you will use on the far side of a disaster.
-        <span class="screenshot__source">Source: Veeam Kasten 9.0.2 user guide, p.565. ↔ Click the image to view it full size.</span>
+        <strong>Where you turn it on.</strong> On the Setup Kasten DR page, under the Settings menu in the navigation sidebar, you specify a location profile for the exported KDR backups and the passphrase method used to encrypt them. Restore Kasten sits directly below it in the sidebar — the page you will use on the far side of a disaster.
+        <span class="screenshot__source">↔ Click the image to view it full size.</span>
       </figcaption>
     </figure>
 
@@ -421,13 +458,13 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">Two constraints to settle before you enable it</div>
-        <p>Choose a location profile that supports immutable backups — the guide states this strongly, so that restore point catalog data can be recovered in the event of incidents including ransomware and accidental deletion [Src: Kasten Docs 9.0.2 p.571]. And check your intended target: Veeam Repository location profiles cannot be used as a destination for KDR backups [Src: Kasten Docs 9.0.2 p.572]. Passphrase options include a passphrase you supply, HashiCorp Vault, and AWS Secrets Manager [Src: Kasten Docs 9.0.2 p.572]; Azure Key Vault Secrets was added as a passphrase provider for Disaster Recovery, allowing KDR passphrase storage and retrieval from Azure Key Vault [Src: Kasten Docs 9.0.2 p.1103].</p>
+        <p>Choose a location profile that supports immutable backups — the guide states this strongly, so the catalog can be recovered after incidents including ransomware and accidental deletion — and check the target: Veeam Repository location profiles cannot be used as a destination for KDR backups. Passphrase options include a passphrase you supply, HashiCorp Vault, and AWS Secrets Manager, with Azure Key Vault Secrets added as a passphrase provider for Disaster Recovery.</p>
       </div>
     </div>
 
     <h3>Choosing a KDR mode</h3>
     <div class="prose">
-      <p>The KDR mode specifies how internal Veeam Kasten resources are protected. It must be set before enabling the KDR policy, and changes to the mode only apply to future KDR policy runs [Src: Kasten Docs 9.0.2 p.565]. Starting in Veeam Kasten v8.0.0, all installations default to Quick DR (Local Catalog Snapshot) mode — a mode that should only be enabled if the storage provisioner used for Veeam Kasten persistent volume claims supports both creating storage snapshots and restoring the existing volume from one [Src: Kasten Docs 9.0.2 p.565].</p>
+      <p>The KDR mode specifies how internal Veeam Kasten resources are protected; set it before enabling the KDR policy — changes only apply to future runs. From v8.0.0 all installations default to Quick DR (Local Catalog Snapshot), which should only be enabled if the storage provisioner behind Veeam Kasten's persistent volume claims supports both creating storage snapshots and restoring the existing volume from one.</p>
     </div>
 
     <table class="data-table">
@@ -435,38 +472,38 @@
       <tbody>
         <tr>
           <td>Quick DR (Local Catalog Snapshot)</td>
-          <td data-label="Recommended when">Storage used for Veeam Kasten persistent volume claims supports both creating storage snapshots and provisioning a volume from a snapshot [Src: Kasten Docs 9.0.2 p.568]</td>
-          <td data-label="What each policy run does">Creates a local snapshot of the catalog persistent volume claim and incrementally exports only the minimally required catalog data [Src: Kasten Docs 9.0.2 p.568]</td>
+          <td data-label="Recommended when">Storage used for Veeam Kasten persistent volume claims supports both creating storage snapshots and provisioning a volume from a snapshot</td>
+          <td data-label="What each policy run does">Creates a local snapshot of the catalog persistent volume claim and incrementally exports only the minimally required catalog data</td>
         </tr>
         <tr>
           <td>Quick DR (Exported Catalog Snapshot)</td>
-          <td data-label="Recommended when">Storage can create snapshots but cannot provision a volume from one; or you want to reduce local snapshot retention without affecting exported backups. May be selected on any snapshot-capable storage for the highest level of resilience [Src: Kasten Docs 9.0.2 p.568]</td>
-          <td data-label="What each policy run does">Everything the local-snapshot mode does, plus an incremental export of the catalog snapshot data [Src: Kasten Docs 9.0.2 p.568]</td>
+          <td data-label="Recommended when">Storage can create snapshots but cannot provision a volume from one; or you want to reduce local snapshot retention without affecting exported backups. May be selected on any snapshot-capable storage for the highest level of resilience</td>
+          <td data-label="What each policy run does">Everything the local-snapshot mode does, plus an incremental export of the catalog snapshot data</td>
         </tr>
         <tr>
           <td>Quick DR (No Catalog Snapshot)</td>
-          <td data-label="Recommended when">No available cluster storage supports snapshot creation, or there is no requirement to recover local restore points or action history [Src: Kasten Docs 9.0.2 p.569, p.570]</td>
-          <td data-label="What each policy run does">Incrementally exports only the minimally required catalog data; does not support recovery of local restore points and action history [Src: Kasten Docs 9.0.2 p.570]</td>
+          <td data-label="Recommended when">No available cluster storage supports snapshot creation, or there is no requirement to recover local restore points or action history</td>
+          <td data-label="What each policy run does">Incrementally exports only the minimally required catalog data; does not support recovery of local restore points and action history</td>
         </tr>
         <tr>
           <td>Legacy DR</td>
-          <td data-label="Recommended when">Supported for backwards-compatibility only — the mode is deprecated and will be removed in a future release, and all clusters should be migrated to a supported Quick DR configuration [Src: Kasten Docs 9.0.2 p.566, p.567]</td>
-          <td data-label="What each policy run does">Exports a full copy of the catalog database [Src: Kasten Docs 9.0.2 p.567]</td>
+          <td data-label="Recommended when">Supported for backwards-compatibility only — the mode is deprecated and will be removed in a future release, and all clusters should be migrated to a supported Quick DR configuration</td>
+          <td data-label="What each policy run does">Exports a full copy of the catalog database</td>
         </tr>
       </tbody>
     </table>
-    <p class="caption">Quick DR modes protect additional Veeam Kasten resource types compared with Legacy DR, including policy presets, transform sets, blueprint bindings, and basic user policies; reports, action pod specs, and audit configuration are protected by neither [Src: Kasten Docs 9.0.2 p.570]. If your storage cannot take or restore local snapshots, Legacy mode is selected explicitly with the Helm value <code>kastenDisasterRecovery.quickMode.enabled=false</code> [Src: Kasten Docs 9.0.2 p.566].</p>
+    <p class="caption">Quick DR modes protect more resource types than Legacy DR — policy presets, transform sets, blueprint bindings, basic user policies; reports, action pod specs, and audit configuration are protected by neither. Legacy mode is selected explicitly with the Helm value <code>kastenDisasterRecovery.quickMode.enabled=false</code>.</p>
 
     <h3>The policy KDR creates for you</h3>
     <div class="prose">
-      <p>Enabling KDR creates a dedicated policy that backs up Veeam Kasten's resources and catalog data to an external location profile [Src: Kasten Docs 9.0.2 p.571]. That policy is named <code>k10-disaster-recovery-policy</code>, is created automatically when KDR is enabled, and can be viewed through the Policies page in the navigation sidebar; Run Once starts a manual backup, and Edit changes the frequency and retention [Src: Kasten Docs 9.0.2 p.587]. The frequency guidance is worth writing down: the KDR policy should match the frequency of the lowest recovery point objective (RPO) policy on the cluster [Src: Kasten Docs 9.0.2 p.587].</p>
+      <p>Enabling KDR automatically creates <code>k10-disaster-recovery-policy</code>, which backs up Veeam Kasten's resources and catalog data to an external location profile. It appears on the Policies page; Run Once starts a manual backup, Edit changes frequency and retention. Match its frequency to the lowest recovery point objective (RPO) policy on the cluster.</p>
     </div>
 
     <figure class="screenshot mt-24">
       <img class="screenshot__img" src="images/named/p0565__Operating_Veeam_Kasten_Veeam_Kasten_Disaster_Recovery_Veeam__3446x1908__255.png" loading="lazy" alt="The k10-disaster-recovery-policy detail page in the Veeam Kasten dashboard, tagged Snapshot plus Export in the kasten-io namespace, showing a valid status, an immutable location profile for blueprint actions and export, hourly snapshot and export frequency, a retention schedule of 4 hourly and 1 daily, weekly, monthly and yearly, export durability, and Edit, Edit YAML, Run Once, Pause and Delete controls">
       <figcaption class="screenshot__caption">
-        <strong>The policy you did not create, and should still review.</strong> Frequency and retention are editable, and the location profile shown here is an immutable one [Src: Kasten Docs 9.0.2 p.571, p.587]. If you recognize this layout from your own application policies, that is the point — KDR is a policy like any other, pointed at Veeam Kasten's own namespace.
-        <span class="screenshot__source">Source: Veeam Kasten 9.0.2 user guide, p.565. ↔ Click the image to view it full size.</span>
+        <strong>The policy you did not create, and should still review.</strong> Frequency and retention are editable, and the location profile shown is an immutable one. If the layout looks like your own application policies, that is the point — KDR is a policy like any other, pointed at Veeam Kasten's own namespace.
+        <span class="screenshot__source">↔ Click the image to view it full size.</span>
       </figcaption>
     </figure>
 
@@ -480,35 +517,35 @@
           <div class="flow__node-tag">STAGE 01</div>
           <div class="flow__node-title">Export application backups off-site</div>
           <div class="flow__node-desc">Policies export backups to an off-site location.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 01 — export off-site.</strong> The documented rebuild strategy starts by configuring policies to export backups to an off-site location [Src: Kasten Docs 9.0.2 p.1093]. Without this, KDR recovers a catalog that points at data the surviving site cannot read.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 01 — export off-site.</strong> The documented rebuild strategy starts by configuring policies to export backups to an off-site location. Without this, KDR recovers a catalog that points at data the surviving site cannot read.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="kdrDetail" id="kdrStep1">
           <div class="flow__node-tag">STAGE 02</div>
           <div class="flow__node-title">Enable KDR for the catalog</div>
           <div class="flow__node-desc">The catalog is exported to external storage, encrypted.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 02 — protect the catalog.</strong> Enable Disaster Recovery for Veeam Kasten to export the Veeam Kasten catalog to external storage, using a user-provided passphrase key or third-party management of the secret that encrypts the catalog data [Src: Kasten Docs 9.0.2 p.1093].</div>
+          <div class="flow__node-detail" hidden><strong>Stage 02 — protect the catalog.</strong> Enable Disaster Recovery for Veeam Kasten to export the Veeam Kasten catalog to external storage, using a user-provided passphrase key or third-party management of the secret that encrypts the catalog data.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="kdrDetail" id="kdrStep2">
           <div class="flow__node-tag">STAGE 03</div>
           <div class="flow__node-title">Stand up a new cluster</div>
           <div class="flow__node-desc">A replacement cluster in a second site or the public cloud.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 03 — new cluster.</strong> In the event of a complete cluster or site loss, a new cluster can be deployed in a secondary site or the public cloud [Src: Kasten Docs 9.0.2 p.1093]. This is the stage where the rebuild strategy pays its cost in time — the tradeoff documented against the replicate strategy, which pre-seeds a secondary site instead [Src: Kasten Docs 9.0.2 p.1093].</div>
+          <div class="flow__node-detail" hidden><strong>Stage 03 — new cluster.</strong> In the event of a complete cluster or site loss, a new cluster can be deployed in a secondary site or the public cloud. This is the stage where the rebuild strategy pays its cost in time — the tradeoff documented against the replicate strategy, which pre-seeds a secondary site instead.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="kdrDetail" id="kdrStep3">
           <div class="flow__node-tag">STAGE 04</div>
           <div class="flow__node-title">Redeploy Veeam Kasten and the profile</div>
           <div class="flow__node-desc">Helm install, then a location profile to the off-site repository.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 04 — redeploy.</strong> Veeam Kasten can be redeployed via Helm, and a location profile created to point to the off-site data repository [Src: Kasten Docs 9.0.2 p.1093]. This is Module 03's install, run against an empty cluster — which is the argument for having practiced it.</div>
+          <div class="flow__node-detail" hidden><strong>Stage 04 — redeploy.</strong> Veeam Kasten can be redeployed via Helm, and a location profile created to point to the off-site data repository. This is Module 03's install, run against an empty cluster — which is the argument for having practiced it.</div>
         </div>
         <div class="flow__arrow">→</div>
         <div class="flow__node" role="tab" tabindex="-1" aria-selected="false" aria-controls="kdrDetail" id="kdrStep4">
           <div class="flow__node-tag">STAGE 05</div>
           <div class="flow__node-title">Import the catalog</div>
           <div class="flow__node-desc">The passphrase from stage 02 unlocks the catalog.</div>
-          <div class="flow__node-detail" hidden><strong>Stage 05 — import the catalog.</strong> The Veeam Kasten catalog can be imported, via the previously set passphrase, to the new instance of Veeam Kasten [Src: Kasten Docs 9.0.2 p.1093]. In the dashboard this is the Restore Kasten page, which asks for the location profile holding the exported KDR backups, the cluster identifier of the source instance, and the passphrase method used at setup [Src: Kasten Docs 9.0.2 p.571, p.572].</div>
+          <div class="flow__node-detail" hidden><strong>Stage 05 — import the catalog.</strong> The Veeam Kasten catalog can be imported, via the previously set passphrase, to the new instance of Veeam Kasten. In the dashboard this is the Restore Kasten page, which asks for the location profile holding the exported KDR backups, the cluster identifier of the source instance, and the passphrase method used at setup.</div>
         </div>
       </div>
       <div class="flow__detail" id="kdrDetail" role="tabpanel" aria-labelledby="kdrStep0" aria-live="polite"></div>
@@ -517,8 +554,8 @@
     <figure class="screenshot mt-24">
       <img class="screenshot__img" src="images/named/p0565__Operating_Veeam_Kasten_Veeam_Kasten_Disaster_Recovery_Veeam__2322x1670__258.png" loading="lazy" alt="The Restore Kasten wizard in the Veeam Kasten dashboard at its Configure Restore step, with steps Configure Restore, Select Restore Point and Summary listed on the left, and fields for the location profile holding exported Kasten DR backups, the Cluster ID of the source Kasten instance, a Passphrase Method choice, and the passphrase used to configure the Kasten DR policy on the source instance">
       <figcaption class="screenshot__caption">
-        <strong>Stage 05 in the dashboard.</strong> Recovering an instance asks for the location profile, the cluster identifier of the source instance, and the passphrase used when the KDR policy was configured — then a restore point and a summary [Src: Kasten Docs 9.0.2 p.571, p.572]. Every field on this screen is something you decided months earlier, which is why the passphrase belongs in your secrets store and your runbook, not in someone's memory.
-        <span class="screenshot__source">Source: Veeam Kasten 9.0.2 user guide, p.565. ↔ Click the image to view it full size.</span>
+        <strong>Stage 05 in the dashboard.</strong> Recovering an instance asks for the location profile, the source instance's cluster identifier, and the passphrase used when the KDR policy was configured — then a restore point and a summary. Every field here was decided months earlier — which is why the passphrase belongs in your secrets store and runbook, not in someone's memory.
+        <span class="screenshot__source">↔ Click the image to view it full size.</span>
       </figcaption>
     </figure>
 
@@ -526,13 +563,13 @@
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
       <div class="note__body">
         <div class="note__label">Pro tip</div>
-        <p>Veeam Kasten catalog backup and restore are handled through this dedicated disaster recovery process, and the guide's recommendation is to enable Veeam Kasten DR and regularly test the process [Src: Kasten Docs 9.0.2 p.1093]. Treat the KDR test like the restore tests you already run: on a schedule, with the passphrase retrieved from where it is meant to live rather than from your own notes.</p>
+        <p>The guide's recommendation is to enable Veeam Kasten DR and regularly test the process. Treat the KDR test like the restore tests you already run: on a schedule, with the passphrase retrieved from where it is meant to live, not from your own notes.</p>
       </div>
     </div>
 
     <div class="sales-aside mt-24">
       <span class="sales-aside__label">For a customer conversation</span>
-      <p>"Who backs up the backup system?" is the question that ends a lot of Kubernetes protection projects late. The answer here is concrete and demonstrable: the platform runs a dedicated policy over its own namespace, exports the catalog to an external location profile you choose — one that supports immutable backups, so the catalog survives ransomware and accidental deletion — and encrypts it with a passphrase held in a passphrase provider, then recovers onto a new cluster from that export [Src: Kasten Docs 9.0.2 p.565, p.571, p.1093].</p>
+      <p>"Who backs up the backup system?" ends a lot of Kubernetes protection projects late. The answer here is concrete: a dedicated policy over the platform's own namespace, the catalog exported encrypted to an immutable external location profile — surviving ransomware and accidental deletion — and recovery onto a new cluster from that export.</p>
     </div>
 
     <div class="continue" data-continue>
@@ -553,20 +590,28 @@
     </p>
 
     <div class="prose">
-      <p>Veeam Kasten provides a way to collect and clean up resources that are either orphaned or whose expiration period has passed, through a garbage collector daemon [Src: Kasten Docs 9.0.2 p.839]. Three Helm options tune it: <code>garbagecollector.daemonPeriod</code> sets the length of time between two consecutive garbage collection events in seconds, <code>garbagecollector.keepMaxActions</code> sets how many finished actions to keep — with no actions deleted if the value is less than or equal to zero — and <code>garbagecollector.actions.enabled</code> enables the action collectors [Src: Kasten Docs 9.0.2 p.839].</p>
-      <p>What the daemon cleans is a specific list: actions above the retained maximum, oldest first and handled independently per action type; <code>RestorePointContents</code> for expired manual backups, as determined by their <code>expiresAt</code> value; and the temporary objects left behind by restore operations — <code>CSISnapshot</code> objects, persistent volumes, profiles, services, network policies, secrets, and config maps [Src: Kasten Docs 9.0.2 p.839]. Export pods are cleaned up by the garbage collection daemon after the configured grace period [Src: Kasten Docs 9.0.2 p.1097].</p>
+      <p>A garbage collector daemon cleans up resources that are orphaned or past their expiration period. Its list is specific: actions above the retained maximum (oldest first, per action type), <code>RestorePointContents</code> for expired manual backups per their <code>expiresAt</code> value, and the temporary objects restores leave behind — <code>CSISnapshot</code> objects, persistent volumes, profiles, services, network policies, secrets, and config maps. Export pods are cleaned up after the configured grace period.</p>
     </div>
+
+    <table class="data-table">
+      <thead><tr><th scope="col">Helm option</th><th scope="col">What it tunes</th></tr></thead>
+      <tbody>
+        <tr><td><code>garbagecollector.daemonPeriod</code></td><td data-label="What it tunes">The length of time between two consecutive garbage collection events, in seconds</td></tr>
+        <tr><td><code>garbagecollector.keepMaxActions</code></td><td data-label="What it tunes">How many finished actions to keep — no actions deleted if the value is less than or equal to zero</td></tr>
+        <tr><td><code>garbagecollector.actions.enabled</code></td><td data-label="What it tunes">Enables the action collectors</td></tr>
+      </tbody>
+    </table>
 
     <div class="note note--caution">
       <span class="note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
       <div class="note__body">
         <div class="note__label">Retiring a restore point does not mean the space comes back today</div>
-        <p>When restore points are retired — manually or through a policy retention schedule — Veeam Kasten cleans up the associated resources, but the cleanup is not immediate for all of them; backup data in an object store may take a significant amount of time to be removed [Src: Kasten Docs 9.0.2 p.365]. Data references shared between restore points, aggregated data awaiting garbage collection, version retention for immutable backups, and safety windows for re-referencing data are among the reasons a retirement might not immediately free space, and deduplication can mean minimal or no reclamation at all [Src: Kasten Docs 9.0.2 p.365]. If you have ever explained to a storage owner why deleting backups did not return capacity, you have given this speech before.</p>
+        <p>When restore points are retired — manually or by a retention schedule — the cleanup is not immediate for every resource, and backup data in an object store may take a significant amount of time to be removed. Shared data references, aggregated data awaiting garbage collection, immutable-backup version retention, and re-referencing safety windows all delay it — and deduplication can mean minimal or no reclamation at all.</p>
       </div>
     </div>
 
     <div class="prose">
-      <p>Log volume is the other thing worth setting deliberately. Log retention is tuned with Helm values including a rotation count and a size threshold that triggers rotation, applied during an upgrade of the release [Src: Kasten Docs 9.0.2 p.176].</p>
+      <p>Log volume is the other thing worth setting deliberately: retention is tuned with Helm values including a rotation count and a size threshold that triggers rotation, applied during an upgrade of the release.</p>
     </div>
 
     <div class="code-block">
@@ -581,22 +626,22 @@
 
     <h3>A healthy week in the life</h3>
     <div class="prose">
-      <p>Nothing below is a product feature — it is a rhythm assembled from the maintenance guidance in this module, sized so it survives a busy week. The daily items take minutes; the monthly and quarterly ones are the ones that decide whether a bad day goes well.</p>
+      <p>Nothing below is a product feature — it is a rhythm assembled from this module's maintenance guidance. The daily items take minutes; the monthly and quarterly ones decide whether a bad day goes well.</p>
     </div>
 
     <ol class="timeline">
-      <li class="timeline__phase"><div class="timeline__dot">1</div><div class="timeline__title">Daily</div><div class="timeline__desc">Read the dashboard: any application that moved to non-compliant, and any failed action [Src: Kasten Docs 9.0.2 p.301].</div></li>
-      <li class="timeline__phase"><div class="timeline__dot">2</div><div class="timeline__title">Weekly</div><div class="timeline__desc">Confirm the KDR policy is running to schedule [Src: Kasten Docs 9.0.2 p.587], and check catalog storage space against the 50% mark [Src: Kasten Docs 9.0.2 p.1093].</div></li>
-      <li class="timeline__phase"><div class="timeline__dot">3</div><div class="timeline__title">Monthly</div><div class="timeline__desc">Test restores rather than waiting for a disaster — in the same namespace, a different namespace, and a different cluster [Src: Kasten Docs 9.0.2 p.1093] — and test the KDR process itself [Src: Kasten Docs 9.0.2 p.1093].</div></li>
-      <li class="timeline__phase"><div class="timeline__dot">4</div><div class="timeline__title">Quarterly</div><div class="timeline__desc">Plan the next upgrade hop, and review the supported Kubernetes and OpenShift matrix against the cluster's roadmap [Src: Kasten Docs 9.0.2 p.198, p.862].</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">1</div><div class="timeline__title">Daily</div><div class="timeline__desc">Read the dashboard: any application that moved to non-compliant, and any failed action.</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">2</div><div class="timeline__title">Weekly</div><div class="timeline__desc">Confirm the KDR policy is running to schedule, and check catalog storage space against the 50% mark.</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">3</div><div class="timeline__title">Monthly</div><div class="timeline__desc">Test restores rather than waiting for a disaster — in the same namespace, a different namespace, and a different cluster — and test the KDR process itself.</div></li>
+      <li class="timeline__phase"><div class="timeline__dot">4</div><div class="timeline__title">Quarterly</div><div class="timeline__desc">Plan the next upgrade hop, and review the supported Kubernetes and OpenShift matrix against the cluster's roadmap.</div></li>
     </ol>
 
     <div class="prose">
       <ul class="checklist">
-        <li>Monitoring configuration is reviewed as the deployment evolves, so you are watching the right metrics and getting alerts for new issues [Src: Kasten Docs 9.0.2 p.1093].</li>
-        <li>Alerts exist for failed actions and for catalog volume used space, the two conditions the guide calls out [Src: Kasten Docs 9.0.2 p.1093].</li>
-        <li>The KDR passphrase is retrievable by someone other than you, from a passphrase provider rather than a personal note [Src: Kasten Docs 9.0.2 p.572]. Decide who that second person or team is — security, a fellow backup admin, the secrets-management team — and write it into the runbook; "someone other than you" is a decision your team has to make explicitly, not a default the product supplies.</li>
-        <li>The upgrade path is known before the upgrade window opens, from the System Information page or the upgrade primer [Src: Kasten Docs 9.0.2 p.198, p.872].</li>
+        <li>Monitoring configuration is reviewed as the deployment evolves — the right metrics, alerts for new issues.</li>
+        <li>Alerts exist for failed actions and for catalog volume used space, the two conditions the guide calls out.</li>
+        <li>The KDR passphrase is retrievable by someone other than you, from a passphrase provider rather than a personal note. Name that second person or team in the runbook — it is a decision your team makes explicitly, not a default the product supplies.</li>
+        <li>The upgrade path is known before the upgrade window opens, from the System Information page or the upgrade primer.</li>
       </ul>
     </div>
 
@@ -661,9 +706,9 @@
         {
           "q": "Restores have started failing for one application and you cannot see why from the dashboard. In what order do you gather what support will ask for?",
           "opts": [
-            { "t": "Open the case first so the clock starts, then collect logs if support asks for them", "correct": false, "why": "Collecting the bundle first is what turns a case into a diagnosis instead of a request for logs. Support runs through Veeam Kasten Community Support or a case opened at the Veeam customer portal [Src: Kasten Docs 9.0.2 p.861]." },
-            { "t": "Confirm on the dashboard which actions are failing, download the support logs from System Information, run the debug script for the fuller bundle, check the platform with k10tools, then open the case with the bundle attached", "correct": true, "why": "Correct — that is the order this module works in, cheapest evidence first. The dashboard names the failing actions and applications [Src: Kasten Docs 9.0.2 p.301]; support logs are available to admin users from the System Information page with no terminal [Src: Kasten Docs 9.0.2 p.862]; the debug script produces k10_debug_logs.tar.gz with per-service logs and can include Prometheus metrics [Src: Kasten Docs 9.0.2 p.862, p.863]; k10tools validates the cluster and debugs the Veeam Kasten micro services [Src: Kasten Docs 9.0.2 p.864]." },
-            { "t": "Run the debug script on every namespace in the cluster, then send the whole archive without reading it", "correct": false, "why": "The debug script assumes your default context points at the cluster and that Veeam Kasten is installed in the kasten-io namespace, with option flags for a different namespace or output file [Src: Kasten Docs 9.0.2 p.862] — it is scoped to the platform, not swept across the cluster. And the dashboard step exists so you know what you are looking for before you collect." }
+            { "t": "Open the case first so the clock starts, then collect logs if support asks for them", "correct": false, "why": "Collecting the bundle first is what turns a case into a diagnosis instead of a request for logs. Support runs through Veeam Kasten Community Support or a case opened at the Veeam customer portal." },
+            { "t": "Confirm on the dashboard which actions are failing, download the support logs from System Information, run the debug script for the fuller bundle, check the platform with k10tools, then open the case with the bundle attached", "correct": true, "why": "Correct — that is the order this module works in, cheapest evidence first. The dashboard names the failing actions and applications; support logs are available to admin users from the System Information page with no terminal; the debug script produces k10_debug_logs.tar.gz with per-service logs and can include Prometheus metrics; k10tools validates the cluster and debugs the Veeam Kasten micro services." },
+            { "t": "Run the debug script on every namespace in the cluster, then send the whole archive without reading it", "correct": false, "why": "The debug script assumes your default context points at the cluster and that Veeam Kasten is installed in the kasten-io namespace, with option flags for a different namespace or output file — it is scoped to the platform, not swept across the cluster. And the dashboard step exists so you know what you are looking for before you collect." }
           ]
         }
       ]

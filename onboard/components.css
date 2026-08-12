@@ -296,13 +296,15 @@
 /* heading-hierarchy demo — h2/h3 come from course.css; h4 is defined here */
 .prose h4 { font-family: 'ES Build', Arial, sans-serif; font-size: 17px; font-weight: 600; margin: 18px 0 8px; letter-spacing: -.01em; color: var(--ink); }
 /* lists */
-.prose ul, .prose ol { margin: 0 0 14px; padding-left: 22px; }
+/* UX-v5: lists share the paragraphs' 720px measure — before this they ran the
+   full 1080px wrap (~135 chars/line) beside 720px prose siblings. */
+.prose ul, .prose ol { margin: 0 0 14px; padding-left: 22px; max-width: 720px; box-sizing: border-box; }
 .prose li { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin: 0 0 6px; }
 .prose dl { margin: 0 0 14px; }
 .prose dt { font-weight: 700; color: var(--ink); font-size: 15px; margin-top: 10px; }
 .prose dd { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
 /* static checklist (also reused by .learn-goals) */
-.checklist { list-style: none; margin: 0 0 14px; padding: 0; }
+.checklist { list-style: none; margin: 0 0 14px; padding: 0; max-width: 720px; } /* UX-v5: same 720px measure as prose */
 .checklist li { position: relative; padding-left: 30px; margin: 0 0 10px; font-size: 15px; color: var(--ink-2); line-height: 1.6; }
 .checklist li:last-child { margin-bottom: 0; }
 .checklist li::before {

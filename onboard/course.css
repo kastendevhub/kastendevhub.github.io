@@ -613,6 +613,10 @@ footer { padding: 32px; text-align: center; color: var(--muted); font-size: 12px
 .about__col h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; margin-bottom: 16px; }
 .about__col p { color: var(--muted); font-size: 15.5px; line-height: 1.7; margin: 0 0 14px; }
 .about__col strong { color: var(--ink); font-weight: 600; }
+/* UX-v5: lists in the about column join the paragraph family — kit parity with
+   the 100Days course, where the bare <ul> rendered at browser defaults. */
+.about__col ul, .about__col ol { margin: 0 0 14px; padding-left: 22px; }
+.about__col li { color: var(--muted); font-size: 15.5px; line-height: 1.7; margin: 0 0 8px; }
 @media (max-width: 760px) { .about__inner { grid-template-columns: 1fr; gap: 32px; } }
 
 /* ─── MODULE LIST ─────────────────────────────── */
@@ -947,6 +951,15 @@ code { overflow-wrap: anywhere; }
    .btn--text landing on --ink stays Veeam green rather than blue. */
 .review .btn--text { color: var(--veeam-green-bright); }
 .review .btn--text:hover { color: var(--paper); text-decoration: underline; }
+
+/* ─── Checklists on the dark recap surface (UX-v5) ───
+   .checklist li is --ink-2, a dark ink meant for light surfaces; on the
+   near-black .review panel it measures ~1.1:1 — invisible. Match the
+   .review-item__text treatment. The lede that introduces a checklist with a
+   colon also kept its full 56px stage gap (14px below the list): tighten the
+   pair so the intro and its list read as one unit. */
+.review .checklist li { color: rgba(251,252,249,.85); }
+.review .lede:has(+ .checklist) { margin-bottom: 20px; }
 
 /* ─── Sticky breadcrumb at small widths (UX-v3-013) ──────
    The full module title wrapped to two lines beside the "Course overview"
