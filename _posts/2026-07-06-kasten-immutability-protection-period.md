@@ -29,11 +29,14 @@ Kasten relies on the object-lock capability of the object storage (S3 Object Loc
 
 This is the part that trips up most readers, so it is worth stating bluntly:
 
-| | Retention | Protection period (immutability) |
-|---|---|---|
-| Configured in | The **policy** | The **location profile** (S3 / Azure Blob configuration) |
-| Granularity | Per policy, per restore point class (hourly / daily / weekly / monthly / yearly) | One single value for the whole profile |
-| Answers | How far back can I restore? | How long do I have to react to a compromise? |
+| | Retention | Protection period (immutability) | Retention lock |
+|---|---|---|---|
+| What it is | A schedule | A duration you configure | A date on each object |
+| Configured in | The **policy** | The **location profile** (S3 / Azure Blob configuration) | Nothing — computed and maintained by Kasten |
+| Granularity | Per policy, per restore point class (hourly / daily / weekly / monthly / yearly) | One single value for the whole profile | Per object |
+| Answers | How far back can I restore? | How long do I have to react to a compromise? | Until when is this object physically undeletable? |
+
+Three terms, three meanings, and this article keeps them strictly apart. **Retention** is the policy schedule. The **protection period** is the profile setting — a constant; it never grows. The **retention lock** is the retain-until date carried by each object on the object store: it is the only one of the three that moves, and it is the only thing the Blob Lifecycle Manager ever extends.
 
 Because the protection period lives on the location profile, **it is a single value that applies to every object written to that profile**. There is no such thing as "a monthly restore point gets a one-month lock and a daily restore point gets a one-day lock." A monthly restore point and a daily restore point exported to the same profile carry **exactly the same protection period**, because that number is a property of the target storage, not of the restore point's class in the retention schedule.
 
@@ -67,14 +70,16 @@ This service guarantees it will inspect, and extend if necessary, every object i
 
 ## Walking through a concrete example
 
-Take a monthly restore point created on **July 1st**, with a protection period set to **4 days** on the location profile.
+Take a monthly restore point created on **July 1st** under a policy that keeps **3 monthly restore points**, with a protection period set to **4 days** on the location profile.
 
 1. **Initial write (July 1st)**: the objects referenced by this restore point immediately receive a retention lock set 24 days out — 4 days of protection plus 20 days of BLM cycle margin. The initial lock date is therefore **July 25th**.
-2. **BLM pass (before July 25th)**: the service guarantees that, before this deadline, it will have re-inspected the objects and extended their retention to at least 4 more days from the date of that pass, so **July 29th**.
+2. **BLM pass (before July 25th)**: the service guarantees that, before this deadline, it will have re-inspected the objects and — because the restore point is still alive under the retention schedule — extended their lock by at least the protection period from the date of that pass, so **July 29th**.
 3. **Following cycles**: this mechanism repeats throughout the lifetime of the restore point. So by October 1st, the associated objects will still carry a retention lock guaranteeing at least 4 more days, so **October 5th**.
-4. **Restore point expiration**: once the restore point expires, and provided the objects are not referenced by any other restore point, they stop receiving retention extensions and are flagged for deletion.
+4. **Restore point expiration**: around October 1st the retention schedule lets this restore point expire, since a fourth monthly restore point has taken its place. Provided the objects are not referenced by any other restore point, they stop receiving lock extensions and are flagged for deletion.
 
-The restore point in this example is a *monthly* one, but nothing in the calculation above depends on that. Run the same walkthrough for a daily restore point written to the same profile and you get the same 4 + 20 lock, the same extensions, the same dates. The only thing the "monthly" label changes is *when the restore point expires* — step 4 — because that comes from the retention schedule in the policy.
+Note what the retention schedule does and does not do in step 2. It acts as a **gate**, not as a basis for the arithmetic: it decides *whether* the lock gets extended at all, never *by how much*. The amount added is always the protection period, whether the restore point has three days or three years left to live.
+
+The restore point in this example is a *monthly* one, but nothing in steps 1 to 3 depends on that. Run the same walkthrough for a daily restore point written to the same profile and you get the same 24 day initial lock, the same July 25th and July 29th dates, the same extension arithmetic. The only thing the "monthly" label changes is *when* step 4 fires — a daily restore point retained 7 days would expire around July 8th instead of October 1st — because that date comes from the retention schedule in the policy, and from nothing else.
 
 > **A note on the numbers.** We deliberately picked 4 days rather than a rounder value. With a 10 day protection period the initial lock lands at 10 + 20 = 30 days, which looks a lot like "one month" and invites the wrong conclusion — that the lock is somehow derived from the monthly retention tier. It is not. The 20 days come from the BLM cycle guarantee and nothing else. Using 4 days makes the initial lock 24 days, which maps to no retention frequency at all, and the arithmetic stays unambiguous.
 
@@ -96,7 +101,7 @@ This is an important technical talking point in pre-sales, because it reassures 
 - The protection period is a **single flat value per location profile**. Daily, weekly and monthly restore points written to the same profile all carry the same lock duration; the lock is never derived from the retention tier.
 - The protection period defines a **detection window**, not a total immutability duration.
 - The Blob Lifecycle Manager guarantees a pass over every object within a 20 day window, hence the **"protection + 20 days"** formula for the initial lock.
-- Every referenced object keeps having its retention extended until the restore point that references it expires.
+- Every referenced object keeps having its **retention lock** extended until the restore point that references it expires. The retention schedule only gates whether that extension happens; the amount added is always the protection period.
 - Once the restore point expires and the object is no longer referenced elsewhere, it is flagged for deletion.
 
 This mechanism allows for robust immutability without oversized protection periods, while guaranteeing that no active object loses protection before its restore point legitimately expires.
@@ -109,9 +114,9 @@ Not within a single location profile. The protection period is a property of the
 
 If you really need two protection periods, you need **two location profiles** — in practice two buckets or containers with their own Object Lock settings — and two policies, each exporting to its own profile. That is an infrastructure decision, not a retention-schedule tweak.
 
-### Why is the initial retention 24 days in this example?
+### Why is the initial retention lock 24 days in this example?
 
-Because the initial retention always follows this formula: protection period + 20 days of margin tied to the Blob Lifecycle Manager cycle. In this example, the configured protection period is 4 days. The BLM guarantees it will inspect, and extend if necessary, every object in the repository within a 20 day window. Kasten cannot set the retention to just 4 days, otherwise an object could lose its immutability before the BLM even gets a chance to check it. Hence the calculation: 4 (protection) + 20 (BLM margin) = 24 days, giving an initial lock of July 25th for a restore point created on July 1st. This 20 day margin is not usable retention, it is a safety buffer that guarantees the BLM will always have time to run its pass and renew protection before the initial deadline.
+Because the initial lock always follows this formula: protection period + 20 days of margin tied to the Blob Lifecycle Manager cycle. In this example, the configured protection period is 4 days. The BLM guarantees it will inspect, and extend if necessary, every object in the repository within a 20 day window. Kasten cannot set the lock to just 4 days, otherwise an object could lose its immutability before the BLM even gets a chance to check it. Hence the calculation: 4 (protection) + 20 (BLM margin) = 24 days, giving an initial lock of July 25th for a restore point created on July 1st. This 20 day margin is not additional protection you can count on, it is a safety buffer that guarantees the BLM will always have time to run its pass and renew the lock before the initial deadline.
 
 Note that the 20 days are a constant of the BLM, not something derived from your policy. If the protection period were 10 days the initial lock would be 30 days — which happens to look like "one month" and is a classic source of confusion. That 30 is 10 + 20, not a monthly retention tier leaking into the lock calculation.
 
@@ -119,14 +124,14 @@ Note that the 20 days are a constant of the BLM, not something derived from your
 
 The principle relies on the structure of the repository. Each restore point corresponds to a manifest in the repository, and that manifest references a set of objects (blobs) that make up the backup data. The BLM walks the repository and, for each object, checks whether it is still referenced by at least one active manifest, meaning a restore point that has not yet expired under the retention policy.
 
-- If the object is still referenced, its retention — the lock on the underlying object storage (S3 Object Lock) — is extended.
-- If the object is no longer referenced by any active restore point, its retention stops being extended and it becomes eligible for deletion, in line with the garbage collection cycle.
+- If the object is still referenced, its retention lock is extended.
+- If the object is no longer referenced by any active restore point, its lock stops being extended and it becomes eligible for deletion, in line with the garbage collection cycle.
 
 This background service monitors repositories that hold immutable backups, and each export can write new blobs or reuse existing ones (deduplication).
 
 ### What happens if the restore point is still referenced after several cycles?
 
-The mechanism simply keeps repeating, indefinitely, for as long as the restore point stays active. Each time the BLM runs its pass, it checks whether the object is still referenced by an active restore point. If so, it extends the retention by at least the configured protection period, starting from the date of that pass. Since the BLM guarantees a pass over every object within a 20 day window, the effective retention of an object that is still referenced never drops below the protection period, no matter how many cycles have already run.
+The mechanism simply keeps repeating, indefinitely, for as long as the restore point stays active. Each time the BLM runs its pass, it checks whether the object is still referenced by an active restore point. If so, it extends the lock by at least the configured protection period, starting from the date of that pass. Since the BLM guarantees a pass over every object within a 20 day window, the remaining lock time on an object that is still referenced never drops below the protection period, no matter how many cycles have already run.
 
 Take the example of a restore point created on July 1st with a 4 day protection period:
 
@@ -141,8 +146,8 @@ There is no ceiling and no degradation of the mechanism. A restore point kept fo
 
 Once the restore point expires, the object stops receiving extensions, but it is not deleted immediately.
 
-1. **Extensions stop**: the BLM stops renewing the object's retention, since it is no longer referenced by any active manifest in the repository.
-2. **Natural end of the lock**: the last retention lock applied (protection + margin) keeps running until its own deadline. The object therefore stays immutable until that date, even though the restore point that referenced it has already expired.
+1. **Extensions stop**: the BLM stops renewing the object's retention lock, since it is no longer referenced by any active manifest in the repository.
+2. **Natural end of the lock**: the last retention lock applied keeps running until its own deadline. The object therefore stays immutable until that date, even though the restore point that referenced it has already expired.
 3. **Flagged for deletion**: once the lock reaches its deadline, the object is flagged for deletion and becomes eligible for the garbage collection cycle.
 
 An object is never deleted the moment the restore point expires. There is always a residual delay corresponding to the last lock window set by the BLM, which prevents any risk of premature deletion for an object that just became unreferenced.
