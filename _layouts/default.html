@@ -26,6 +26,7 @@
   <script src="{{ site.baseurl }}/js/scripts.js"></script>
   <script src="{{ site.baseurl }}/js/common.js"></script>
   <script src="{{ site.baseurl }}/js/tabs.js"></script>
+  {% if page.mermaid %}{% include mermaid.html %}{% endif %}
   <script>
     var base_url = "",
       pagination_next_url = base_url + '/page2',

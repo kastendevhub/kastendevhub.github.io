@@ -1,0 +1,77 @@
+<!-- Mermaid diagrams: opt in per page with `mermaid: true` in the front matter -->
+<style>
+  /* Diagrams are wider than the text column, so break out to the full page
+     width (set in JS) and scroll horizontally when they still don't fit. */
+  pre.mermaid {
+    background: none;
+    border: 0;
+    padding: 0 12px;
+    margin: 0 0 30px;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  pre.mermaid svg {
+    max-width: none;
+    height: auto;
+  }
+</style>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.17.1/dist/mermaid.esm.min.mjs';
+
+  // Kramdown renders ```mermaid as a highlighted code block. Swap those blocks
+  // for the <pre class="mermaid"> markup mermaid expects, keeping the raw text.
+  var blocks = document.querySelectorAll('.language-mermaid');
+
+  blocks.forEach(function (block) {
+    // Plain kramdown gives pre > code.language-mermaid; with Rouge enabled the
+    // class sits on an outer div. Either way, replace the whole block.
+    var target = block;
+
+    if (target.tagName === 'CODE' && target.parentElement.tagName === 'PRE') {
+      target = target.parentElement;
+    }
+
+    var pre = document.createElement('pre');
+    pre.className = 'mermaid';
+    pre.textContent = block.textContent.replace(/\n$/, '');
+    target.replaceWith(pre);
+  });
+
+  if (blocks.length) {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'base',
+      fontFamily: 'Mulish, sans-serif',
+      flowchart: { useMaxWidth: false },
+      themeVariables: {
+        primaryColor: '#e6f6f5',
+        primaryBorderColor: '#00A69f',
+        primaryTextColor: '#121315',
+        lineColor: '#687385',
+        secondaryColor: '#f3f7ff',
+        tertiaryColor: '#f3f3f3'
+      }
+    });
+
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+
+    // Match the page width exactly — 100vw would include the scrollbar gutter
+    // and give the page a few pixels of horizontal scroll.
+    var fitToPage = function () {
+      var width = document.documentElement.clientWidth + 'px';
+
+      document.querySelectorAll('pre.mermaid').forEach(function (pre) {
+        pre.style.width = width;
+      });
+    };
+
+    fitToPage();
+    window.addEventListener('resize', fitToPage);
+  }
+</script>

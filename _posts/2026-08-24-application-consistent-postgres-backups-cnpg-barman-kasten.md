@@ -6,6 +6,7 @@ featured: false
 image: "/images/posts/2026-08-24-application-consistent-postgres-backups-cnpg-barman-kasten/cnpg-barman.png"
 image_caption: "Protect CNPG with Barman and Kasten"
 layout: post
+mermaid: true
 published: true
 tags: [ai,security,agentic ai]
 title: "Application-Consistent PostgreSQL Backups on Kubernetes: CloudNativePG, Barman, and Kasten"
