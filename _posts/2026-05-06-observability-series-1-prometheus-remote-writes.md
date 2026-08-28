@@ -96,6 +96,7 @@ write_relabel_configs:
       |events_service_.*
       |process_.*
       |compliance_count
+      |catalog_storage_artifact_count
 ```
 If you skip relabeling, Prometheus will happily ship every scraped metric — including its own internals and anything else running in the Kasten namespace. That’s a fast path to high costs, noisy dashboards, and cardinality issues in your remote backend.
 
@@ -110,7 +111,7 @@ Roughly speaking, this regex keeps:
  - `repository_data_*`, `data_operation_*`, `data_upload_session_*` – repository usage and data movement metrics.
  - `exec_*`, `limiter_*`, `events_service_*`, `process_*` – controller/process/execution control metrics
  - `export_storage_*`, `snapshot_storage_*` – snapshot/export storage metrics.
- - `metering_license_*`, `compliance_count` – licensing and compliance summary metrics.
+ - `metering_license_*`, `compliance_count`, `catalog_storage_artifact_count` – licensing, compliance, and catalog storage summary metrics.
 
 This keeps the remote stream lean and focused on Kasten’s operational metrics. This is an **example** starting set; you should review and adapt it for your needs. You can **extend or narrow** the regex depending on what metrics you want exported.
 
@@ -126,7 +127,7 @@ This value comes directly from the Helm chart’s `clusterName` field.
 This becomes essential when you build multi‑cluster dashboards and alerts.
 
 
-{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics. A cluster_name can always be added after Kasten is installed using a `helm upgrade`" %}
+{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics. A clusterName helm value can always be added after Kasten is installed using a `helm upgrade`" %}
 
 ## Setup
 The steps below all follow the same pattern, regardless of auth method:
@@ -176,7 +177,7 @@ kubectl create secret generic prometheus-remote-write-creds \
         url: https://<remote-write-endpoint>/path/to/receive
         write_relabel_configs:
         - action: keep
-          regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count
+          regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count|catalog_storage_artifact_count
           source_labels: [__name__]
 ```
 
@@ -218,7 +219,7 @@ kubectl create secret generic prometheus-ca-cert-secret \
         url: https://<remote-write-endpoint>/path/to/receive
         write_relabel_configs:
         - action: keep
-          regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count
+          regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count|catalog_storage_artifact_count
           source_labels: [__name__]
 ```
 
@@ -255,7 +256,7 @@ spec:
         url: https://<remote-write-endpoint>/path/to/receive
         write_relabel_configs:
         - action: keep
-          regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count
+          regex: action_.*|.*_persistent_volume_.*|repository_data_.*|data_operation_.*|data_upload_session_.*|exec_.*|limiter_.*|export_storage_.*|snapshot_storage_.*|metering_license_.*|events_service_.*|process_.*|compliance_count|catalog_storage_artifact_count
           source_labels: [__name__]
 ```
 To apply it, save the patch as patch.yaml and run:
@@ -295,18 +296,18 @@ Next, open the **query UI** for your remote backend (Prometheus, Grafana Explore
 
 For example:
 ```json
-catalog_persistent_volume_free_space_percent{clusterName="<Cluster-Unique-Name>"}
+catalog_persistent_volume_free_space_percent{cluster_name="<Cluster-Unique-Name>"}
 ```
 Any metric name that matches your `write_relabel_configs` regex will work here.
 
 If remote write is working, you should see:
 - One or more time series returned.
 - Recent timestamps (not stale data).
-- A `clusterName` label with the value you configured in your Kasten Helm values or Operator spec.
+- A `cluster_name` label with the value you configured in your Kasten Helm values or Operator spec.
 
 ## Conclusion
 
-That’s the entire remote write setup. Once you’ve updated your Kasten values and run a Helm upgrade (or patched the Kasten operand), Kasten’s in‑cluster Prometheus starts streaming a **curated** set of Kasten metrics to your remote backend — with a consistent `clusterName` attached. 
+That’s the entire remote write setup. Once you’ve updated your Kasten values and run a Helm upgrade (or patched the Kasten operand), Kasten’s in‑cluster Prometheus starts streaming a **curated** set of Kasten metrics to your remote backend — with a consistent `cluster_name` label attached. 
 
 You’ve effectively turned Kasten into a first‑class citizen of your central observability stack, without maintaining a separate Prometheus just for backups.
 
