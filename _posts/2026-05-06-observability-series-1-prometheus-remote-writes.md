@@ -127,7 +127,7 @@ This value comes directly from the Helm chart’s `clusterName` field.
 This becomes essential when you build multi‑cluster dashboards and alerts.
 
 
-{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics. A cluster_name can always be added after Kasten is installed using a `helm upgrade`" %}
+{% include note.html content="The clusterName value is required when remote_write is enabled; deployment will fail without it. The clusterName will appear as the cluster_name label on all exported metrics. A clusterName helm value can always be added after Kasten is installed using a `helm upgrade`" %}
 
 ## Setup
 The steps below all follow the same pattern, regardless of auth method:
