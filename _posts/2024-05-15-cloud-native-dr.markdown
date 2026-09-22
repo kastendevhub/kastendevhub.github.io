@@ -17,7 +17,7 @@ I am sometimes asked by partners, prospects, peers, and in the line at the super
 
 And while the answer may seem obvious to me and my peers at Veeam Kasten, our competitors, and partners, it may not always be so obvious to those dipping their toes into Cloud Native architectures with things like containers, helm charts, or kubevirt VMs.  After all, I thought Kubernetes is all stateless? Doesn't "big cloud" have my back? And can't I just stuff everything into GitOps and redeploy when the proverbial feces hit the large air circulator (by the way, when using that idiom, I like to imagine a ceiling fan because it just seems more festive)?
 
-So without further adieu, here's a list of considerations for Data Protection in the context of cloud native architectures, in no particular order
+So without further ado, here's a list of considerations for Data Protection in the context of cloud native architectures, in no particular order
 
 
 # What is Disaster Recovery for Cloud Native Workloads?

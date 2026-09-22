@@ -34,7 +34,7 @@ And wowee, is it cool. So cool in fact that I ditched my previous homelab virtua
 
 And while Harvester provides a lot of day 1 functionality that is needed for Virtual Machine management (e.g. images, cloning, power operations, mountint disks, etc), Longhorn backup leaves a bit more to be desired... Also factor in that you may have applications that are comprised of both VM and containerized components, you'll want something that can protect all of these assets in one go. The answer? Kasten K10 by Veeam!
 
-So without further adieue, let's see how!
+So without further ado, let's see how!
 
 First, install Harvester on your hardware. Suse makes this dead simple, you boot their ISO image from USB, fill in a few options, and choose whether you want to create a new cluster or join an existing cluster, and within a few minutes, you're pretty much ready to go. I won't cover the steps here, but check out their very good [Harvester Installation Documentation](https://docs.harvesterhci.io/v1.3/install/index) for the steps. Also worth nothing that it fully supports Air-Gapped environments, [much like Kasten K10](https://docs.kasten.io/latest/install/offline.html).
 

@@ -34,7 +34,7 @@ And as easy as it is to share the `kubeadm` key or use a single login for your o
 
 Okay, so we need to implement authentication for our OpenShift cluster and for Kasten so we can deploy and protect workloads. Let's just use htpasswd because its quick, easy, and it just works! While you could do that (and to be honest I do it most of the time when building quick demo labs), it obviously doesn't scale well. For all my infra or network playa's in the house, think of host files vs DNS. For 1-3 systems, a host file will get you by, but try and scale that to anything more and your life quickly becomes a never ending task of updating text files.
 
-Instead, let's use something more sophisticated but still keep it easy. Enter OpenShift and Okta - so without further adieu, let's get started:
+Instead, let's use something more sophisticated but still keep it easy. Enter OpenShift and Okta - so without further ado, let's get started:
 
 ## Configure OpenShift to use Okta for Authentication
 

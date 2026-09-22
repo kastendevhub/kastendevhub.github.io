@@ -90,7 +90,7 @@ As it so happens, a big part of context is the ability to reference historical q
 
 And consider the scenario where our AI Chat application's MCP servers go offline.  Our application will still be able to provide a response to our user's query, but it will lack any context.  So if all of our MCP servers are offline and a user prompts our model with the phrase, "Lovely weather today," the user will still get a response, but it will just be a generic, "Happy to hear - make sure to wear sunscreen!" with no recognition of the user's actual meaning, since our model lacks context.  In that event, the jig is up, and the protagonist knows that the individual standing next to him is actually an advanced humanoid robot sent back in time from the future to destroy him.
 
-We need to have a quick way to restore our MCP servers and their data, so as to not tip off the unknowing protagonist with a generic response that would be a key tell that we don't understand saracasm or nuance.
+We need to have a quick way to restore our MCP servers and their data, so as to not tip off the unknowing protagonist with a generic response that would be a key tell that we don't understand sarcasm or nuance.
 
 So without a dedicated backup/restore solution, we'd have to trigger a restore of our database from a backup for it (assuming the database is outside of the Kubernetes cluster where our MCP servers reside, otherwise you'd need to essentially start from scratch), ensure the data is available, restore our secrets to our cluster, then trigger our pipeline run to redeploy our MCP servers to our Kubernetes clusters.
 
